@@ -1,4 +1,4 @@
-#include "canvasview.h"
+#include "src/canvasview.h"
 #include "imageitem.h"
 
 #include <QGraphicsScene>
@@ -8,6 +8,8 @@
 #include <QMimeData>
 #include <QUrl>
 #include <QKeyEvent>
+#include <QFileInfo>
+#include <QImageReader>
 
 CanvasView::CanvasView(QWidget *parent) : QGraphicsView(parent) {
     //создание сцену и связываем ее с просмотром
@@ -31,11 +33,11 @@ void CanvasView::drawBackground(QPainter *painter, const QRectF &rect) {
     //вызывается родительский метод, чтобы он нарисовал фон (цвет из конструктора)
     QGraphicsView::drawBackground(painter, rect);
 
-    //настройки сетки
-    const int gridSize = 25; //нужно добавить возможность изменения пользователем
-    const QColor dotColor = QColor(60, 60, 60);
+    //настройки сетки, нужно добавить возможность изменения пользователем
+    const int gridSize = 25; //размер сетки
+    const QColor dotColor = QColor(60, 60, 60); //цвет точки
     QPen pen(dotColor);
-    pen.setWidth(1);
+    pen.setWidth(3); //толщина точки
     painter->setPen(pen);
 
     //вычисление, с какой точки начать рисовать, чтобы покрыть всю видимую область
@@ -51,38 +53,43 @@ void CanvasView::drawBackground(QPainter *painter, const QRectF &rect) {
 }
 
 void CanvasView::dragEnterEvent(QDragEnterEvent *event) {
-    //проверка, содержат ли перетаскиваемые данные ссылки (файлы)
+    //проверка, являются ли перетаскиваемые данные локальными и содержат ли они url
     if (event->mimeData()->hasUrls()) {
-        //проверка, что хотя бы один из файлов - изображение
+        const QList<QByteArray> supportedFormats = QImageReader::supportedImageFormats(); //поддерживаемые Qt расширения файлов картинок
         for (const QUrl &url : event->mimeData()->urls()) {
             if (url.isLocalFile()) {
-                QString filePath = url.toLocalFile();
                 //проверка по расширению
-                if (filePath.endsWith(".png") || filePath.endsWith(".jpg") || filePath.endsWith(".jpeg") || filePath.endsWith(".bmp")) {
-                    event->acceptProposedAction(); //разрешение на перетаскивание, курсор изменится
+                QString extension = QFileInfo(url.toLocalFile()).suffix().toLower();
+                if (supportedFormats.contains(extension.toUtf8())) {
+                    //если нашли хотя бы один подходящий файл, разрешаем операцию
+                    event->acceptProposedAction();
                     return;
                 }
             }
         }
     }
-    event->ignore(); //в остальных случаях - игнорир
+    event->ignore(); //в остальных случаях - не разрешаем
+}
+
+void CanvasView::dragMoveEvent(QDragMoveEvent *event) {
+    //разрешение перетаскивания
+    event->acceptProposedAction();
 }
 
 void CanvasView::dropEvent(QDropEvent *event) {
+    const QList<QByteArray> supportedFormats = QImageReader::supportedImageFormats(); //поддерживаемые Qt расширения файлов картинок
     for (const QUrl &url : event->mimeData()->urls()) {
         if (url.isLocalFile()) {
-            QString filePath = url.toLocalFile();
-            QPixmap pixmap(filePath);
+            QString extension = QFileInfo(url.toLocalFile()).suffix().toLower();
+            if (supportedFormats.contains(extension.toUtf8())) {
+                QString filePath = url.toLocalFile();
+                QPixmap pixmap(filePath); //если расширение поддерживается, идет загрузка в QPixmap
 
-            //если pixmap успешно загрузился и не пустой
-            if (!pixmap.isNull()) {
-                //создается объект ImageItem
-                ImageItem *imageItem = new ImageItem(pixmap);
-                //объект добавляется его на сцену
-                m_scene->addItem(imageItem);
-                //позиция устанавливается в то место, где была отпущена мышь
-                //mapToScene преобразует координаты виджета в координаты сцены
-                imageItem->setPos(mapToScene(event->position().toPoint()));
+                if (!pixmap.isNull()) {
+                    ImageItem *imageItem = new ImageItem(pixmap);
+                    m_scene->addItem(imageItem); //если в QPixmap что-то есть, то оно уходит на сцену
+                    imageItem->setPos(mapToScene(event->position().toPoint()));
+                }
             }
         }
     }

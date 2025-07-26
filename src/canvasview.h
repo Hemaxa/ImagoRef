@@ -5,6 +5,7 @@
 class QGraphicsScene;
 class QKeyEvent;
 class QDragEnterEvent;
+class QDragMoveEvent;
 class QDropEvent;
 
 class CanvasView : public QGraphicsView {
@@ -23,6 +24,7 @@ protected:
 
     //методы для добавления файлов (Drag & Drop)
     void dragEnterEvent(QDragEnterEvent *event) override;
+    void dragMoveEvent(QDragMoveEvent *event) override;
     void dropEvent(QDropEvent *event) override;
 
     //событие нажатие клавиши для локальных действий
