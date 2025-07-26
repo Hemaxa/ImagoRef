@@ -74,14 +74,14 @@ void CanvasView::dropEvent(QDropEvent *event) {
             QString filePath = url.toLocalFile();
             QPixmap pixmap(filePath);
 
-            // Если pixmap успешно загрузился и не пустой
+            //если pixmap успешно загрузился и не пустой
             if (!pixmap.isNull()) {
-                // Создаем наш кастомный ImageItem
+                //создается объект ImageItem
                 ImageItem *imageItem = new ImageItem(pixmap);
-                // Добавляем его на сцену
+                //объект добавляется его на сцену
                 m_scene->addItem(imageItem);
-                // Устанавливаем его позицию в то место, где была отпущена мышь
-                // mapToScene преобразует координаты виджета в координаты сцены
+                //позиция устанавливается в то место, где была отпущена мышь
+                //mapToScene преобразует координаты виджета в координаты сцены
                 imageItem->setPos(mapToScene(event->position().toPoint()));
             }
         }
@@ -90,21 +90,21 @@ void CanvasView::dropEvent(QDropEvent *event) {
 }
 
 void CanvasView::keyPressEvent(QKeyEvent *event) {
-    // Если нажата клавиша Delete
+    //если нажата клавиша Delete
     if (event->key() == Qt::Key_Delete) {
-        deleteSelectedItems(); // Вызываем функцию удаления
+        deleteSelectedItems(); //вызывается функцию удаления
     } else {
-        // Для всех остальных клавиш передаем управление родительскому классу
+        //для всех остальных клавиш передается управление родительскому классу
         QGraphicsView::keyPressEvent(event);
     }
 }
 
 void CanvasView::deleteSelectedItems() {
-    // Получаем список всех выделенных элементов со сцены
+    //получает список всех выделенных элементов со сцены
     QList<QGraphicsItem*> selected = m_scene->selectedItems();
 
-    // Удаляем каждый элемент.
-    // qDeleteAll - удобная функция Qt для удаления всех объектов в контейнере.
+    //удаление каждого элемента
+    //qDeleteAll - функция Qt для удаления всех объектов в контейнере
     qDeleteAll(selected);
 }
 

@@ -5,6 +5,7 @@
 class CanvasView;
 class QToolBar;
 class QAction;
+class QKeyEvent;
 
 class MainWindow : public QMainWindow {
     Q_OBJECT

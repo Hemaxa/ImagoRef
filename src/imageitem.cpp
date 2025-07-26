@@ -15,20 +15,27 @@ ImageItem::ImageItem(const QPixmap &pixmap, QGraphicsItem *parent)
     setAcceptHoverEvents(true);
 }
 
+void ImageItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
+    //вызывается родительский метод, чтобы само изображение нарисовалось
+    QGraphicsPixmapItem::paint(painter, option, widget);
+
+    //если курсор находится над элементом - русиется рамку
+    if (m_isHovered) {
+        painter->setPen(QPen(Qt::white, 2)); //белое перо, 2px
+        painter->drawRect(boundingRect());
+    }
+}
+
 //срабатывает, когда курсор мыши входит в границы элемента
 void ImageItem::hoverEnterEvent(QGraphicsSceneHoverEvent *event) {
-    //создается перо для рисования рамки: белый цвет, толщина 2 пикселя
-    QPen pen(Qt::white, 2);
-    setPen(pen); //устанавливает перо для элемента
-
-    //вызывается родительская реализация на всякий случай
+    m_isHovered = true; //установка флага
+    update(); //запрашивается перерисовку элемента, чтобы paint() был вызван снова
     QGraphicsPixmapItem::hoverEnterEvent(event);
 }
 
 //срабатывает, когда курсор мыши покидает границы элемента
 void ImageItem::hoverLeaveEvent(QGraphicsSceneHoverEvent *event) {
-    //убирается рамка, устанавливается "пустое" перо
-    setPen(Qt::NoPen);
-
+    m_isHovered = false;
+    update();
     QGraphicsPixmapItem::hoverLeaveEvent(event);
 }

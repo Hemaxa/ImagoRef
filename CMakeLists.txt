@@ -10,24 +10,26 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 
-set(SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
-
 qt_standard_project_setup()
 
-qt_add_executable(ImagoRef
-    WIN32 MACOSX_BUNDLE
-    ${SOURCE_DIR}/main.cpp
+qt_add_executable(ImagoRef WIN32 MACOSX_BUNDLE)
+
+target_sources (ImagoRef PRIVATE
+    src/main.cpp
     mainwindow.cpp
     mainwindow.h
-    src/canvasview.h src/canvasview.cpp
-    src/imageitem.h src/imageitem.cpp
+    src/canvasview.cpp
+    src/canvasview.h
+    src/imageitem.cpp
+    src/imageitem.h
 )
 
-target_link_libraries(ImagoRef
-    PRIVATE
-        Qt::Core
-        Qt::Widgets
-        Qt::Gui
+target_include_directories(ImagoRef PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+
+target_link_libraries(ImagoRef PRIVATE
+    Qt::Core
+    Qt::Widgets
+    Qt::Gui
 )
 
 include(GNUInstallDirs)
