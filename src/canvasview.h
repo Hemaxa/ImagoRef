@@ -17,6 +17,8 @@ public:
 public slots: //слоты могут вызываться в ответ на сигналы
     void deleteSelectedItems();
     void snapAllToGrid();
+    void zoomIn();
+    void zoomOut();
 
 protected:
     //отрисовка фона
@@ -27,9 +29,13 @@ protected:
     void dragMoveEvent(QDragMoveEvent *event) override;
     void dropEvent(QDropEvent *event) override;
 
+    //метод изменения масштаба
+    void wheelEvent(QWheelEvent *event) override;
+
     //событие нажатие клавиши для локальных действий
     void keyPressEvent(QKeyEvent *event) override;
 
 private:
     QGraphicsScene *m_scene; //создания экземпляра сцены
+    const QList<QByteArray> m_supportedFormats; //получение поддерживаемых форматов изображений Qt
 };

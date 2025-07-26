@@ -1,4 +1,4 @@
-#include "src/canvasview.h"
+#include "canvasview.h"
 #include "imageitem.h"
 
 #include <QGraphicsScene>
@@ -10,8 +10,9 @@
 #include <QKeyEvent>
 #include <QFileInfo>
 #include <QImageReader>
+#include <QWheelEvent>
 
-CanvasView::CanvasView(QWidget *parent) : QGraphicsView(parent) {
+CanvasView::CanvasView(QWidget *parent) : QGraphicsView(parent), m_supportedFormats(QImageReader::supportedImageFormats()) {
     //создание сцену и связываем ее с просмотром
     m_scene = new QGraphicsScene(this);
     setScene(m_scene);
@@ -27,6 +28,8 @@ CanvasView::CanvasView(QWidget *parent) : QGraphicsView(parent) {
 
     //задание цвет фона
     setBackgroundBrush(QColor(42, 42, 42));
+
+    setFocusPolicy(Qt::StrongFocus);
 }
 
 void CanvasView::drawBackground(QPainter *painter, const QRectF &rect) {
@@ -55,12 +58,11 @@ void CanvasView::drawBackground(QPainter *painter, const QRectF &rect) {
 void CanvasView::dragEnterEvent(QDragEnterEvent *event) {
     //проверка, являются ли перетаскиваемые данные локальными и содержат ли они url
     if (event->mimeData()->hasUrls()) {
-        const QList<QByteArray> supportedFormats = QImageReader::supportedImageFormats(); //поддерживаемые Qt расширения файлов картинок
         for (const QUrl &url : event->mimeData()->urls()) {
             if (url.isLocalFile()) {
                 //проверка по расширению
                 QString extension = QFileInfo(url.toLocalFile()).suffix().toLower();
-                if (supportedFormats.contains(extension.toUtf8())) {
+                if (m_supportedFormats.contains(extension.toUtf8())) {
                     //если нашли хотя бы один подходящий файл, разрешаем операцию
                     event->acceptProposedAction();
                     return;
@@ -77,11 +79,10 @@ void CanvasView::dragMoveEvent(QDragMoveEvent *event) {
 }
 
 void CanvasView::dropEvent(QDropEvent *event) {
-    const QList<QByteArray> supportedFormats = QImageReader::supportedImageFormats(); //поддерживаемые Qt расширения файлов картинок
     for (const QUrl &url : event->mimeData()->urls()) {
         if (url.isLocalFile()) {
             QString extension = QFileInfo(url.toLocalFile()).suffix().toLower();
-            if (supportedFormats.contains(extension.toUtf8())) {
+            if (m_supportedFormats.contains(extension.toUtf8())) {
                 QString filePath = url.toLocalFile();
                 QPixmap pixmap(filePath); //если расширение поддерживается, идет загрузка в QPixmap
 
@@ -116,13 +117,55 @@ void CanvasView::deleteSelectedItems() {
 }
 
 void CanvasView::snapAllToGrid() {
-    // Эта функция будет реализована позже.
-    // Логика:
-    // 1. const int gridSize = 50;
-    // 2. Пройтись в цикле по всем QGraphicsItem на сцене (m_scene->items()).
-    // 3. Для каждого item:
-    //    - QPointF pos = item->pos();
-    //    - qreal newX = round(pos.x() / gridSize) * gridSize;
-    //    - qreal newY = round(pos.y() / gridSize) * gridSize;
-    //    - item->setPos(newX, newY);
+    const int gridSize = 50; //жестко задаем шаг сетки, позже можно сделать настраиваемым
+
+    //проходимся по всем элементам на сцене
+    for (QGraphicsItem *item : m_scene->items()) {
+        //убеждаемся, что это ImageItem, хотя на сцене других и нет
+        if (dynamic_cast<ImageItem*>(item)) {
+            //получаем текущую позицию элемента
+            QPointF currentPos = item->pos();
+
+            //вычисляем новую позицию, ближайшую к узлу сетки
+            qreal newX = round(currentPos.x() / gridSize) * gridSize;
+            qreal newY = round(currentPos.y() / gridSize) * gridSize;
+
+            //устанавливаем новую позицию
+            item->setPos(newX, newY);
+        }
+    }
+}
+
+void CanvasView::zoomIn() {
+    scale(1.15, 1.15);
+}
+
+void CanvasView::zoomOut() {
+    scale(1.0 / 1.15, 1.0 / 1.15);
+}
+
+void CanvasView::wheelEvent(QWheelEvent *event) {
+    // Проверяем, зажата ли клавиша Ctrl
+    if (event->modifiers() & Qt::ControlModifier) {
+        // Определяем направление прокрутки
+        const int delta = event->angleDelta().y();
+
+        qreal scaleFactor;
+        if (delta > 0) {
+            // Приближаем (крутим колесо "от себя")
+            scaleFactor = 1.15;
+        } else {
+            // Отдаляем (крутим колесо "на себя")
+            scaleFactor = 1.0 / 1.15;
+        }
+
+        // Масштабируем сцену
+        scale(scaleFactor, scaleFactor);
+
+        // "Поглощаем" событие, чтобы оно не обрабатывалось дальше
+        event->accept();
+    } else {
+        // Если Ctrl не зажат, передаем событие родительскому классу для стандартной прокрутки
+        QGraphicsView::wheelEvent(event);
+    }
 }

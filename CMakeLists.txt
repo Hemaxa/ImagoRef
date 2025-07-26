@@ -12,7 +12,8 @@ set(CMAKE_AUTORCC ON)
 
 qt_standard_project_setup()
 
-qt_add_executable(ImagoRef WIN32 MACOSX_BUNDLE)
+qt_add_executable(ImagoRef WIN32 MACOSX_BUNDLE
+    floatingtoolbar.h floatingtoolbar.cpp)
 
 target_sources (ImagoRef PRIVATE
     src/main.cpp

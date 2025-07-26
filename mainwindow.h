@@ -3,7 +3,7 @@
 
 //наследуемые классы
 class CanvasView;
-class QToolBar;
+class FloatingToolBar;
 class QAction;
 class QKeyEvent;
 
@@ -23,9 +23,11 @@ private:
 
     //указатели на основные компоненты из унаследованных классов
     CanvasView *m_canvasView;
-    QToolBar *m_mainToolBar;
+    FloatingToolBar *m_toolBar;
 
     //действия, которые можно будет повесить на кнопки и горячие клавиши
     QAction *m_deleteAction;
     QAction *m_snapToGridAction;
+    QAction *m_zoomInAction;
+    QAction *m_zoomOutAction;
 };
