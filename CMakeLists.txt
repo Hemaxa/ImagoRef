@@ -19,6 +19,8 @@ qt_add_executable(ImagoRef
     ${SOURCE_DIR}/main.cpp
     mainwindow.cpp
     mainwindow.h
+    src/canvasview.h src/canvasview.cpp
+    src/imageitem.h src/imageitem.cpp
 )
 
 target_link_libraries(ImagoRef
