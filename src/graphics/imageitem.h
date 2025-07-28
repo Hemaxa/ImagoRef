@@ -12,6 +12,9 @@ public:
     //метод для включения/выключения режима изменения размера
     void setResizeMode(bool enabled);
 
+    //переопределение для контроля над границами элемента
+    QRectF boundingRect() const override;
+
 protected:
     //метод отрисовки для добавления рамки
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
@@ -39,12 +42,14 @@ private:
     //флаги
     bool m_isHovered = false;
     bool m_isResizing = false;
+    bool m_isScalingInProgress = false;
 
     //оригинальное изображение для качественного масштабирования
     QPixmap m_originalPixmap;
 
     Handle m_activeHandle = None; //выбранный маркер сейчас тащим
     QRectF m_initialSceneRect; //прямоугольник изображения в момент начала перетаскивания
+    QRectF m_currentBounds; //прямоугольник, описывающий текущие границы элемента
     QPointF m_initialMousePos; //позиция мыши в момент начала перетаскивания
 
     QVector<QRectF> m_handles; //массив с прямоугольниками маркеров для отрисовки и проверки попадания

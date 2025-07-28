@@ -6,7 +6,7 @@
 #include <QFormLayout>
 #include <QListWidget>
 #include <QStackedWidget>
-#include <QLabel> //виджет текста
+#include <QLabel>
 #include <QSpinBox>
 #include <QComboBox>
 #include <QDialogButtonBox>
@@ -19,7 +19,7 @@
 SettingsDialog::SettingsDialog(int currentGridSize, const QString &currentTheme, QWidget *parent)
     : QDialog(parent) {
     setWindowTitle("Настройки");
-    setMinimumWidth(550);
+    setFixedWidth(550);
     setMinimumHeight(300);
 
     //основной вертикальный макет для всего диалога
@@ -105,6 +105,29 @@ QWidget* SettingsDialog::createHotkeysPage() {
     hotkeysText->setObjectName("hotkeysTextEdit");
     hotkeysText->setReadOnly(true);
     hotkeysText->setHtml(R"(
+        <style>
+            body {
+                color: #e0e0e0;
+                line-height: 1.6;
+            }
+            h3 {
+                color: #ffffff;
+                border-bottom: 1px solid #5a5a5a;
+                padding-bottom: 5px;
+                margin-bottom: 10px;
+            }
+            ul {
+                list-style: none;
+                padding-left: 0;
+            }
+            li {
+                padding-bottom: 8px;
+            }
+            b {
+                color: #ffffff;
+                font-weight: bold;
+            }
+        </style>
         <h3>Основные действия</h3>
         <ul>
             <li><b>Перемещение холста:</b> Зажать среднюю кнопку мыши</li>

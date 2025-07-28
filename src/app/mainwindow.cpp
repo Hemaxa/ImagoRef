@@ -180,18 +180,25 @@ void MainWindow::applyTheme(const QString &themeName) {
         setStyleSheet(styleSheet);
         file.close();
     } else {
-        //если тема не найдена, можно установить стиль по умолчанию
         setStyleSheet("");
     }
 
     QColor iconColor;
+    QColor gridColor;
+
     if (themeName == "dark") {
-        iconColor = QColor("#ff0000");
+        iconColor = QColor("#e0e0e0");
+        gridColor = QColor("#1f1f1f");
     } else if (themeName == "light") {
         iconColor = QColor("#2a2a2a");
+        gridColor = QColor("#cccccc");
     } else {
-        iconColor = QColor("#e0e0e0"); //цвет иконок по умолчанию
+        // Цвет по умолчанию, если тема не найдена
+        iconColor = QColor("#e0e0e0");
+        gridColor = QColor("#1f1f1f");
     }
+
+    m_canvasView->setGridColor(gridColor);
 
     m_deleteAction->setIcon(createRecolorableIcon(":/icons/icons/delete.svg", iconColor));
     m_pasteAction->setIcon(createRecolorableIcon(":/icons/icons/paste.svg", iconColor));

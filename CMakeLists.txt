@@ -12,27 +12,29 @@ set(CMAKE_AUTORCC ON)
 
 qt_standard_project_setup()
 
+set(SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
+
 qt_add_executable(ImagoRef WIN32 MACOSX_BUNDLE)
 
 target_sources (ImagoRef PRIVATE
-    mainwindow.cpp
-    mainwindow.h
-    floatingtoolbar.cpp
-    floatingtoolbar.h
-    settingsdialog.cpp
-    settingsdialog.h
-    themes.qrc
-
-    src/main.cpp
-    src/canvasview.cpp
-    src/canvasview.h
-    src/imageitem.cpp
-    src/imageitem.h
+    ${SRC_DIR}/main.cpp
+    ${SRC_DIR}/app/mainwindow.cpp
+    ${SRC_DIR}/app/mainwindow.h
+    ${SRC_DIR}/widgets/floatingtoolbar.cpp
+    ${SRC_DIR}/widgets/floatingtoolbar.h
+    ${SRC_DIR}/widgets/settingsdialog.cpp
+    ${SRC_DIR}/widgets/settingsdialog.h
+    ${SRC_DIR}/graphics/canvasview.cpp
+    ${SRC_DIR}/graphics/canvasview.h
+    ${SRC_DIR}/graphics/imageitem.cpp
+    ${SRC_DIR}/graphics/imageitem.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/res/resources.qrc
 )
 
 target_include_directories(ImagoRef PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_CURRENT_SOURCE_DIR}/src
+    ${SRC_DIR}/app
+    ${SRC_DIR}/widgets
+    ${SRC_DIR}/graphics
 )
 
 target_link_libraries(ImagoRef PRIVATE

@@ -7,6 +7,7 @@ class QKeyEvent;
 class QDragEnterEvent;
 class QDragMoveEvent;
 class QDropEvent;
+//class QWheelEvent;
 
 class CanvasView : public QGraphicsView {
     Q_OBJECT
@@ -26,6 +27,7 @@ public slots:
     void zoomOut();
 
     void setGridSize(int size);
+    void setGridColor(const QColor &color);
 
 protected:
     //отрисовка фона
@@ -54,4 +56,5 @@ private:
     QPoint m_panStartPos;
 
     int m_gridSize; //параметр шага сетки
+    QColor m_gridDotColor; //цвет точек фона
 };

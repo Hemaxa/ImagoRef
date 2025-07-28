@@ -35,6 +35,7 @@ CanvasView::CanvasView(QWidget *parent) :
 
     //задание шага сетки по умолчанию
     m_gridSize = 25;
+    m_gridDotColor = QColor(60, 60, 60);
 
     //установка фокуса на виджет
     setFocusPolicy(Qt::StrongFocus);
@@ -46,8 +47,7 @@ void CanvasView::drawBackground(QPainter *painter, const QRectF &rect) {
     QGraphicsView::drawBackground(painter, rect);
 
     //настройки сетки, нужно добавить возможность изменения пользователем
-    const QColor dotColor = QColor(60, 60, 60); //цвет точки
-    QPen pen(dotColor);
+    QPen pen(m_gridDotColor);
     pen.setWidth(3); //толщина точки
     painter->setPen(pen);
 
@@ -165,20 +165,20 @@ void CanvasView::zoomOut() {
 }
 
 void CanvasView::wheelEvent(QWheelEvent *event) {
-    //проверка, зажата ли клавиша Ctrl
+    //проверка, зажата ли клавиша ctrl
     if (event->modifiers() & Qt::ControlModifier) {
-        //определяется направление прокрутки
-        const int delta = event->angleDelta().y();
+        // Устанавливается якорь трансформации под курсор
+        setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
 
-        qreal scaleFactor;
-        if (delta > 0) {
-            scaleFactor = 1.15;
-        } else {
-            scaleFactor = 1.0 / 1.15;
-        }
+        //определяется направление прокрутки и фактор масштабирования
+        const int delta = event->angleDelta().y();
+        const qreal scaleFactor = (delta > 0) ? 1.15 : 1.0 / 1.15;
 
         //масштабирование сцены
         scale(scaleFactor, scaleFactor);
+
+        //якорь возвращается в центр (поведение по умолчанию)
+        setTransformationAnchor(QGraphicsView::AnchorViewCenter);
 
         //"поглощение" события, чтобы оно не обрабатывалось дальше
         event->accept();
@@ -294,6 +294,15 @@ void CanvasView::setGridSize(int size) {
         //обновление фона, чтобы сетка перерисовалась
         scene()->invalidate(scene()->sceneRect(), QGraphicsScene::BackgroundLayer);
     }
+}
+
+void CanvasView::setGridColor(const QColor &color)
+{
+    if (m_gridDotColor == color) return;
+
+    m_gridDotColor = color;
+    //принудительная перерисовка фона, чтобы изменения применились
+    scene()->invalidate(scene()->sceneRect(), QGraphicsScene::BackgroundLayer);
 }
 
 int CanvasView::getGridSize() const {
