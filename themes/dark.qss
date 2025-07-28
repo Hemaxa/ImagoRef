@@ -1,0 +1,95 @@
+/* ------- Глобальные стили для виджетов ------- */
+QWidget {
+    background-color: #2a2a2a; /* Цвет фона по умолчанию */
+    color: #e0e0e0; /* Цвет текста по умолчанию */
+}
+
+/* ------- Стили для холста ------- */
+CanvasView {
+    border: none;
+}
+
+/* ------- Стили для панели инструментов ------- */
+FloatingToolBar, QFrame#FloatingToolBar {
+    background-color: rgba(35, 35, 35, 230);
+    border: 3px solid #464646;
+    border-radius: 12px;
+}
+
+/* ------- Стили для кнопок на панели инструментов ------- */
+FloatingToolBar QToolButton {
+    background-color: transparent;
+    border: none;
+    padding: 8px;
+    margin: 2px;
+    border-radius: 6px;
+}
+
+FloatingToolBar QToolButton:hover {
+    background-color: #505050;
+}
+
+FloatingToolBar QToolButton:pressed {
+    background-color: #5a5a5a;
+}
+
+/* ------- Стили для диалоговых окон (Настройки) ------- */
+
+
+/* Левый список */
+QListWidget {
+    border: 1px solid #464646;
+    border-radius: 12px;
+    outline: 0;
+    padding: 3px;
+}
+
+/* Элемент левого списка */
+QListWidget::item {
+    border-radius: 8px;
+    margin-bottom: 4px;
+    padding: 8px;
+}
+
+QListWidget::item:hover {
+    background-color: #505050;
+}
+
+QListWidget::item:selected {
+    background-color: #4a4a4a;
+}
+
+/* Правый список */
+QStackedWidget > QWidget {
+    border: 1px solid #464646;
+    border-radius: 12px;
+}
+
+QComboBox {
+    border: 1px solid #5a5a5a;
+    border-radius: 4px;
+    padding: 4px;
+    width: 100px;
+}
+
+QComboBox QAbstractItemView {
+    selection-background-color: #5a5a5a;
+    selection-color: white;
+    padding: 4px;
+}
+
+QSpinBox {
+    border: 1px solid #5a5a5a;
+    border-radius: 4px;
+    padding: 4px;
+    width: 104px;
+}
+
+QSpinBox::up-button, QSpinBox::down-button {
+    width: 16px;
+}
+
+QTextEdit#hotkeysTextEdit {
+    background-color: transparent;
+    border: none;
+}

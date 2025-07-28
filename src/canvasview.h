@@ -14,11 +14,18 @@ class CanvasView : public QGraphicsView {
 public:
     explicit CanvasView(QWidget *parent = nullptr);
 
-public slots: //слоты могут вызываться в ответ на сигналы
+    //геттеры
+    int gridSize() const;
+
+//слоты могут вызываться в ответ на сигналы
+public slots:
     void deleteSelectedItems();
+    void pasteImage();
     void snapAllToGrid();
     void zoomIn();
     void zoomOut();
+
+    void setGridSize(int size);
 
 protected:
     //отрисовка фона
@@ -32,10 +39,19 @@ protected:
     //метод изменения масштаба
     void wheelEvent(QWheelEvent *event) override;
 
+    //методы для перемещения колесиком мыши
+    void mousePressEvent(QMouseEvent *event) override;
+    void mouseMoveEvent(QMouseEvent *event) override;
+    void mouseReleaseEvent(QMouseEvent *event) override;
+
     //событие нажатие клавиши для локальных действий
     void keyPressEvent(QKeyEvent *event) override;
 
 private:
     QGraphicsScene *m_scene; //создания экземпляра сцены
     const QList<QByteArray> m_supportedFormats; //получение поддерживаемых форматов изображений Qt
+    bool m_isPanning;
+    QPoint m_panStartPos;
+
+    int m_gridSize; //параметр шага сетки
 };

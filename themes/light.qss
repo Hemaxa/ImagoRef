@@ -1,0 +1,72 @@
+/* ------- Глобальные стили для виджетов (Светлая тема) ------- */
+QWidget {
+    background-color: #f0f0f0; /* Светло-серый фон */
+    color: #000000; /* Черный текст */
+}
+
+/* ------- Стили для холста ------- */
+CanvasView {
+    background-color: #e0e0e0; /* Чуть более темный фон для холста */
+    border: none;
+}
+
+/* ------- Стили для панели инструментов (FloatingToolBar) ------- */
+FloatingToolBar, QFrame#FloatingToolBar {
+    background-color: rgba(255, 255, 255, 230); /* Полупрозрачный белый */
+    border: 1px solid #c0c0c0; /* Светло-серая рамка */
+    border-radius: 12px;
+}
+
+/* ------- Стили для кнопок на панели инструментов ------- */
+FloatingToolBar QToolButton {
+    background-color: transparent;
+    border: none;
+    padding: 8px;
+    margin: 2px;
+    border-radius: 6px;
+}
+
+FloatingToolBar QToolButton:hover {
+    background-color: #dcdcdc;
+}
+
+FloatingToolBar QToolButton:pressed {
+    background-color: #c0c0c0;
+}
+
+/* ------- Стили для диалоговых окон ------- */
+QDialog {
+    background-color: #f5f5f5;
+}
+
+QTabWidget::pane {
+    borde: none;
+}
+
+QTabBar::tab {
+    background: #f0f0f0;
+    border: 1px solid #d0d0d0;
+    border-bottom-color: #f0f0f0;
+    padding: 6px;
+    min-width: 80px;
+}
+
+QTabBar::tab:selected, QTabBar::tab:hover {
+    background: #ffffff;
+}
+
+QTabBar::tab:selected {
+    border-color: #c0c0c0;
+    border-bottom-color: #ffffff;
+}
+
+QSpinBox, QComboBox, QTextEdit {
+    background-color: #ffffff;
+    border: 1px solid #c0c0c0;
+    border-radius: 4px;
+    padding: 4px;
+}
+
+QSpinBox::up-button, QSpinBox::down-button {
+     width: 16px;
+}

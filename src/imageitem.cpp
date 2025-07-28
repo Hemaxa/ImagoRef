@@ -1,5 +1,5 @@
 #include "imageitem.h"
-#include <QPen>     //модуль для рисования контуров, определяет свойсво пера
+#include <QPen> //модуль для рисования контуров, определяет свойсво пера
 #include <QPainter> //модуль для рисования
 
 ImageItem::ImageItem(const QPixmap &pixmap, QGraphicsItem *parent)
