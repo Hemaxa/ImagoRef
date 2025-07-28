@@ -8,6 +8,31 @@
 #include <QIcon> //класс иконок
 #include <QPropertyAnimation> //класс для анимаций
 #include <QFile> //класс для подключения файлов
+#include <QSvgRenderer> //класс для работы с svg файлами
+#include <QPainter> //класс для рисования на виджетах
+
+//метод перекрашивания иконок
+QIcon createRecolorableIcon(const QString& path, const QColor& color, const QSize& size = QSize(24, 24)) {
+    //открытие svg файла из ресурсов
+    QFile file(path);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        return QIcon(); //возвращается пустая иконка, если файл не выбран
+    }
+
+    //читается содержимое и заменяется цвет
+    QTextStream in(&file);
+    QString svgData = in.readAll();
+    svgData.replace("currentColor", color.name());
+
+    //создается QPixmap и на нём рисуется изменённый SVG
+    QSvgRenderer renderer(svgData.toUtf8());
+    QPixmap pixmap(size);
+    pixmap.fill(Qt::transparent);
+    QPainter painter(&pixmap);
+    renderer.render(&painter);
+
+    return QIcon(pixmap);
+}
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     //создание холста
@@ -32,6 +57,7 @@ void MainWindow::onAnimationFinished() {
     m_toolBar->setProperty("animation", QVariant());
 }
 
+//появление и скрытие боковой панели
 void MainWindow::keyPressEvent(QKeyEvent *event) {
     if (event->key() == Qt::Key_Tab) { //проверка нажатия клавиши Tab
         event->accept();
@@ -43,8 +69,8 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
             currentAnimation->stop();
         }
 
-        const int duration = 300; //длительность анимации выхода/ухода
-        const int endXOnScreen = 15; //позиция окна при выходе
+        const int duration = 300; //длительность анимации выхода/ухода (мс)
+        const int endXOnScreen = 15; //позиция окна при выходе (px)
 
         //создание нового объекта анимации
         auto* animation = new QPropertyAnimation(m_toolBar, "pos", this);
@@ -75,36 +101,43 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
     }
 }
 
+//добавление кнопок и действий на них в боковую панель
 void MainWindow::createActions() {
+    QColor defaultIconColor("#e0e0e0"); //начальный цвет иконок
     //действие "Удалить"
-    m_deleteAction = new QAction(QIcon::fromTheme("edit-delete"), "Удалить", this);
+    m_deleteAction = new QAction(createRecolorableIcon(":/icons/icons/delete.svg", defaultIconColor), "Удалить", this);
     m_deleteAction->setShortcut(QKeySequence::Delete);
     connect(m_deleteAction, &QAction::triggered, m_canvasView, &CanvasView::deleteSelectedItems);
     //соединение сигнала triggered() со слотом deleteSelectedItems() CanvasView
-    //когда нажимается кнопка или шорткат, CanvasView получает команду на удаление
+    //когда нажимается кнопка или шорткат, CanvasView получает команду на удаление и выполняет метод deleteSelectedItems()
 
-    //действие "Выровнять по сетке"
-    m_snapToGridAction = new QAction(QIcon::fromTheme("grid"), "Привязать к сетке", this);
-    m_snapToGridAction->setShortcut(tr("Ctrl+G"));
-    connect(m_snapToGridAction, &QAction::triggered, m_canvasView, &CanvasView::snapAllToGrid);
-
-    // Действие "Вставить"
-    m_pasteAction = new QAction(QIcon::fromTheme("edit-paste"), "Вставить", this);
+    //действие "Вставить"
+    m_pasteAction = new QAction(createRecolorableIcon(":/icons/icons/paste.svg", defaultIconColor), "Вставить", this);
     m_pasteAction->setShortcut(QKeySequence::Paste);
     connect(m_pasteAction, &QAction::triggered, m_canvasView, &CanvasView::pasteImage);
 
-    //действие "Увеличить"
-    m_zoomInAction = new QAction(QIcon::fromTheme("zoom-in"), "Приблизить", this);
+    //действие "Выровнять по сетке"
+    m_snapToGridAction = new QAction(createRecolorableIcon(":/icons/icons/grid.svg", defaultIconColor), "Привязать к сетке", this);
+    m_snapToGridAction->setShortcut(tr("Ctrl+G"));
+    connect(m_snapToGridAction, &QAction::triggered, m_canvasView, &CanvasView::snapAllToGrid);
+
+    //действие "Изменить размер"
+    m_resizeAction = new QAction(createRecolorableIcon(":/icons/icons/resize.svg", defaultIconColor), "Изменить размер", this);
+    m_resizeAction->setShortcut(tr("Ctrl+R"));
+    connect(m_resizeAction, &QAction::triggered, m_canvasView, &CanvasView::enterResizeMode);
+
+    //действие "Приблизить"
+    m_zoomInAction = new QAction(createRecolorableIcon(":/icons/icons/zoom-in.svg", defaultIconColor), "Приблизить", this);
     m_zoomInAction->setShortcuts({QKeySequence::ZoomIn, QKeySequence(tr("Ctrl+=")), QKeySequence(tr("Ctrl++"))});
     connect(m_zoomInAction, &QAction::triggered, m_canvasView, &CanvasView::zoomIn);
 
-    //действие "Уменьшить"
-    m_zoomOutAction = new QAction(QIcon::fromTheme("zoom-out"), "Отдалить", this);
+    //действие "Отдалить"
+    m_zoomOutAction = new QAction(createRecolorableIcon(":/icons/icons/zoom-out.svg", defaultIconColor), "Отдалить", this);
     m_zoomOutAction->setShortcuts({QKeySequence::ZoomOut, QKeySequence(tr("Ctrl--"))});
     connect(m_zoomOutAction, &QAction::triggered, m_canvasView, &CanvasView::zoomOut);
 
     //действие "Открыть окно настроек"
-    m_settingsAction = new QAction(QIcon::fromTheme("document-properties"), "Настройки", this);
+    m_settingsAction = new QAction(createRecolorableIcon(":/icons/icons/settings.svg", defaultIconColor), "Настройки", this);
     m_settingsAction->setShortcut(tr("Ctrl+,"));
     connect(m_settingsAction, &QAction::triggered, this, &MainWindow::openSettingsDialog);
 }
@@ -118,6 +151,7 @@ void MainWindow::createToolBar() {
     m_toolBar->addAction(m_deleteAction);
     m_toolBar->addAction(m_pasteAction);
     m_toolBar->addAction(m_snapToGridAction);
+    m_toolBar->addAction(m_resizeAction);
     m_toolBar->addAction(m_zoomInAction);
     m_toolBar->addAction(m_zoomOutAction);
     m_toolBar->addAction(m_settingsAction);
@@ -128,7 +162,7 @@ void MainWindow::createToolBar() {
 
 void MainWindow::openSettingsDialog() {
     //передается текущий размер сетки и имя текущей темы
-    SettingsDialog dialog(m_canvasView->gridSize(), m_currentThemeName, this);
+    SettingsDialog dialog(m_canvasView->getGridSize(), m_currentThemeName, this);
     if (dialog.exec() == QDialog::Accepted) {
         m_canvasView->setGridSize(dialog.gridSize());
         applyTheme(dialog.theme());
@@ -149,4 +183,21 @@ void MainWindow::applyTheme(const QString &themeName) {
         //если тема не найдена, можно установить стиль по умолчанию
         setStyleSheet("");
     }
+
+    QColor iconColor;
+    if (themeName == "dark") {
+        iconColor = QColor("#ff0000");
+    } else if (themeName == "light") {
+        iconColor = QColor("#2a2a2a");
+    } else {
+        iconColor = QColor("#e0e0e0"); //цвет иконок по умолчанию
+    }
+
+    m_deleteAction->setIcon(createRecolorableIcon(":/icons/icons/delete.svg", iconColor));
+    m_pasteAction->setIcon(createRecolorableIcon(":/icons/icons/paste.svg", iconColor));
+    m_snapToGridAction->setIcon(createRecolorableIcon(":/icons/icons/grid.svg", iconColor));
+    m_resizeAction->setIcon(createRecolorableIcon(":/icons/icons/resize.svg", iconColor));
+    m_zoomInAction->setIcon(createRecolorableIcon(":/icons/icons/zoom-in.svg", iconColor));
+    m_zoomOutAction->setIcon(createRecolorableIcon(":/icons/icons/zoom-out.svg", iconColor));
+    m_settingsAction->setIcon(createRecolorableIcon(":/icons/icons/settings.svg", iconColor));
 }

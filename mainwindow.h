@@ -2,6 +2,7 @@
 #include <QMainWindow> //класс основного окна приложения в Qt
 
 //наследуемые классы
+//используется такая структура, потому что необходим только указатель на обект этих классов
 class CanvasView; //класс доски с изображениями
 class FloatingToolBar; //класс всплывающего окна инструментов
 class QAction; //класс Qt для обработки действий
@@ -18,7 +19,7 @@ protected:
     void keyPressEvent(QKeyEvent *event) override;
 
 private slots:
-    void onAnimationFinished();
+    void onAnimationFinished(); //метод завершения анимации ухода боковой панели
     void openSettingsDialog(); //метод открытия окна настроек приложение
 
 private:
@@ -35,6 +36,7 @@ private:
     QAction *m_deleteAction;
     QAction *m_pasteAction;
     QAction *m_snapToGridAction;
+    QAction *m_resizeAction;
     QAction *m_zoomInAction;
     QAction *m_zoomOutAction;
     QAction *m_settingsAction;

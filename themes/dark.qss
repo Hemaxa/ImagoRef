@@ -1,22 +1,67 @@
-/* ------- Глобальные стили для виджетов ------- */
+/* =================================================================== */
+/* ПАЛИТРА ЦВЕТОВ ТЕМЫ                                                 */
+/* =================================================================== */
+
+/*
+    ЦВЕТ ХОЛСТА: #2a2a2a
+    ЦВЕТ ТЕКСТА: #e0e0e0
+    ЦВЕТ РАМКИ: #464646
+    ЦВЕТ ФОНА БОКОВОГО МЕНЮ: rgba(35, 35, 35, 230)
+    ЦВЕТ КНОПКИ: #d3d3d3
+    ЦВЕТ ХОВЕРА КНОПКИ:
+    ЦВЕТ ВЫБОРА КНОПКИ:
+    ЦВЕТ НАЖАТИЯ КНОПКИ:
+    ЦВЕТ ХОВЕРА ЭЛЕМЕНТА: #505050
+    ЦВЕТ ВЫБОРА ЭЛЕМЕНТА: #4a4a4a
+    ЦВЕТ НАЖАТИЯ ЭЛЕМЕНТА: #5a5a5a
+*/
+
+/* =================================================================== */
+/* ГЛОБАЛЬНЫЕ СТИЛИ                                                    */
+/* =================================================================== */
+
 QWidget {
     background-color: #2a2a2a; /* Цвет фона по умолчанию */
     color: #e0e0e0; /* Цвет текста по умолчанию */
+    font-size: 14px; /* Размер текста по умолчанию */
 }
 
-/* ------- Стили для холста ------- */
+/* Кнопки типа "Применить", "Отмена" */
+QPushButton {
+    background-color: #d3d3d3;
+    color: black;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+}
+
+QPushButton:pressed {
+    background-color: #808080;
+    color: white;
+}
+
+/* =================================================================== */
+/* СТИЛИ КОНКРЕТНЫХ КОМПОНЕНТОВ                                        */
+/* =================================================================== */
+
+/* ----- Холст ----- */
+
 CanvasView {
     border: none;
 }
 
-/* ------- Стили для панели инструментов ------- */
-FloatingToolBar, QFrame#FloatingToolBar {
+
+
+/* ----- Боковая панель инструментов ----- */
+
+/* Боковая панель */
+FloatingToolBar {
     background-color: rgba(35, 35, 35, 230);
     border: 3px solid #464646;
     border-radius: 12px;
 }
 
-/* ------- Стили для кнопок на панели инструментов ------- */
+/* Кнопки боковой панели инструментов */
 FloatingToolBar QToolButton {
     background-color: transparent;
     border: none;
@@ -33,63 +78,89 @@ FloatingToolBar QToolButton:pressed {
     background-color: #5a5a5a;
 }
 
-/* ------- Стили для диалоговых окон (Настройки) ------- */
 
 
-/* Левый список */
-QListWidget {
+/* ----- Окно настроек приложения ----- */
+
+/* - Само окно настроек - */
+SettingsDialog {
+    background-color: --bg-main;
+}
+
+/* - Левый список навигации - */
+QListWidget#settingsNavigationList {
     border: 1px solid #464646;
     border-radius: 12px;
     outline: 0;
     padding: 3px;
 }
 
-/* Элемент левого списка */
-QListWidget::item {
+QListWidget#settingsNavigationList::item {
     border-radius: 8px;
     margin-bottom: 4px;
     padding: 8px;
 }
 
-QListWidget::item:hover {
-    background-color: #505050;
+QListWidget#settingsNavigationList::item:selected {
+    background-color: #464646;
 }
 
-QListWidget::item:selected {
+QListWidget#settingsNavigationList::item:hover {
     background-color: #4a4a4a;
 }
 
-/* Правый список */
-QStackedWidget > QWidget {
+/* - Правый список настроек - */
+SettingsDialog  QStackedWidget > QWidget {
     border: 1px solid #464646;
     border-radius: 12px;
 }
 
-QComboBox {
+/* Элементы управления */
+SettingsDialog QSpinBox, SettingsDialog QComboBox {
     border: 1px solid #5a5a5a;
     border-radius: 4px;
     padding: 4px;
-    width: 100px;
+    width: 110px;
+    height: 20px;
 }
 
-QComboBox QAbstractItemView {
-    selection-background-color: #5a5a5a;
+SettingsDialog QSpinBox {
+    width: 114px;
+}
+
+SettingsDialog QSpinBox:hover, SettingsDialog QComboBox:hover {
+    border-color: #505050
+}
+
+/* Выпадающий список у комбобокса */
+SettingsDialog QComboBox QAbstractItemView {
+    background-color: #2a2a2a
+    border: 1px solid white;
     selection-color: white;
-    padding: 4px;
+    padding: 8px;
 }
 
-QSpinBox {
-    border: 1px solid #5a5a5a;
-    border-radius: 4px;
-    padding: 4px;
-    width: 104px;
+/* Стрелочки у комбобокса и спинбокса */
+SettingsDialog QComboBox::drop-down {
+    border: none;
+    width: 25px;
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
 }
 
-QSpinBox::up-button, QSpinBox::down-button {
+SettingsDialog QComboBox::down-arrow {
     width: 16px;
+    height: 16px;
 }
 
-QTextEdit#hotkeysTextEdit {
+
+SettingsDialog QSpinBox::up-button, QSpinBox::down-button {
+    width: 25px; /* Задаём ширину кнопок */
+    border-left: 1px solid #5a5a5a;
+}
+
+/* - Поле с текстом горячих клавиш - */
+SettingsDialog QTextEdit#hotkeysTextEdit {
     background-color: transparent;
     border: none;
 }

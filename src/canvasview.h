@@ -14,14 +14,14 @@ class CanvasView : public QGraphicsView {
 public:
     explicit CanvasView(QWidget *parent = nullptr);
 
-    //геттеры
-    int gridSize() const;
+    int getGridSize() const;
 
-//слоты могут вызываться в ответ на сигналы
+//слоты могут вызываться в ответ на сигналы (сигналы идут из MainWindow)
 public slots:
     void deleteSelectedItems();
     void pasteImage();
     void snapAllToGrid();
+    void enterResizeMode();
     void zoomIn();
     void zoomOut();
 

@@ -9,14 +9,44 @@ public:
     //конструктор принимает QPixmap (объект кртинки) для отображения
     explicit ImageItem(const QPixmap &pixmap, QGraphicsItem *parent = nullptr);
 
+    //метод для включения/выключения режима изменения размера
+    void setResizeMode(bool enabled);
+
 protected:
     //метод отрисовки для добавления рамки
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 
-    //дополнительные события для эффекта обводки изображения
+    //методы для эффекта обводки изображения
     void hoverEnterEvent(QGraphicsSceneHoverEvent *event) override;
     void hoverLeaveEvent(QGraphicsSceneHoverEvent *event) override;
 
+    //методы для реализации логики перетаскивания маркеров
+    void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
+    void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
+    void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
+
 private:
-    bool m_isHovered = false; //флаг отслеживания курсора
+    //перечисление маркеров взаимодействия с изображением
+    enum Handle {
+        None, TopLeft, Top, TopRight, Right, BottomRight, Bottom, Left, BottomLeft
+    };
+
+    //вспомогательные функции для взаимодействия с курсором
+    void updateHandlesPos();
+    Handle getHandleAt(const QPointF &pos);
+    void setCursorForHandle(Handle handle);
+
+    //флаги
+    bool m_isHovered = false;
+    bool m_isResizing = false;
+
+    //оригинальное изображение для качественного масштабирования
+    QPixmap m_originalPixmap;
+
+    Handle m_activeHandle = None; //выбранный маркер сейчас тащим
+    QRectF m_initialSceneRect; //прямоугольник изображения в момент начала перетаскивания
+    QPointF m_initialMousePos; //позиция мыши в момент начала перетаскивания
+
+    QVector<QRectF> m_handles; //массив с прямоугольниками маркеров для отрисовки и проверки попадания
+    const int m_handleSize = 15; //размер маркера в пикселях
 };

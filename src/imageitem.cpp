@@ -1,9 +1,16 @@
 #include "imageitem.h"
+
 #include <QPen> //модуль для рисования контуров, определяет свойсво пера
 #include <QPainter> //модуль для рисования
+#include <QGraphicsSceneMouseEvent>
+#include <QGuiApplication>
+#include <QCursor>
 
 ImageItem::ImageItem(const QPixmap &pixmap, QGraphicsItem *parent)
-    : QObject(nullptr), QGraphicsPixmapItem(pixmap, parent) {
+    : QObject(nullptr),
+    QGraphicsPixmapItem(pixmap, parent),
+    m_originalPixmap(pixmap)
+{
 
     //установка флагов, которые делают элемент интерактивным (то, что можно делать с изображением)
     //1. ItemIsSelectable - можно выделять
@@ -13,8 +20,26 @@ ImageItem::ImageItem(const QPixmap &pixmap, QGraphicsItem *parent)
 
     //обработка событий наведения мыши
     setAcceptHoverEvents(true);
+
+    //обработка добавления маркеров
+    m_handles.resize(8); //количесвто маркеров
 }
 
+//метод включения режима изменения размера
+void ImageItem::setResizeMode(bool enabled) {
+    if (m_isResizing == enabled) return; //ничего не делать, если уже режим изменения размера
+
+    m_isResizing = enabled;
+    if (m_isResizing) {
+        setFlag(ItemIsMovable, false); //запрет на перемещение при активном изменении размера
+        updateHandlesPos(); //вычисление позиции маркеров
+    } else {
+        setFlag(ItemIsMovable, true);
+    }
+    update(); //перерисовка элемента
+}
+
+//метод отризовки рамки и маркеров изменения изображения
 void ImageItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
     //вызывается родительский метод, чтобы само изображение нарисовалось
     QGraphicsPixmapItem::paint(painter, option, widget);
@@ -23,6 +48,56 @@ void ImageItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
     if (m_isHovered) {
         painter->setPen(QPen(Qt::white, 2)); //белое перо, 2px
         painter->drawRect(boundingRect());
+    }
+
+    if (m_isResizing) {
+        painter->setBrush(Qt::white);
+        painter->setPen(QPen(Qt::black, 2));
+        for (const auto &handleRect : m_handles) {
+            painter->drawEllipse(handleRect);
+        }
+    }
+}
+
+//метод просчета позиций маркеров изменения размера
+void ImageItem::updateHandlesPos() {
+    const QRectF br = boundingRect();
+    const qreal hs = m_handleSize / 2.0; //половина изображения
+    m_handles[0].setRect(br.topLeft().x() - hs, br.topLeft().y() - hs, m_handleSize, m_handleSize); // TopLeft
+    m_handles[1].setRect(br.center().x() - hs, br.top() - hs, m_handleSize, m_handleSize); // Top
+    m_handles[2].setRect(br.topRight().x() - hs, br.topRight().y() - hs, m_handleSize, m_handleSize); // TopRight
+    m_handles[3].setRect(br.right() - hs, br.center().y() - hs, m_handleSize, m_handleSize); // Right
+    m_handles[4].setRect(br.bottomRight().x() - hs, br.bottomRight().y() - hs, m_handleSize, m_handleSize); // BottomRight
+    m_handles[5].setRect(br.center().x() - hs, br.bottom() - hs, m_handleSize, m_handleSize); // Bottom
+    m_handles[6].setRect(br.left() - hs, br.center().y() - hs, m_handleSize, m_handleSize); // Left
+    m_handles[7].setRect(br.bottomLeft().x() - hs, br.bottomLeft().y() - hs, m_handleSize, m_handleSize); // BottomLeft
+}
+
+ImageItem::Handle ImageItem::getHandleAt(const QPointF &pos) {
+    for (int i = 0; i < m_handles.size(); ++i) {
+        if (m_handles[i].contains(pos)) {
+            return static_cast<Handle>(i + 1);
+        }
+    }
+    return None;
+}
+
+void ImageItem::setCursorForHandle(Handle handle) {
+    switch (handle) {
+        case TopLeft:
+        case TopRight:
+        case BottomLeft:
+            setCursor(Qt::SizeBDiagCursor); break;
+        case BottomRight:
+            setCursor(Qt::SizeFDiagCursor); break;
+        case Top:
+        case Bottom:
+            setCursor(Qt::SizeVerCursor); break;
+        case Right:
+        case Left:
+            setCursor(Qt::SizeHorCursor); break;
+        default:
+            setCursor(Qt::ArrowCursor); break;
     }
 }
 
@@ -36,6 +111,96 @@ void ImageItem::hoverEnterEvent(QGraphicsSceneHoverEvent *event) {
 //срабатывает, когда курсор мыши покидает границы элемента
 void ImageItem::hoverLeaveEvent(QGraphicsSceneHoverEvent *event) {
     m_isHovered = false;
+    setCursor(Qt::ArrowCursor);
     update();
     QGraphicsPixmapItem::hoverLeaveEvent(event);
+}
+
+//обработка событий мыши для изменения размера
+void ImageItem::mousePressEvent(QGraphicsSceneMouseEvent *event) {
+    if (m_isResizing) {
+        m_activeHandle = getHandleAt(event->pos()); //определение нажатого маркера
+        if (m_activeHandle != None) {
+            m_initialSceneRect = this->mapToScene(boundingRect()).boundingRect();
+            m_initialMousePos = event->scenePos();
+            event->accept();
+            return;
+        }
+    }
+    //если не в режиме изменения или клик не по маркеру, вызывается стандартное поведение
+    QGraphicsPixmapItem::mousePressEvent(event);
+}
+
+//метод выполняется при каждом движении мыши с зажатой кнопкой
+void ImageItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event) {
+    if (m_isResizing && m_activeHandle != None) {
+        prepareGeometryChange();
+
+        QRectF newSceneRect = m_initialSceneRect;
+        QPointF delta = event->scenePos() - m_initialMousePos;
+
+        //определяется новый прямоугольник в координатах сцены
+        switch (m_activeHandle) {
+        case TopLeft:     newSceneRect.setTopLeft(m_initialSceneRect.topLeft() + delta); break;
+        case Top:         newSceneRect.setTop(m_initialSceneRect.top() + delta.y()); break;
+        case TopRight:    newSceneRect.setTopRight(m_initialSceneRect.topRight() + delta); break;
+        case Right:       newSceneRect.setRight(m_initialSceneRect.right() + delta.x()); break;
+        case BottomRight: newSceneRect.setBottomRight(m_initialSceneRect.bottomRight() + delta); break;
+        case Bottom:      newSceneRect.setBottom(m_initialSceneRect.bottom() + delta.y()); break;
+        case Left:        newSceneRect.setLeft(m_initialSceneRect.left() + delta.x()); break;
+        case BottomLeft:  newSceneRect.setBottomLeft(m_initialSceneRect.bottomLeft() + delta); break;
+        default: break;
+        }
+
+        //обработка зажатия Shift для сохранения пропорций
+        if (event->modifiers() & Qt::ShiftModifier) {
+            qreal ratio = m_initialSceneRect.width() / m_initialSceneRect.height();
+            qreal newWidth = newSceneRect.width();
+            qreal newHeight = newSceneRect.height();
+
+            if (m_activeHandle == Top || m_activeHandle == Bottom) {
+                newWidth = newHeight * ratio;
+            } else if (m_activeHandle == Left || m_activeHandle == Right) {
+                newHeight = newWidth / ratio;
+            } else { //угловые маркеры
+                if (abs(delta.x()) > abs(delta.y())) {
+                    newHeight = newWidth / ratio;
+                } else {
+                    newWidth = newHeight * ratio;
+                }
+            }
+            //"прибивается" к нужному углу
+            switch (m_activeHandle) {
+            case TopLeft:     newSceneRect.setTopLeft(newSceneRect.bottomRight() - QPointF(newWidth, newHeight)); break;
+            case TopRight:    newSceneRect.setTopRight(newSceneRect.bottomLeft() + QPointF(newWidth, -newHeight)); break;
+            case BottomLeft:  newSceneRect.setBottomLeft(newSceneRect.topRight() + QPointF(-newWidth, newHeight)); break;
+            case BottomRight: newSceneRect.setBottomRight(newSceneRect.topLeft() + QPointF(newWidth, newHeight)); break;
+            default: break; // для боковых маркеров уже все хорошо
+            }
+        }
+
+        //нормализация прямоугольника, если он "вывернулся"
+        newSceneRect = newSceneRect.normalized();
+
+        //применяется новая геометрию
+        setPos(newSceneRect.topLeft());
+        setPixmap(m_originalPixmap.scaled(newSceneRect.size().toSize(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+        updateHandlesPos();
+        event->accept();
+        return;
+
+    } else if (m_isResizing) {
+        setCursorForHandle(getHandleAt(event->pos()));
+    }
+    QGraphicsPixmapItem::mouseMoveEvent(event);
+}
+
+void ImageItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event) {
+    if (m_isResizing && m_activeHandle != None) {
+        m_activeHandle = None; //сбрасывается активный маркер
+        setCursor(Qt::ArrowCursor);
+        event->accept();
+        return;
+    }
+    QGraphicsPixmapItem::mouseReleaseEvent(event);
 }

@@ -13,7 +13,6 @@
 #include <QScrollBar>
 #include <QGuiApplication>
 #include <QClipboard>
-#include <QMimeData>
 #include <QUrl>
 
 CanvasView::CanvasView(QWidget *parent) :
@@ -41,6 +40,7 @@ CanvasView::CanvasView(QWidget *parent) :
     setFocusPolicy(Qt::StrongFocus);
 }
 
+//метод отрисовки фона
 void CanvasView::drawBackground(QPainter *painter, const QRectF &rect) {
     //вызывается родительский метод, чтобы он нарисовал фон (цвет из конструктора)
     QGraphicsView::drawBackground(painter, rect);
@@ -63,6 +63,7 @@ void CanvasView::drawBackground(QPainter *painter, const QRectF &rect) {
     }
 }
 
+//методы для Drag & Drop
 void CanvasView::dragEnterEvent(QDragEnterEvent *event) {
     //проверка, являются ли перетаскиваемые данные локальными по url
     if (event->mimeData()->hasUrls()) {
@@ -105,7 +106,17 @@ void CanvasView::dropEvent(QDropEvent *event) {
     event->acceptProposedAction();
 }
 
+//метод нажатия клавиш
 void CanvasView::keyPressEvent(QKeyEvent *event) {
+    //если нажата клавиша Esc
+    if (event->key() == Qt::Key_Escape) {
+        // При нажатии Esc выключаем режим изменения размера у всех выделенных элементов
+        for (QGraphicsItem *it : m_scene->selectedItems()) {
+            if (ImageItem *imgItem = dynamic_cast<ImageItem*>(it)) {
+                imgItem->setResizeMode(false);
+            }
+        }
+    }
     //если нажата клавиша Delete или Backspace
     if (event->key() == Qt::Key_Delete || event->key() == Qt::Key_Backspace) {
         deleteSelectedItems(); //вызывается функция удаления
@@ -115,6 +126,7 @@ void CanvasView::keyPressEvent(QKeyEvent *event) {
     }
 }
 
+//метод удаления выбранных рамкой изображений
 void CanvasView::deleteSelectedItems() {
     //получает список всех выделенных элементов со сцены
     QList<QGraphicsItem*> selected = m_scene->selectedItems();
@@ -124,6 +136,7 @@ void CanvasView::deleteSelectedItems() {
     qDeleteAll(selected);
 }
 
+//метод привязки изображений к сетке
 void CanvasView::snapAllToGrid() {
     //проходимся по всем элементам на сцене
     for (QGraphicsItem *item : m_scene->items()) {
@@ -142,6 +155,7 @@ void CanvasView::snapAllToGrid() {
     }
 }
 
+//методы увеличения и уменьшения масштаба сцены
 void CanvasView::zoomIn() {
     scale(1.15, 1.15);
 }
@@ -174,7 +188,7 @@ void CanvasView::wheelEvent(QWheelEvent *event) {
     }
 }
 
-//перемещение на центральную кнопку мыши
+//методы перемещения на центральную кнопку мыши
 void CanvasView::mousePressEvent(QMouseEvent *event) {
     if (event->button() == Qt::MiddleButton) {
         m_isPanning = true;
@@ -182,6 +196,14 @@ void CanvasView::mousePressEvent(QMouseEvent *event) {
         setCursor(Qt::ClosedHandCursor);
         event->accept();
         return;
+    }
+    if (!itemAt(event->pos())) {
+        const auto selected = m_scene->selectedItems();
+        for (QGraphicsItem *it : selected) {
+            if (ImageItem *imgItem = dynamic_cast<ImageItem*>(it)) {
+                imgItem->setResizeMode(false);
+            }
+        }
     }
     QGraphicsView::mousePressEvent(event);
 }
@@ -208,19 +230,7 @@ void CanvasView::mouseReleaseEvent(QMouseEvent *event) {
     QGraphicsView::mouseReleaseEvent(event);
 }
 
-//метод изменения шага сетки
-void CanvasView::setGridSize(int size) {
-    if (size > 0) {
-        m_gridSize = size;
-        //обновление фона, чтобы сетка перерисовалась
-        scene()->invalidate(scene()->sceneRect(), QGraphicsScene::BackgroundLayer);
-    }
-}
-
-int CanvasView::gridSize() const {
-    return m_gridSize;
-}
-
+//метод вставки изображений
 void CanvasView::pasteImage() {
     //получение доступа к системному буферу обмена
     const QClipboard *clipboard = QGuiApplication::clipboard();
@@ -259,4 +269,33 @@ void CanvasView::pasteImage() {
         m_scene->addItem(imageItem);
         imageItem->setPos(mapToScene(viewport()->rect().center()));
     }
+}
+
+//методы вызова метода изменения масштаба изображения в ImageItem
+void CanvasView::enterResizeMode() {
+    // Получаем список выделенных элементов
+    QList<QGraphicsItem*> selected = m_scene->selectedItems();
+
+    // Мы будем работать только если выделен один элемент
+    if (selected.count() == 1) {
+        // Преобразуем QGraphicsItem в наш ImageItem
+        ImageItem *item = dynamic_cast<ImageItem*>(selected.first());
+        if (item) {
+            // Включаем режим изменения размера для этого элемента
+            item->setResizeMode(true);
+        }
+    }
+}
+
+//сеттеры и геттеры
+void CanvasView::setGridSize(int size) {
+    if (size > 0) {
+        m_gridSize = size;
+        //обновление фона, чтобы сетка перерисовалась
+        scene()->invalidate(scene()->sceneRect(), QGraphicsScene::BackgroundLayer);
+    }
+}
+
+int CanvasView::getGridSize() const {
+    return m_gridSize;
 }

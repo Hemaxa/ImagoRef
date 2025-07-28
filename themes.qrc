@@ -3,4 +3,13 @@
         <file>themes/dark.qss</file>
         <file>themes/light.qss</file>
     </qresource>
+    <qresource prefix="/icons">
+        <file>icons/delete.svg</file>
+        <file>icons/grid.svg</file>
+        <file>icons/paste.svg</file>
+        <file>icons/resize.svg</file>
+        <file>icons/settings.svg</file>
+        <file>icons/zoom-in.svg</file>
+        <file>icons/zoom-out.svg</file>
+    </qresource>
 </RCC>

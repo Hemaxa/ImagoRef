@@ -19,7 +19,7 @@
 SettingsDialog::SettingsDialog(int currentGridSize, const QString &currentTheme, QWidget *parent)
     : QDialog(parent) {
     setWindowTitle("Настройки");
-    setMinimumWidth(500);
+    setMinimumWidth(550);
     setMinimumHeight(300);
 
     //основной вертикальный макет для всего диалога
@@ -29,17 +29,20 @@ SettingsDialog::SettingsDialog(int currentGridSize, const QString &currentTheme,
 
     //список слева
     QListWidget *navigationList = new QListWidget(this);
-    navigationList->setFixedWidth(140); //фиксированная ширина списка
+    navigationList->setObjectName("settingsNavigationList");
+    navigationList->setFixedWidth(160); //фиксированная ширина списка
     navigationList->addItem("Общие");
     navigationList->addItem("Горячие клавиши");
 
     //создание "стопки" виджетов для содержимого вкладок
     QStackedWidget *pagesWidget = new QStackedWidget(this);
+    pagesWidget->setObjectName("settingsPages");
 
     //--- вкладка "Общие" ---
     //параметр шага сетки
     QWidget *generalPage = new QWidget;
-    QFormLayout *formLayout = new QFormLayout(generalPage);
+    QHBoxLayout* pageLayout = new QHBoxLayout(generalPage);
+    QFormLayout *formLayout = new QFormLayout();
     formLayout->setLabelAlignment(Qt::AlignLeft);
     m_gridSizeSpinBox = new QSpinBox;
     m_gridSizeSpinBox->setRange(20, 200);
@@ -57,6 +60,9 @@ SettingsDialog::SettingsDialog(int currentGridSize, const QString &currentTheme,
     int index = m_themeComboBox->findData(currentTheme);
     if (index != -1) { m_themeComboBox->setCurrentIndex(index); }
     formLayout->addRow("Тема интерфейса:", m_themeComboBox);
+
+    pageLayout->addLayout(formLayout);
+    pageLayout->addStretch();
 
     //--- вкладка "Горячие клавиши" ---
     QWidget *hotkeysPage = createHotkeysPage();

@@ -17,7 +17,7 @@ void FloatingToolBar::addAction(QAction *action) {
     //создается кнопка, связанная с действием (QAction)
     QToolButton *button = new QToolButton(this);
     button->setDefaultAction(action);
-    button->setIconSize(QSize(24, 24)); //размер иконок
+    button->setIconSize(QSize(20, 20)); //размер иконок
 
     //кнопка перед "распоркой"
     m_layout->insertWidget(m_layout->count() - 1, button);

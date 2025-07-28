@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.19)
 project(ImagoRef VERSION 1.0 LANGUAGES CXX)
 
-find_package(Qt6 6.5 REQUIRED COMPONENTS Core Gui Widgets)
+find_package(Qt6 6.5 REQUIRED COMPONENTS Core Gui Widgets Svg)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -21,24 +21,25 @@ target_sources (ImagoRef PRIVATE
     floatingtoolbar.h
     settingsdialog.cpp
     settingsdialog.h
+    themes.qrc
+
     src/main.cpp
     src/canvasview.cpp
     src/canvasview.h
     src/imageitem.cpp
     src/imageitem.h
-    themes.qrc
 )
 
 target_include_directories(ImagoRef PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/src
-    ${CMAKE_CURRENT_SOURCE_DIR}/themes
 )
 
 target_link_libraries(ImagoRef PRIVATE
     Qt::Core
     Qt::Widgets
     Qt::Gui
+    Qt::Svg
 )
 
 include(GNUInstallDirs)
