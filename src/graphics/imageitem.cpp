@@ -92,10 +92,10 @@ ImageItem::Handle ImageItem::getHandleAt(const QPointF &pos) {
 void ImageItem::setCursorForHandle(Handle handle) {
     switch (handle) {
     case TopLeft:
-    case BottomRight: // Оба используют SizeFDiagCursor
+    case BottomRight:
         setCursor(Qt::SizeFDiagCursor); break;
     case TopRight:
-    case BottomLeft: // Оба используют SizeBDiagCursor
+    case BottomLeft:
         setCursor(Qt::SizeBDiagCursor); break;
     case Top:
     case Bottom:

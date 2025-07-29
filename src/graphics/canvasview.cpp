@@ -273,15 +273,12 @@ void CanvasView::pasteImage() {
 
 //методы вызова метода изменения масштаба изображения в ImageItem
 void CanvasView::enterResizeMode() {
-    // Получаем список выделенных элементов
+    //получение списка выделенных элементов
     QList<QGraphicsItem*> selected = m_scene->selectedItems();
 
-    // Мы будем работать только если выделен один элемент
     if (selected.count() == 1) {
-        // Преобразуем QGraphicsItem в наш ImageItem
         ImageItem *item = dynamic_cast<ImageItem*>(selected.first());
         if (item) {
-            // Включаем режим изменения размера для этого элемента
             item->setResizeMode(true);
         }
     }

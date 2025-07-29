@@ -4,31 +4,31 @@
 
 /*
     ОСНОВНЫЕ
-    ЦВЕТ ХОЛСТА: #e0e0e0
-    ЦВЕТ ТЕКСТА: #2a2a2a
-    ЦВЕТ РАМКИ: #cccccc
-    ФОН БОКОВОГО МЕНЮ: rgba(245, 245, 245, 230)
-    ФОН ЭЛЕМЕНТОВ УПРАВЛЕНИЯ: #ffffff
+    ЦВЕТ ХОЛСТА: #FFF0F5
+    ЦВЕТ ТЕКСТА: #96536C
+    ЦВЕТ РАМКИ: #FFE6EB
+    ФОН БОКОВОГО МЕНЮ: rgba(255, 248, 250, 230)
+    ФОН ЭЛЕМЕНТОВ УПРАВЛЕНИЯ: #FFFFFF
 
     КНОПКИ (ОБЫЧНЫЕ)
-    ЦВЕТ ФОНА: #505050
-    ЦВЕТ ТЕКСТА: white
-    ЦВЕТ ФОНА (НАВЕДЕНИЕ): #cccccc
-    ЦВЕТ ТЕКСТА (НАВЕДЕНИЕ): black
-    ЦВЕТ ФОНА (НАЖАТИЕ): #bbbbbb
-    ЦВЕТ ТЕКСТА (НАЖАТИЕ): black
+    ЦВЕТ ФОНА: #FFB6C1
+    ЦВЕТ ТЕКСТА: #96536C
+    ЦВЕТ ФОНА (НАВЕДЕНИЕ): #FFD9E0
+    ЦВЕТ ТЕКСТА (НАВЕДЕНИЕ): #96536C
+    ЦВЕТ ФОНА (НАЖАТИЕ): #FFD1D9
+    ЦВЕТ ТЕКСТА (НАЖАТИЕ): #96536C
 
     СПИСКИ И МЕНЮ
-    ЦВЕТ ФОНА ВЫПАДАЮЩЕГО СПИСКА: #f0f0f0
+    ЦВЕТ ФОНА ВЫПАДАЮЩЕГО СПИСКА: #FFF0F5
     ЦВЕТ ВЫДЕЛЕННОГО ЭЛЕМЕНТА: #ffffff
-    ЦВЕТ ЭЛЕМЕНТА (НАВЕДЕНИЕ): #e9e9e9
-    ЦВЕТ ВЫБРАННОГО ЭЛЕМЕНТА (ВНУТРИ СПИСКА): #d0d0d0
+    ЦВЕТ ЭЛЕМЕНТА (НАВЕДЕНИЕ): #FFF8FA
+    ЦВЕТ ВЫБРАННОГО ЭЛЕМЕНТА (ВНУТРИ СПИСКА): #FFD9E0
 
     ЭЛЕМЕНТЫ УПРАВЛЕНИЯ (COMBOBOX, SPINBOX)
-    ЦВЕТ ФОНА КНОПОК: #e9e9e9
-    ЦВЕТ ФОНА КНОПОК (НАВЕДЕНИЕ): #d9d9d9
+    ЦВЕТ ФОНА КНОПОК: #FFB6C1
+    ЦВЕТ ФОНА КНОПОК (НАВЕДЕНИЕ): #FFACB9
 
-    ЦВЕТ РАЗДЕЛИТЕЛЯ: #cccccc
+    ЦВЕТ РАЗДЕЛИТЕЛЯ: #FFE6EB
 */
 
 /* =================================================================== */
@@ -36,28 +36,28 @@
 /* =================================================================== */
 
 QWidget {
-    background-color: #e0e0e0;
-    color: #2a2a2a;
+    background-color: #FFF0F5;
+    color: #96536C;
     font-size: 14px;
 }
 
 /* Кнопки типа "Применить", "Отмена" */
 QPushButton {
-    background-color: #505050;
-    color: white;
+    background-color: #FFB6C1;
+    color: #96536C;
     padding: 10px 20px;
     border: none;
     border-radius: 5px;
 }
 
 QPushButton:hover {
-    background-color: #cccccc;
-    color: black;
+    background-color: #FFD9E0;
+    color: #96536C;
 }
 
 QPushButton:pressed {
-    background-color: #bbbbbb;
-    color: black;
+    background-color: #FFD1D9;
+    color: #96536C;
 }
 
 /* =================================================================== */
@@ -74,8 +74,8 @@ CanvasView {
 
 /* Боковая панель */
 FloatingToolBar {
-    background-color: rgba(245, 245, 245, 230);
-    border: 3px solid #cccccc;
+    background-color: rgba(255, 248, 250, 230);
+    border: 3px solid #FFE6EB;
     border-radius: 12px;
 }
 
@@ -89,18 +89,18 @@ FloatingToolBar QToolButton {
 }
 
 FloatingToolBar QToolButton:hover {
-    background-color: #d9d9d9;
+    background-color: #FFD9E0;
 }
 
 FloatingToolBar QToolButton:pressed {
-    background-color: #cccccc;
+    background-color: #FFD1D9;
 }
 
 /* ----- Окно настроек приложения ----- */
 
 /* - Левый список навигации - */
 QListWidget#settingsNavigationList {
-    border: 1px solid #cccccc;
+    border: 1px solid #FFE6EB;
     border-radius: 12px;
     outline: 0;
     padding: 3px;
@@ -114,23 +114,23 @@ QListWidget#settingsNavigationList::item {
 
 QListWidget#settingsNavigationList::item:selected {
     background-color: #ffffff;
-    color: #2a2a2a;
+    color: #96536C;
 }
 
 QListWidget#settingsNavigationList::item:hover {
-    background-color: #e9e9e9;
+    background-color: #FFF8FA;
 }
 
 /* - Правый список настроек - */
 SettingsDialog  QStackedWidget > QWidget {
-    border: 1px solid #cccccc;
+    border: 1px solid #FFE6EB;
     border-radius: 12px;
 }
 
 /* Элементы управления */
 SettingsDialog QSpinBox, SettingsDialog QComboBox {
-    background-color: #ffffff;
-    border: 1px solid #cccccc;
+    background-color: #FFFFFF;
+    border: 1px solid #FFE6EB;
     border-radius: 4px;
     padding: 5px;
 }
@@ -144,13 +144,13 @@ SettingsDialog QSpinBox {
 }
 
 SettingsDialog QSpinBox:hover, SettingsDialog QComboBox:hover {
-    border-color: #bbbbbb;
+    border-color: #FFB6C1;
 }
 
 /* Стиль самого выпадающего контейнера */
 SettingsDialog QComboBox QAbstractItemView {
-    background-color: #f0f0f0;
-    border: 1px solid #cccccc;
+    background-color: #FFF0F5;
+    border: 1px solid #FFE6EB;
     border-radius: 4px;
     padding: 4px;
 }
@@ -166,12 +166,12 @@ SettingsDialog QComboBox QAbstractItemView::item {
 
 /* Стиль элемента при наведении */
 SettingsDialog QComboBox QAbstractItemView::item:hover {
-    background-color: #e9e9e9;
+    background-color: #FFF8FA;
 }
 
 /* Стиль выбранного элемента */
 SettingsDialog QComboBox QAbstractItemView::item:selected {
-    background-color: #d0d0d0;
+    background-color: #FFD9E0;
 }
 
 /* Область для индикатора-галочки (слева от текста) */
@@ -190,14 +190,14 @@ SettingsDialog QComboBox::drop-down {
     subcontrol-origin: padding;
     subcontrol-position: top right;
     width: 25px;
-    background-color: #e9e9e9;
-    border-left: 1px solid #cccccc;
+    background-color: #FFB6C1;
+    border-left: 1px solid #FFE6EB;
     border-top-right-radius: 3px;
     border-bottom-right-radius: 3px;
 }
 
 SettingsDialog QComboBox::drop-down:hover {
-    background-color: #d9d9d9;
+    background-color: #FFACB9;
 }
 
 /* Сама иконка стрелки */
@@ -210,13 +210,13 @@ SettingsDialog QSpinBox::up-button,
 SettingsDialog QSpinBox::down-button {
     subcontrol-origin: padding;
     width: 25px;
-    background-color: #e9e9e9;
-    border-left: 1px solid #cccccc;
+    background-color: #FFB6C1;
+    border-left: 1px solid #FFE6EB;
 }
 
 SettingsDialog QSpinBox::up-button:hover,
 SettingsDialog QSpinBox::down-button:hover {
-    background-color: #d9d9d9;
+    background-color: #FFACB9;
 }
 
 SettingsDialog QSpinBox::up-button {

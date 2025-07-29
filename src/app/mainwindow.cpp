@@ -191,11 +191,29 @@ void MainWindow::applyTheme(const QString &themeName) {
         gridColor = QColor("#1f1f1f");
     } else if (themeName == "light") {
         iconColor = QColor("#2a2a2a");
-        gridColor = QColor("#cccccc");
+        gridColor = QColor("#d0d0d0");
+    } else if (themeName == "purple") {
+        iconColor = QColor("#B5A8E8");
+        gridColor = QColor("#D6CADD");
+    } else if (themeName == "orange") {
+        iconColor = QColor("#FFB366");
+        gridColor = QColor("#FFE8CC");
+    } else if (themeName == "blue") {
+        iconColor = QColor("#85C1E9");
+        gridColor = QColor("#D4EAF7");
+    } else if (themeName == "pink") {
+        iconColor = QColor("#FFB6C1");
+        gridColor = QColor("#FFE6EB");
+    } else if (themeName == "aquamarine") {
+        iconColor = QColor("#7FFFD4");
+        gridColor = QColor("#D0F7EE");
+    } else if (themeName == "green") {
+        iconColor = QColor("#B4D8B4");
+        gridColor = QColor("#E0EEE0");
     } else {
-        // Цвет по умолчанию, если тема не найдена
-        iconColor = QColor("#e0e0e0");
-        gridColor = QColor("#1f1f1f");
+        //цвет по умолчанию, если тема не найдена
+        iconColor = QColor("#2a2a2a");
+        gridColor = QColor("#d0d0d0");
     }
 
     m_canvasView->setGridColor(gridColor);

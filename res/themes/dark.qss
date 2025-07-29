@@ -27,6 +27,7 @@
     ЭЛЕМЕНТЫ УПРАВЛЕНИЯ (COMBOBOX, SPINBOX)
     ЦВЕТ ФОНА КНОПОК: #4a4a4a
     ЦВЕТ ФОНА КНОПОК (НАВЕДЕНИЕ): #555555
+
     ЦВЕТ РАЗДЕЛИТЕЛЯ: #5a5a5a
 */
 
@@ -113,6 +114,7 @@ QListWidget#settingsNavigationList::item {
 
 QListWidget#settingsNavigationList::item:selected {
     background-color: #333333;
+    color: #e0e0e0;
 }
 
 QListWidget#settingsNavigationList::item:hover {

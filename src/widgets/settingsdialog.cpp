@@ -1,8 +1,8 @@
 #include "settingsdialog.h"
 
 //части интерфейса
-#include <QVBoxLayout> //вертикальное расположение элементов
-#include <QHBoxLayout> //горизонтальное расположение элементов
+#include <QVBoxLayout>
+#include <QHBoxLayout>
 #include <QFormLayout>
 #include <QListWidget>
 #include <QStackedWidget>
@@ -54,9 +54,12 @@ SettingsDialog::SettingsDialog(int currentGridSize, const QString &currentTheme,
     m_themeComboBox = new QComboBox;
     m_themeComboBox->addItem("Темная", "dark");
     m_themeComboBox->addItem("Светлая", "light");
-    // m_themeComboBox->addItem("Зеленая", "green");
-    // m_themeComboBox->addItem("Голубая", "blue");
-    // m_themeComboBox->addItem("Фиолетова", "purple");
+    m_themeComboBox->addItem("Голубая", "blue");
+    m_themeComboBox->addItem("Аквамариновая", "aquamarine");
+    m_themeComboBox->addItem("Зеленая", "green");
+    m_themeComboBox->addItem("Фиолетовая", "purple");
+    m_themeComboBox->addItem("Розовая", "pink");
+    m_themeComboBox->addItem("Оранжевая", "orange");
     int index = m_themeComboBox->findData(currentTheme);
     if (index != -1) { m_themeComboBox->setCurrentIndex(index); }
     formLayout->addRow("Тема интерфейса:", m_themeComboBox);

@@ -2,6 +2,12 @@
     <qresource prefix="/themes">
         <file>themes/dark.qss</file>
         <file>themes/light.qss</file>
+        <file>themes/purple.qss</file>
+        <file>themes/aquamarine.qss</file>
+        <file>themes/blue.qss</file>
+        <file>themes/green.qss</file>
+        <file>themes/orange.qss</file>
+        <file>themes/pink.qss</file>
     </qresource>
     <qresource prefix="/icons">
         <file>icons/delete.svg</file>
