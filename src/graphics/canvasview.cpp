@@ -1,22 +1,25 @@
 #include "canvasview.h"
 #include "imageitem.h"
+#include "undocommands.h"
 
-#include <QGraphicsScene>
-#include <QPainter>
-#include <QDragEnterEvent>
-#include <QDropEvent>
-#include <QMimeData>
-#include <QKeyEvent>
-#include <QFileInfo>
-#include <QImageReader>
-#include <QWheelEvent>
-#include <QScrollBar>
-#include <QGuiApplication>
-#include <QClipboard>
-#include <QUrl>
+#include <QGraphicsScene> //класс Qt для работы со сценой
+#include <QPainter> //класс Qt для рисования
+#include <QDragEnterEvent> //класс события Qt
+#include <QDropEvent> //класс события Qt
+#include <QMimeData> //класс для получения содержимого буфера обмена
+#include <QKeyEvent> //класс события Qt
+#include <QFileInfo> //класс для получения расширения файла Qt
+#include <QImageReader> //класс для получения списка всех поддерживаемых в Qt форматов изображений
+#include <QWheelEvent> //класс события Qt
+#include <QScrollBar> //класс для доступа к скроллбарам Qt
+#include <QGuiApplication> //класс для доступа к глобальному объекту приложения, а через него — к системному буферу обмена
+#include <QClipboard> //содержит объявление класса QClipboard, который используется в pasteImage
+#include <QUrl> //класс для работы со списком файлов по Url
+#include <QUndoStack> //класс для стека (Undo & Redo)
 
-CanvasView::CanvasView(QWidget *parent) :
+CanvasView::CanvasView(QUndoStack *undoStack, QWidget *parent) :
     QGraphicsView(parent),
+    m_undoStack(undoStack),
     m_supportedFormats(QImageReader::supportedImageFormats()),
     m_isPanning(false)
 {
@@ -96,9 +99,9 @@ void CanvasView::dropEvent(QDropEvent *event) {
                 QPixmap pixmap(filePath); //если расширение поддерживается, идет загрузка в QPixmap
 
                 if (!pixmap.isNull()) {
-                    ImageItem *imageItem = new ImageItem(pixmap);
-                    m_scene->addItem(imageItem); //если в QPixmap что-то есть, то оно уходит на сцену
+                    ImageItem *imageItem = new ImageItem(pixmap, m_undoStack);
                     imageItem->setPos(mapToScene(event->position().toPoint()));
+                    m_undoStack->push(new AddCommand(imageItem, m_scene));
                 }
             }
         }
@@ -108,32 +111,36 @@ void CanvasView::dropEvent(QDropEvent *event) {
 
 //метод нажатия клавиш
 void CanvasView::keyPressEvent(QKeyEvent *event) {
-    //если нажата клавиша Esc
+    //обработка клавиши удаления (Delete)
+    if (event->key() == Qt::Key_Delete || event->key() == Qt::Key_Backspace) {
+        deleteSelectedItems();
+        event->accept(); //сообщение системе, что событие обработано
+        return;          //завершение выполнения
+    }
+
+    //обработка клавиши для выхода из режима изменения размера (Escape)
     if (event->key() == Qt::Key_Escape) {
-        // При нажатии Esc выключаем режим изменения размера у всех выделенных элементов
         for (QGraphicsItem *it : m_scene->selectedItems()) {
             if (ImageItem *imgItem = dynamic_cast<ImageItem*>(it)) {
                 imgItem->setResizeMode(false);
             }
         }
+        event->accept();
+        return;
     }
-    //если нажата клавиша Delete или Backspace
-    if (event->key() == Qt::Key_Delete || event->key() == Qt::Key_Backspace) {
-        deleteSelectedItems(); //вызывается функция удаления
-    } else {
-        //для всех остальных клавиш передается управление родительскому классу
-        QGraphicsView::keyPressEvent(event);
-    }
+
+    //для всех остальных клавиш вызывается реализация базового класса
+    QGraphicsView::keyPressEvent(event);
 }
 
 //метод удаления выбранных рамкой изображений
 void CanvasView::deleteSelectedItems() {
     //получает список всех выделенных элементов со сцены
     QList<QGraphicsItem*> selected = m_scene->selectedItems();
+    if (selected.isEmpty()) return;
 
     //удаление каждого элемента
-    //qDeleteAll - функция Qt для удаления всех объектов в контейнере
-    qDeleteAll(selected);
+    m_undoStack->push(new RemoveCommand(selected, m_scene));
 }
 
 //метод привязки изображений к сетке
@@ -246,9 +253,9 @@ void CanvasView::pasteImage() {
                 if (m_supportedFormats.contains(extension.toUtf8())) {
                     QPixmap pixmap(filePath);
                     if (!pixmap.isNull()) {
-                        ImageItem *imageItem = new ImageItem(pixmap);
-                        m_scene->addItem(imageItem);
+                        ImageItem *imageItem = new ImageItem(pixmap, m_undoStack);
                         imageItem->setPos(mapToScene(viewport()->rect().center()));
+                        m_undoStack->push(new AddCommand(imageItem, m_scene));
                         imagePasted = true;
                     }
                 }
@@ -265,9 +272,9 @@ void CanvasView::pasteImage() {
     const QImage image = clipboard->image();
     if (!image.isNull()) {
         QPixmap pixmap = QPixmap::fromImage(image);
-        ImageItem *imageItem = new ImageItem(pixmap);
-        m_scene->addItem(imageItem);
+        ImageItem *imageItem = new ImageItem(pixmap, m_undoStack);
         imageItem->setPos(mapToScene(viewport()->rect().center()));
+        m_undoStack->push(new AddCommand(imageItem, m_scene));
     }
 }
 

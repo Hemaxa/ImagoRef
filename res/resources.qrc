@@ -23,5 +23,7 @@
         <file>icons/arrow-up-light.svg</file>
         <file>icons/checkmark-dark.svg</file>
         <file>icons/checkmark-light.svg</file>
+        <file>icons/redo.svg</file>
+        <file>icons/undo.svg</file>
     </qresource>
 </RCC>

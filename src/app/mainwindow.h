@@ -7,12 +7,14 @@ class CanvasView; //класс доски с изображениями
 class FloatingToolBar; //класс всплывающего окна инструментов
 class QAction; //класс Qt для обработки действий
 class QKeyEvent; //класс Qt для обработки событий с клавиатуры
+class QUndoStack; //класс стека для Undo & Redo
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
 
 public:
     explicit MainWindow(QWidget *parent = nullptr); //explicit используется для предотвращения неявного преобразования типов при вызове конструктора
+    ~MainWindow();
 
 protected:
     //метод перхватывания нажатия клавиш для глобальных шорткатов
@@ -30,6 +32,7 @@ private:
     //указатели на основные компоненты из унаследованных классов
     CanvasView *m_canvasView;
     FloatingToolBar *m_toolBar;
+    QUndoStack *m_undoStack;
     QString m_currentThemeName;
 
     //действия, которые можно установить на кнопки и горячие клавиши
@@ -39,5 +42,7 @@ private:
     QAction *m_resizeAction;
     QAction *m_zoomInAction;
     QAction *m_zoomOutAction;
+    QAction *m_undoAction;
+    QAction *m_redoAction;
     QAction *m_settingsAction;
 };

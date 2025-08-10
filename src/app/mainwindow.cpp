@@ -10,6 +10,7 @@
 #include <QFile> //класс для подключения файлов
 #include <QSvgRenderer> //класс для работы с svg файлами
 #include <QPainter> //класс для рисования на виджетах
+#include <QUndoStack> //класс стека для Undo & Redo
 
 //метод перекрашивания иконок
 QIcon createRecolorableIcon(const QString& path, const QColor& color, const QSize& size = QSize(24, 24)) {
@@ -35,8 +36,11 @@ QIcon createRecolorableIcon(const QString& path, const QColor& color, const QSiz
 }
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
+    //создание стека
+    m_undoStack = new QUndoStack(this); //объект QUndoStack создается как дочерний для MainWindow
+
     //создание холста
-    m_canvasView = new CanvasView(this); //объект CanvasView создается как дочерний для MainWindow
+    m_canvasView = new CanvasView(m_undoStack, this); //объект CanvasView создается как дочерний для MainWindow
     //это заничт, что при уничтожении MainWindow, уничтожится и CanvasView
 
     //холст устанавливается как центральный виджет окна, он займет все доступное пространство
@@ -50,6 +54,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     setWindowTitle("ImagoRef");
     resize(1280, 720);
     applyTheme("dark");
+}
+
+MainWindow::~MainWindow() {
 }
 
 void MainWindow::onAnimationFinished() {
@@ -75,7 +82,7 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
         //создание нового объекта анимации
         auto* animation = new QPropertyAnimation(m_toolBar, "pos", this);
         animation->setDuration(duration);
-        animation->setEasingCurve(QEasingCurve::InOutCubic);
+        animation->setEasingCurve(QEasingCurve::InOutCubic); //создание кривой сглаживания
 
         //соединение сигнала завершения с слотом для очистки (onAnimationFinished вызывается после завершения анимации)
         connect(animation, &QPropertyAnimation::finished, this, &MainWindow::onAnimationFinished);
@@ -136,6 +143,18 @@ void MainWindow::createActions() {
     m_zoomOutAction->setShortcuts({QKeySequence::ZoomOut, QKeySequence(tr("Ctrl--"))});
     connect(m_zoomOutAction, &QAction::triggered, m_canvasView, &CanvasView::zoomOut);
 
+    //дейсвтие "Отменить"
+    m_undoAction = new QAction(createRecolorableIcon(":/icons/icons/undo.svg", defaultIconColor), "Отменить", this);
+    m_undoAction->setShortcut(QKeySequence::Undo);
+    connect(m_undoAction, &QAction::triggered, m_undoStack, &QUndoStack::undo);
+    connect(m_undoStack, &QUndoStack::canUndoChanged, m_undoAction, &QAction::setEnabled);
+
+    //дейсвтие "Повторить"
+    m_redoAction = new QAction(createRecolorableIcon(":/icons/icons/redo.svg", defaultIconColor), "Повторить", this);
+    m_redoAction->setShortcut(QKeySequence::Redo);
+    connect(m_redoAction, &QAction::triggered, m_undoStack, &QUndoStack::redo);
+    connect(m_undoStack, &QUndoStack::canRedoChanged, m_redoAction, &QAction::setEnabled);
+
     //действие "Открыть окно настроек"
     m_settingsAction = new QAction(createRecolorableIcon(":/icons/icons/settings.svg", defaultIconColor), "Настройки", this);
     m_settingsAction->setShortcut(tr("Ctrl+,"));
@@ -154,6 +173,8 @@ void MainWindow::createToolBar() {
     m_toolBar->addAction(m_resizeAction);
     m_toolBar->addAction(m_zoomInAction);
     m_toolBar->addAction(m_zoomOutAction);
+    m_toolBar->addAction(m_undoAction);
+    m_toolBar->addAction(m_redoAction);
     m_toolBar->addAction(m_settingsAction);
 
     //позиционирование панели
@@ -169,14 +190,15 @@ void MainWindow::openSettingsDialog() {
     }
 }
 
+//метод применения темы приложения
 void MainWindow::applyTheme(const QString &themeName) {
-    m_currentThemeName = themeName;
+    m_currentThemeName = themeName; //сохранения имени новой темы
     QString path = QString(":/themes/themes/%1.qss").arg(themeName);
 
     QFile file(path);
     if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        QTextStream stream(&file);
-        QString styleSheet = stream.readAll();
+        QTextStream stream(&file); //объект QTextStream для чтения содержимого файла
+        QString styleSheet = stream.readAll(); //чтение всего содержимого в строку styleSheet
         setStyleSheet(styleSheet);
         file.close();
     } else {
@@ -193,23 +215,23 @@ void MainWindow::applyTheme(const QString &themeName) {
         iconColor = QColor("#2a2a2a");
         gridColor = QColor("#d0d0d0");
     } else if (themeName == "purple") {
-        iconColor = QColor("#B5A8E8");
-        gridColor = QColor("#D6CADD");
+        iconColor = QColor("#b5a8e8");
+        gridColor = QColor("#d6cadd");
     } else if (themeName == "orange") {
-        iconColor = QColor("#FFB366");
-        gridColor = QColor("#FFE8CC");
+        iconColor = QColor("#ffb366");
+        gridColor = QColor("#ffe8cc");
     } else if (themeName == "blue") {
-        iconColor = QColor("#85C1E9");
-        gridColor = QColor("#D4EAF7");
+        iconColor = QColor("#85c1e9");
+        gridColor = QColor("#d4eaf7");
     } else if (themeName == "pink") {
-        iconColor = QColor("#FFB6C1");
-        gridColor = QColor("#FFE6EB");
+        iconColor = QColor("#ffb6c1");
+        gridColor = QColor("#ffe6eb");
     } else if (themeName == "aquamarine") {
-        iconColor = QColor("#7FFFD4");
-        gridColor = QColor("#D0F7EE");
+        iconColor = QColor("#7fffd4");
+        gridColor = QColor("#d0f7ee");
     } else if (themeName == "green") {
-        iconColor = QColor("#B4D8B4");
-        gridColor = QColor("#E0EEE0");
+        iconColor = QColor("#b4d8b4");
+        gridColor = QColor("#e0eee0");
     } else {
         //цвет по умолчанию, если тема не найдена
         iconColor = QColor("#2a2a2a");
@@ -224,5 +246,7 @@ void MainWindow::applyTheme(const QString &themeName) {
     m_resizeAction->setIcon(createRecolorableIcon(":/icons/icons/resize.svg", iconColor));
     m_zoomInAction->setIcon(createRecolorableIcon(":/icons/icons/zoom-in.svg", iconColor));
     m_zoomOutAction->setIcon(createRecolorableIcon(":/icons/icons/zoom-out.svg", iconColor));
+    m_undoAction->setIcon(createRecolorableIcon(":/icons/icons/undo.svg", iconColor));
+    m_redoAction->setIcon(createRecolorableIcon(":/icons/icons/redo.svg", iconColor));
     m_settingsAction->setIcon(createRecolorableIcon(":/icons/icons/settings.svg", iconColor));
 }

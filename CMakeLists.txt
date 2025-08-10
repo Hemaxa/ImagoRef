@@ -20,6 +20,8 @@ target_sources (ImagoRef PRIVATE
     ${SRC_DIR}/main.cpp
     ${SRC_DIR}/app/mainwindow.cpp
     ${SRC_DIR}/app/mainwindow.h
+    ${SRC_DIR}/app/undocommands.cpp
+    ${SRC_DIR}/app/undocommands.h
     ${SRC_DIR}/widgets/floatingtoolbar.cpp
     ${SRC_DIR}/widgets/floatingtoolbar.h
     ${SRC_DIR}/widgets/settingsdialog.cpp

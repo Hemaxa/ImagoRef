@@ -7,13 +7,13 @@ class QKeyEvent;
 class QDragEnterEvent;
 class QDragMoveEvent;
 class QDropEvent;
-//class QWheelEvent;
+class QUndoStack;
 
 class CanvasView : public QGraphicsView {
     Q_OBJECT
 
 public:
-    explicit CanvasView(QWidget *parent = nullptr);
+    explicit CanvasView(QUndoStack *undoStack, QWidget *parent = nullptr);
 
     int getGridSize() const;
 
@@ -51,6 +51,7 @@ protected:
 
 private:
     QGraphicsScene *m_scene; //создания экземпляра сцены
+    QUndoStack *m_undoStack; //создание стека
     const QList<QByteArray> m_supportedFormats; //получение поддерживаемых форматов изображений Qt
     bool m_isPanning;
     QPoint m_panStartPos;

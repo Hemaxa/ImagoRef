@@ -2,18 +2,28 @@
 #include <QGraphicsPixmapItem> //класс Qt для отображения картинки
 #include <QObject> //базовый класс для большинсва объектов в Qt
 
+//предварительное объявления класса для Undo & Redo
+class QUndoStack;
+
 class ImageItem : public QObject, public QGraphicsPixmapItem {
     Q_OBJECT
 
 public:
-    //конструктор принимает QPixmap (объект кртинки) для отображения
-    explicit ImageItem(const QPixmap &pixmap, QGraphicsItem *parent = nullptr);
+    //конструктор принимает QPixmap (объект кртинки) для отображения и указатель на QUndoStack
+    explicit ImageItem(const QPixmap &pixmap, QUndoStack *undoStack, QGraphicsItem *parent = nullptr);
 
     //метод для включения/выключения режима изменения размера
     void setResizeMode(bool enabled);
 
+    //сеттер для геометрии, который будет использоваться командой ResizeCommand
+    void setGeometry(const QRectF &bounds, const QPointF &pos);
+
     //переопределение для контроля над границами элемента
     QRectF boundingRect() const override;
+
+    //поля для доступа из команд
+    const QPixmap m_originalPixmap; //оригинальное изображение для качественного масштабирования
+    QRectF m_currentBounds; //прямоугольник, описывающий текущие границы элемента
 
 protected:
     //метод отрисовки для добавления рамки
@@ -44,13 +54,14 @@ private:
     bool m_isResizing = false;
     bool m_isScalingInProgress = false;
 
-    //оригинальное изображение для качественного масштабирования
-    QPixmap m_originalPixmap;
+    //стек команд для Undo & Redo
+    QUndoStack *m_undoStack;
 
     Handle m_activeHandle = None; //выбранный маркер сейчас тащим
-    QRectF m_initialSceneRect; //прямоугольник изображения в момент начала перетаскивания
-    QRectF m_currentBounds; //прямоугольник, описывающий текущие границы элемента
+    QRectF m_initialRect;
+    QRectF m_initialSceneRect;
     QPointF m_initialMousePos; //позиция мыши в момент начала перетаскивания
+    QPointF m_initialPos;
 
     QVector<QRectF> m_handles; //массив с прямоугольниками маркеров для отрисовки и проверки попадания
     const int m_handleSize = 15; //размер маркера в пикселях
