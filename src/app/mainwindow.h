@@ -42,6 +42,8 @@ private:
     QAction *m_resizeAction;
     QAction *m_zoomInAction;
     QAction *m_zoomOutAction;
+    QAction *m_rotateLeftAction;
+    QAction *m_rotateRightAction;
     QAction *m_undoAction;
     QAction *m_redoAction;
     QAction *m_settingsAction;

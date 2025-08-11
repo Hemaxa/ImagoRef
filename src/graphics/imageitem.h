@@ -18,12 +18,18 @@ public:
     //сеттер для геометрии, который будет использоваться командой ResizeCommand
     void setGeometry(const QRectF &bounds, const QPointF &pos);
 
+    //сеттер для угла поворота изображеия
+    void setRotation(qreal angle);
+
     //переопределение для контроля над границами элемента
     QRectF boundingRect() const override;
 
     //поля для доступа из команд
     const QPixmap m_originalPixmap; //оригинальное изображение для качественного масштабирования
     QRectF m_currentBounds; //прямоугольник, описывающий текущие границы элемента
+
+    //геттер для получения текущего угла
+    qreal rotation() const;
 
 protected:
     //метод отрисовки для добавления рамки

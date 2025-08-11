@@ -103,3 +103,23 @@ void ResizeCommand::undo() {
 void ResizeCommand::redo() {
     if (m_item) m_item->setGeometry(m_newRect, m_newPos); // Безопасная проверка
 }
+
+//RotateCommand
+RotateCommand::RotateCommand(ImageItem *item, qreal angleDelta, QUndoCommand *parent)
+    : QUndoCommand(parent), m_item(item), m_angleDelta(angleDelta) {
+    setText("Вращение элемента");
+}
+
+void RotateCommand::undo() {
+    if (m_item) {
+        m_item->setRotation(m_item->rotation() - m_angleDelta);
+        if (m_item->scene()) m_item->scene()->update();
+    }
+}
+
+void RotateCommand::redo() {
+    if (m_item) {
+        m_item->setRotation(m_item->rotation() + m_angleDelta);
+        if (m_item->scene()) m_item->scene()->update();
+    }
+}

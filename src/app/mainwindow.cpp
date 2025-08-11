@@ -130,7 +130,7 @@ void MainWindow::createActions() {
 
     //действие "Изменить размер"
     m_resizeAction = new QAction(createRecolorableIcon(":/icons/icons/resize.svg", defaultIconColor), "Изменить размер", this);
-    m_resizeAction->setShortcut(tr("Ctrl+R"));
+    m_resizeAction->setShortcut(tr("Ctrl+E"));
     connect(m_resizeAction, &QAction::triggered, m_canvasView, &CanvasView::enterResizeMode);
 
     //действие "Приблизить"
@@ -142,6 +142,16 @@ void MainWindow::createActions() {
     m_zoomOutAction = new QAction(createRecolorableIcon(":/icons/icons/zoom-out.svg", defaultIconColor), "Отдалить", this);
     m_zoomOutAction->setShortcuts({QKeySequence::ZoomOut, QKeySequence(tr("Ctrl--"))});
     connect(m_zoomOutAction, &QAction::triggered, m_canvasView, &CanvasView::zoomOut);
+
+    //действие "Вращать против часовой"
+    m_rotateLeftAction = new QAction(createRecolorableIcon(":/icons/icons/rotate-left.svg", defaultIconColor), "Вращать против часовой", this);
+    m_rotateLeftAction->setShortcut(tr("Ctrl+Shift+R"));
+    connect(m_rotateLeftAction, &QAction::triggered, m_canvasView, &CanvasView::rotateSelectedLeft);
+
+    //действие "Вращать по часовой"
+    m_rotateRightAction = new QAction(createRecolorableIcon(":/icons/icons/rotate-right.svg", defaultIconColor), "Вращать по часовой", this);
+    m_rotateRightAction->setShortcut(tr("Ctrl+R"));
+    connect(m_rotateRightAction, &QAction::triggered, m_canvasView, &CanvasView::rotateSelectedRight);
 
     //дейсвтие "Отменить"
     m_undoAction = new QAction(createRecolorableIcon(":/icons/icons/undo.svg", defaultIconColor), "Отменить", this);
@@ -167,14 +177,29 @@ void MainWindow::createToolBar() {
     //позволяет панели инструментов взаимодействовать с холстом
 
     //добавление действий на панель инструментов
-    m_toolBar->addAction(m_deleteAction);
+    //группа "Буфер обмена и удаление"
     m_toolBar->addAction(m_pasteAction);
+    m_toolBar->addAction(m_deleteAction);
+    m_toolBar->addSeparator();
+
+    //группа "Трансформации"
     m_toolBar->addAction(m_snapToGridAction);
     m_toolBar->addAction(m_resizeAction);
+    m_toolBar->addAction(m_rotateLeftAction);
+    m_toolBar->addAction(m_rotateRightAction);
+    m_toolBar->addSeparator();
+
+    //группа "Масштаб"
     m_toolBar->addAction(m_zoomInAction);
     m_toolBar->addAction(m_zoomOutAction);
+    m_toolBar->addSeparator();
+
+    //группа "История"
     m_toolBar->addAction(m_undoAction);
     m_toolBar->addAction(m_redoAction);
+    m_toolBar->addSeparator();
+
+    //группа "Настройки"
     m_toolBar->addAction(m_settingsAction);
 
     //позиционирование панели
@@ -246,6 +271,8 @@ void MainWindow::applyTheme(const QString &themeName) {
     m_resizeAction->setIcon(createRecolorableIcon(":/icons/icons/resize.svg", iconColor));
     m_zoomInAction->setIcon(createRecolorableIcon(":/icons/icons/zoom-in.svg", iconColor));
     m_zoomOutAction->setIcon(createRecolorableIcon(":/icons/icons/zoom-out.svg", iconColor));
+    m_rotateLeftAction->setIcon(createRecolorableIcon(":/icons/icons/rotate-left.svg", iconColor));
+    m_rotateRightAction->setIcon(createRecolorableIcon(":/icons/icons/rotate-right.svg", iconColor));
     m_undoAction->setIcon(createRecolorableIcon(":/icons/icons/undo.svg", iconColor));
     m_redoAction->setIcon(createRecolorableIcon(":/icons/icons/redo.svg", iconColor));
     m_settingsAction->setIcon(createRecolorableIcon(":/icons/icons/settings.svg", iconColor));

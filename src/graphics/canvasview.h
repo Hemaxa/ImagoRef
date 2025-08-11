@@ -25,6 +25,8 @@ public slots:
     void enterResizeMode();
     void zoomIn();
     void zoomOut();
+    void rotateSelectedLeft();
+    void rotateSelectedRight();
 
     void setGridSize(int size);
     void setGridColor(const QColor &color);

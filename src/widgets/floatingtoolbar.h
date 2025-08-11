@@ -10,6 +10,7 @@ class FloatingToolBar : public QFrame {
 public:
     explicit FloatingToolBar(QWidget *parent = nullptr);
     void addAction(QAction *action);
+    void addSeparator();
 
 private:
     QVBoxLayout *m_layout;

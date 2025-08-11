@@ -25,5 +25,7 @@
         <file>icons/checkmark-light.svg</file>
         <file>icons/redo.svg</file>
         <file>icons/undo.svg</file>
+        <file>icons/rotate-left.svg</file>
+        <file>icons/rotate-right.svg</file>
     </qresource>
 </RCC>

@@ -171,6 +171,34 @@ void CanvasView::zoomOut() {
     scale(1.0 / 1.15, 1.0 / 1.15);
 }
 
+//методы вразения элемента
+void CanvasView::rotateSelectedLeft() {
+    QList<QGraphicsItem*> selected = m_scene->selectedItems();
+    if (selected.isEmpty()) return;
+
+    m_undoStack->beginMacro("Вращение против часовой");
+    for (QGraphicsItem *item : selected) {
+        if (ImageItem *imgItem = dynamic_cast<ImageItem*>(item)) {
+            //создание команды и помещение ее в стек
+            m_undoStack->push(new RotateCommand(imgItem, -90.0));
+        }
+    }
+    m_undoStack->endMacro();
+}
+
+void CanvasView::rotateSelectedRight() {
+    QList<QGraphicsItem*> selected = m_scene->selectedItems();
+    if (selected.isEmpty()) return;
+
+    m_undoStack->beginMacro("Вращение по часовой");
+    for (QGraphicsItem *item : selected) {
+        if (ImageItem *imgItem = dynamic_cast<ImageItem*>(item)) {
+            m_undoStack->push(new RotateCommand(imgItem, 90.0));
+        }
+    }
+    m_undoStack->endMacro();
+}
+
 void CanvasView::wheelEvent(QWheelEvent *event) {
     //проверка, зажата ли клавиша ctrl
     if (event->modifiers() & Qt::ControlModifier) {

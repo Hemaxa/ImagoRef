@@ -16,6 +16,10 @@ ImageItem::ImageItem(const QPixmap &pixmap, QUndoStack *undoStack, QGraphicsItem
     m_undoStack(undoStack)
 {
     m_currentBounds = pixmap.rect();
+
+    //установка точки транформации в центре картинки
+    setTransformOriginPoint(m_currentBounds.center());
+
     //установка флагов, которые делают элемент интерактивным (то, что можно делать с изображением)
     //1. ItemIsSelectable - можно выделять
     //2. ItemIsMovable - можно перемещать мышью
@@ -204,6 +208,7 @@ void ImageItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event) {
             m_undoStack->push(new ResizeCommand(this, m_initialRect, m_initialPos));
         }
         setPixmap(m_originalPixmap.scaled(m_currentBounds.size().toSize(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+        setTransformOriginPoint(m_currentBounds.center());
         m_isScalingInProgress = false;
         m_activeHandle = None;
         setCursor(Qt::ArrowCursor);
@@ -222,7 +227,20 @@ void ImageItem::setGeometry(const QRectF &bounds, const QPointF &pos) {
     prepareGeometryChange();
     setPos(pos);
     m_currentBounds = bounds;
+    setTransformOriginPoint(m_currentBounds.center());
     setPixmap(m_originalPixmap.scaled(bounds.size().toSize(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
     updateHandlesPos();
     update();
+}
+
+//метод установки угла поворота
+void ImageItem::setRotation(qreal angle) {
+    //вращение происходит вокруг точки, заданной в setTransformOriginPoint()
+    QGraphicsPixmapItem::setRotation(angle);
+    update();
+}
+
+//метод получения текущего угла поворота
+qreal ImageItem::rotation() const {
+    return QGraphicsPixmapItem::rotation();
 }

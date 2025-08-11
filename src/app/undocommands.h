@@ -70,3 +70,17 @@ private:
     QPointF m_oldPos;
     QPointF m_newPos;
 };
+
+//команда для изменения угла поворота элемента
+class RotateCommand : public QUndoCommand {
+public:
+    //конструктор принимает элемент и "дельту" - угол, на который нужно повернуть
+    explicit RotateCommand(ImageItem *item, qreal angleDelta, QUndoCommand *parent = nullptr);
+
+    void undo() override;
+    void redo() override;
+
+private:
+    QPointer<ImageItem> m_item;
+    qreal m_angleDelta; //значение угла поворота (градусы)
+};
