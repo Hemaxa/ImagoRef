@@ -25,7 +25,7 @@ void FloatingToolBar::addAction(QAction *action) {
 
 void FloatingToolBar::addSeparator() {
     QFrame *line = new QFrame(this);
-    line->setFrameShape(QFrame::HLine);   //горизонтальная линия для разделителя
+    line->setFrameShape(QFrame::HLine); //горизонтальная линия для разделителя
     line->setObjectName("toolBarSeparator");
     m_layout->insertWidget(m_layout->count() - 1, line);
 }

@@ -13,14 +13,15 @@
 #include <QPushButton>
 #include <QTextEdit>
 #include <QWidget>
+#include <QScrollArea>
 
 #include <QString>
 
 SettingsDialog::SettingsDialog(int currentGridSize, const QString &currentTheme, QWidget *parent)
     : QDialog(parent) {
     setWindowTitle("Настройки");
-    setFixedWidth(550);
-    setMinimumHeight(300);
+    setFixedWidth(750);
+    setFixedHeight(450);
 
     //основной вертикальный макет для всего диалога
     QVBoxLayout *mainLayout = new QVBoxLayout(this);
@@ -30,7 +31,7 @@ SettingsDialog::SettingsDialog(int currentGridSize, const QString &currentTheme,
     //список слева
     QListWidget *navigationList = new QListWidget(this);
     navigationList->setObjectName("settingsNavigationList");
-    navigationList->setFixedWidth(160); //фиксированная ширина списка
+    navigationList->setFixedWidth(180); //ширина левого столбц
     navigationList->addItem("Общие");
     navigationList->addItem("Горячие клавиши");
 
@@ -43,7 +44,10 @@ SettingsDialog::SettingsDialog(int currentGridSize, const QString &currentTheme,
     QWidget *generalPage = new QWidget;
     QHBoxLayout* pageLayout = new QHBoxLayout(generalPage);
     QFormLayout *formLayout = new QFormLayout();
+
+    formLayout->setHorizontalSpacing(30);
     formLayout->setLabelAlignment(Qt::AlignLeft);
+
     m_gridSizeSpinBox = new QSpinBox;
     m_gridSizeSpinBox->setRange(20, 200);
     m_gridSizeSpinBox->setValue(currentGridSize);
@@ -52,6 +56,7 @@ SettingsDialog::SettingsDialog(int currentGridSize, const QString &currentTheme,
 
     //параметр темы
     m_themeComboBox = new QComboBox;
+    m_themeComboBox->addItem("Imago", "imago");
     m_themeComboBox->addItem("Темная", "dark");
     m_themeComboBox->addItem("Светлая", "light");
     m_themeComboBox->addItem("Голубая", "blue");
@@ -70,9 +75,16 @@ SettingsDialog::SettingsDialog(int currentGridSize, const QString &currentTheme,
     //--- вкладка "Горячие клавиши" ---
     QWidget *hotkeysPage = createHotkeysPage();
 
+    //добавление полосы прокрутки
+    QScrollArea *scrollArea = new QScrollArea(this);
+    scrollArea->setObjectName("hotkeysScrollArea");
+    scrollArea->setWidgetResizable(true);
+    scrollArea->setFrameShape(QFrame::NoFrame);
+    scrollArea->setWidget(hotkeysPage);
+
     //добавление страниц в стопку
     pagesWidget->addWidget(generalPage);
-    pagesWidget->addWidget(hotkeysPage);
+    pagesWidget->addWidget(scrollArea);
 
     //соединение выбора в списке с переключением страниц
     connect(navigationList, &QListWidget::currentRowChanged, pagesWidget, &QStackedWidget::setCurrentIndex);
@@ -102,44 +114,53 @@ QString SettingsDialog::theme() const {
 }
 
 QWidget* SettingsDialog::createHotkeysPage() {
+    //основной виджет
     QWidget *hotkeysPage = new QWidget;
-    QVBoxLayout *layout = new QVBoxLayout(hotkeysPage);
-    QTextEdit *hotkeysText = new QTextEdit;
-    hotkeysText->setObjectName("hotkeysTextEdit");
-    hotkeysText->setReadOnly(true);
-    hotkeysText->setHtml(R"(
-        <style>
-            body {
-                color: #e0e0e0;
-                line-height: 1.6;
-            }
-            h3 {
-                color: #ffffff;
-                border-bottom: 1px solid #5a5a5a;
-                padding-bottom: 5px;
-                margin-bottom: 10px;
-            }
-            ul {
-                list-style: none;
-                padding-left: 0;
-            }
-            li {
-                padding-bottom: 8px;
-            }
-            b {
-                color: #ffffff;
-                font-weight: bold;
-            }
-        </style>
-        <h3>Основные действия</h3>
-        <ul>
-            <li><b>Перемещение холста:</b> Зажать среднюю кнопку мыши</li>
-            <li><b>Масштабирование:</b> Ctrl/Cmd + колесико мыши ИЛИ Ctrl/Cmd + / -</li>
-            <li><b>Удалить элемент:</b> Delete</li>
-            <li><b>Привязать к сетке:</b> Ctrl+G</li>
-            <li><b>Скрыть/показать панель:</b> Tab</li>
-        </ul>
-    )");
-    layout->addWidget(hotkeysText);
+    QFormLayout *unifiedLayout = new QFormLayout(hotkeysPage);
+    unifiedLayout->setVerticalSpacing(15);
+    unifiedLayout->setHorizontalSpacing(30);
+
+    //функция-хелпер для создания строки в раскладке
+    auto addHotkeyRow = [](QFormLayout* layout, const QString& description, const QString& keys) {
+        QLabel* keyLabel = new QLabel(keys);
+        keyLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
+        keyLabel->setStyleSheet("font-weight: bold;");
+        layout->addRow(description, keyLabel);
+    };
+
+    //функция-хелпер для создания заголовка секции
+    auto createSectionHeader = [](const QString& title) {
+        QLabel* header = new QLabel(title);
+        header->setObjectName("hotkeySectionHeader");
+        return header;
+    };
+
+    //секция "Навигация и холст"
+    unifiedLayout->addRow(createSectionHeader("Навигация и холст"));
+    addHotkeyRow(unifiedLayout, "Перемещение холста:", "Зажать среднюю кнопку мыши");
+    addHotkeyRow(unifiedLayout, "Масштабирование:", "Ctrl/Cmd + Колесико мыши");
+    addHotkeyRow(unifiedLayout, "Приблизить:", "Ctrl/Cmd + Плюс (+)");
+    addHotkeyRow(unifiedLayout, "Отдалить:", "Ctrl/Cmd + Минус (-)");
+    addHotkeyRow(unifiedLayout, "Привязать все к сетке:", "Ctrl + G");
+
+    //секция "Управление элементами"
+    unifiedLayout->addRow(createSectionHeader("Управление элементами"));
+    addHotkeyRow(unifiedLayout, "Вставить из буфера:", "Ctrl/Cmd + V");
+    addHotkeyRow(unifiedLayout, "Удалить выделенное:", "Delete/Backspace");
+    addHotkeyRow(unifiedLayout, "Отменить действие:", "Ctrl/Cmd + Z");
+    addHotkeyRow(unifiedLayout, "Повторить действие:", "Ctrl/Cmd + Shift + Z");
+
+    //секция "Трансформации"
+    unifiedLayout->addRow(createSectionHeader("Трансформации"));
+    addHotkeyRow(unifiedLayout, "Режим изменения размера:", "Ctrl + E");
+    addHotkeyRow(unifiedLayout, "Вращать по часовой:", "Ctrl + R");
+    addHotkeyRow(unifiedLayout, "Вращать против часовой:", "Ctrl + Shift + R");
+    addHotkeyRow(unifiedLayout, "Сохранять пропорции:", "Зажать Shift");
+
+    //секция "Интерфейс"
+    unifiedLayout->addRow(createSectionHeader("Интерфейс"));
+    addHotkeyRow(unifiedLayout, "Скрыть/показать панель:", "Tab");
+    addHotkeyRow(unifiedLayout, "Открыть настройки:", "Ctrl/Cmd + ,");
+
     return hotkeysPage;
 }

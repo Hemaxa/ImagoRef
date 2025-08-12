@@ -75,14 +75,14 @@ void CanvasView::dragEnterEvent(QDragEnterEvent *event) {
                 //проверка по расширению
                 QString extension = QFileInfo(url.toLocalFile()).suffix().toLower();
                 if (m_supportedFormats.contains(extension.toUtf8())) {
-                    //если нашли хотя бы один подходящий файл, разрешаем операцию
+                    //если нашелся хотя бы один подходящий файл, операция разрешается
                     event->acceptProposedAction();
                     return;
                 }
             }
         }
     }
-    event->ignore(); //в остальных случаях - не разрешаем
+    event->ignore();
 }
 
 void CanvasView::dragMoveEvent(QDragMoveEvent *event) {
@@ -115,7 +115,7 @@ void CanvasView::keyPressEvent(QKeyEvent *event) {
     if (event->key() == Qt::Key_Delete || event->key() == Qt::Key_Backspace) {
         deleteSelectedItems();
         event->accept(); //сообщение системе, что событие обработано
-        return;          //завершение выполнения
+        return; //завершение выполнения
     }
 
     //обработка клавиши для выхода из режима изменения размера (Escape)
@@ -145,11 +145,10 @@ void CanvasView::deleteSelectedItems() {
 
 //метод привязки изображений к сетке
 void CanvasView::snapAllToGrid() {
-    //проходимся по всем элементам на сцене
+    //проход по всем элементам на сцене
     for (QGraphicsItem *item : m_scene->items()) {
-        //убеждаемся, что это ImageItem, хотя на сцене других и нет
         if (dynamic_cast<ImageItem*>(item)) {
-            //получаем текущую позицию элемента
+            //получает текущую позицию элемента
             QPointF currentPos = item->pos();
 
             //вычисляем новую позицию, ближайшую к узлу сетки
@@ -202,7 +201,7 @@ void CanvasView::rotateSelectedRight() {
 void CanvasView::wheelEvent(QWheelEvent *event) {
     //проверка, зажата ли клавиша ctrl
     if (event->modifiers() & Qt::ControlModifier) {
-        // Устанавливается якорь трансформации под курсор
+        //устанавливается якорь трансформации под курсор
         setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
 
         //определяется направление прокрутки и фактор масштабирования

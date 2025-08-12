@@ -8,6 +8,7 @@
         <file>themes/green.qss</file>
         <file>themes/orange.qss</file>
         <file>themes/pink.qss</file>
+        <file>themes/imago.qss</file>
     </qresource>
     <qresource prefix="/icons">
         <file>icons/delete.svg</file>

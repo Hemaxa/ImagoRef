@@ -61,6 +61,43 @@ QPushButton:pressed {
 }
 
 /* =================================================================== */
+/* СТИЛИ ПОЛОСЫ ПРОКРУТКИ                                              */
+/* =================================================================== */
+
+/* Вертикальный скролл */
+QScrollArea#hotkeysScrollArea QScrollBar:vertical {
+    border: none;
+    background: transparent;
+    width: 8px;
+    margin: 0px;
+}
+
+/* Стиль ползунка */
+QScrollArea#hotkeysScrollArea QScrollBar::handle:vertical {
+    background-color: #FFC894;
+    border-radius: 4px;
+    min-height: 25px;
+}
+
+/* Стиль ползунка при наведении */
+QScrollArea#hotkeysScrollArea QScrollBar::handle:vertical:hover {
+    background-color: #FFD1A3;
+}
+
+/* Стиль ползунка при нажатии */
+QScrollArea#hotkeysScrollArea QScrollBar::handle:vertical:pressed {
+    background-color: #FFB366;
+}
+
+/* Кнопки со стрелками сверху и снизу */
+QScrollArea#hotkeysScrollArea QScrollBar::add-line:vertical,
+QScrollArea#hotkeysScrollArea QScrollBar::sub-line:vertical {
+    height: 0px;
+    border: none;
+    background: none;
+}
+
+/* =================================================================== */
 /* СТИЛИ КОНКРЕТНЫХ КОМПОНЕНТОВ                                        */
 /* =================================================================== */
 
@@ -96,6 +133,14 @@ FloatingToolBar QToolButton:pressed {
     background-color: #FFC894;
 }
 
+/* Разделитель на панели инструментов */
+FloatingToolBar QFrame#toolBarSeparator {
+    background-color: #FFE8CC;
+    height: 1px;
+    border: none;
+    margin: 5px 5px;
+}
+
 /* ----- Окно настроек приложения ----- */
 
 /* - Левый список навигации - */
@@ -109,7 +154,7 @@ QListWidget#settingsNavigationList {
 QListWidget#settingsNavigationList::item {
     border-radius: 10px;
     margin-bottom: 4px;
-    padding: 8px;
+    padding: 10px;
 }
 
 QListWidget#settingsNavigationList::item:selected {
@@ -125,6 +170,19 @@ QListWidget#settingsNavigationList::item:hover {
 SettingsDialog  QStackedWidget > QWidget {
     border: 1px solid #FFE8CC;
     border-radius: 12px;
+    padding: 5px;
+}
+
+/* Заголовки на странице горячих клавиш */
+QLabel#hotkeySectionHeader {
+    color: #8C5A2D;
+    font-weight: bold;
+    font-size: 15px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    margin-bottom: 5px;
+    margin-left: 5px;
+    border-bottom: 1px solid #FFC894;
 }
 
 /* Элементы управления */
@@ -135,12 +193,12 @@ SettingsDialog QSpinBox, SettingsDialog QComboBox {
     padding: 5px;
 }
 
-/* Задаем фиксированную ширину для точного выравнивания */
 SettingsDialog QComboBox {
-    width: 126px;
+    width: 166px;
 }
+
 SettingsDialog QSpinBox {
-    min-width: 140px;
+    min-width: 180px;
 }
 
 SettingsDialog QSpinBox:hover, SettingsDialog QComboBox:hover {
@@ -150,7 +208,7 @@ SettingsDialog QSpinBox:hover, SettingsDialog QComboBox:hover {
 /* Стиль самого выпадающего контейнера */
 SettingsDialog QComboBox QAbstractItemView {
     background-color: #FFF5E1;
-    border: 1px solid #FFE8CC;
+    border: 1px solid #FFC894;
     border-radius: 4px;
     padding: 4px;
 }
@@ -182,7 +240,7 @@ SettingsDialog QComboBox::indicator {
 
 /* Отображаем нашу иконку, только если элемент выбран */
 SettingsDialog QComboBox::indicator:checked {
-    image: url(:/icons/icons/checkmark-light.svg);
+    image: url(:/icons/icons/checkmark-dark.svg);
 }
 
 /* Область кнопки со стрелкой у QComboBox */
@@ -191,7 +249,7 @@ SettingsDialog QComboBox::drop-down {
     subcontrol-position: top right;
     width: 25px;
     background-color: #FFB366;
-    border-left: 1px solid #FFE8CC;
+    border-left: 1px solid #FFC894;
     border-top-right-radius: 3px;
     border-bottom-right-radius: 3px;
 }
@@ -202,7 +260,7 @@ SettingsDialog QComboBox::drop-down:hover {
 
 /* Сама иконка стрелки */
 SettingsDialog QComboBox::down-arrow {
-    image: url(:/icons/icons/arrow-down-light.svg);
+    image: url(:/icons/icons/arrow-down-dark.svg);
 }
 
 /* Кнопки вверх/вниз у QSpinBox */
@@ -211,7 +269,7 @@ SettingsDialog QSpinBox::down-button {
     subcontrol-origin: padding;
     width: 25px;
     background-color: #FFB366;
-    border-left: 1px solid #FFE8CC;
+    border-left: 1px solid #FFC894;
 }
 
 SettingsDialog QSpinBox::up-button:hover,
@@ -231,14 +289,9 @@ SettingsDialog QSpinBox::down-button {
 
 /* Иконки стрелок для QSpinBox */
 SettingsDialog QSpinBox::up-arrow {
-    image: url(:/icons/icons/arrow-up-light.svg);
-}
-SettingsDialog QSpinBox::down-arrow {
-    image: url(:/icons/icons/arrow-down-light.svg);
+    image: url(:/icons/icons/arrow-up-dark.svg);
 }
 
-/* - Поле с текстом горячих клавиш - */
-SettingsDialog QTextEdit#hotkeysTextEdit {
-    background-color: transparent;
-    border: none;
+SettingsDialog QSpinBox::down-arrow {
+    image: url(:/icons/icons/arrow-down-dark.svg);
 }

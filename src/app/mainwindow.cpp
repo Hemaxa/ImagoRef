@@ -53,7 +53,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     //настройка окна
     setWindowTitle("ImagoRef");
     resize(1280, 720);
-    applyTheme("dark");
+    applyTheme("imago");
 }
 
 MainWindow::~MainWindow() {
@@ -233,29 +233,32 @@ void MainWindow::applyTheme(const QString &themeName) {
     QColor iconColor;
     QColor gridColor;
 
-    if (themeName == "dark") {
+    if (themeName == "imago") {
+        iconColor = QColor("#e67e22");
+        gridColor = QColor("#1f1f1f");
+    } else if (themeName == "dark") {
         iconColor = QColor("#e0e0e0");
         gridColor = QColor("#1f1f1f");
     } else if (themeName == "light") {
         iconColor = QColor("#2a2a2a");
         gridColor = QColor("#d0d0d0");
     } else if (themeName == "purple") {
-        iconColor = QColor("#b5a8e8");
+        iconColor = QColor("#6b5b95");
         gridColor = QColor("#d6cadd");
     } else if (themeName == "orange") {
-        iconColor = QColor("#ffb366");
+        iconColor = QColor("#8c5a2d");
         gridColor = QColor("#ffe8cc");
     } else if (themeName == "blue") {
-        iconColor = QColor("#85c1e9");
+        iconColor = QColor("#3c6c8e");
         gridColor = QColor("#d4eaf7");
     } else if (themeName == "pink") {
-        iconColor = QColor("#ffb6c1");
+        iconColor = QColor("#96536c");
         gridColor = QColor("#ffe6eb");
     } else if (themeName == "aquamarine") {
-        iconColor = QColor("#7fffd4");
+        iconColor = QColor("#3d8a7e");
         gridColor = QColor("#d0f7ee");
     } else if (themeName == "green") {
-        iconColor = QColor("#b4d8b4");
+        iconColor = QColor("#556b2f");
         gridColor = QColor("#e0eee0");
     } else {
         //цвет по умолчанию, если тема не найдена

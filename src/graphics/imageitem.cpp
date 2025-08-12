@@ -8,6 +8,7 @@
 #include <QCursor> //класс для работы с курсором мыши
 #include <QStyleOptionGraphicsItem> //класс для работы со стилем элемента
 #include <QUndoStack> //стек для Undo & Redo
+#include <QTransform> //трансформация координат
 
 ImageItem::ImageItem(const QPixmap &pixmap, QUndoStack *undoStack, QGraphicsItem *parent)
     : QObject(nullptr),
