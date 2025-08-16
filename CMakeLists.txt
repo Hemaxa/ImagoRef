@@ -16,6 +16,26 @@ set(SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 qt_add_executable(ImagoRef WIN32 MACOSX_BUNDLE)
 
+if(APPLE)
+    set_target_properties(ImagoRef PROPERTIES
+        MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/Info.plist.in"
+    )
+
+    target_sources(ImagoRef PRIVATE
+        "res/app_icon/icon.icns"
+    )
+
+    set_source_files_properties("res/app_icon/icon.icns" PROPERTIES
+        MACOSX_PACKAGE_LOCATION "Resources"
+    )
+endif()
+
+if(WIN32)
+    target_sources(ImagoRef PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/resources.rc
+    )
+endif()
+
 target_sources (ImagoRef PRIVATE
     ${SRC_DIR}/main.cpp
     ${SRC_DIR}/app/mainwindow.cpp
@@ -30,7 +50,7 @@ target_sources (ImagoRef PRIVATE
     ${SRC_DIR}/graphics/canvasview.h
     ${SRC_DIR}/graphics/imageitem.cpp
     ${SRC_DIR}/graphics/imageitem.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/res/resources.qrc
+    ${SRC_DIR}/../res/resources.qrc
 )
 
 target_include_directories(ImagoRef PRIVATE
