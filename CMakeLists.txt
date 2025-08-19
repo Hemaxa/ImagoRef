@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.19)
+cmake_minimum_required(VERSION 3.21.1)
 project(ImagoRef VERSION 1.0 LANGUAGES CXX)
 
 find_package(Qt6 6.5 REQUIRED COMPONENTS Core Gui Widgets Svg)
@@ -18,6 +18,7 @@ qt_add_executable(ImagoRef WIN32 MACOSX_BUNDLE)
 
 if(APPLE)
     set_target_properties(ImagoRef PROPERTIES
+        MACOSX_BUNDLE TRUE
         MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/Info.plist.in"
     )
 
@@ -66,6 +67,16 @@ target_link_libraries(ImagoRef PRIVATE
     Qt::Svg
 )
 
+if(APPLE)
+    add_custom_command(TARGET ImagoRef POST_BUILD
+            COMMAND Qt6::macdeployqt
+                    "$<TARGET_BUNDLE_DIR:ImagoRef>"
+                    -verbose=1
+
+            COMMAND codesign --force --deep --sign - "$<TARGET_BUNDLE_DIR:ImagoRef>"
+        )
+endif()
+
 include(GNUInstallDirs)
 
 install(TARGETS ImagoRef
@@ -73,10 +84,3 @@ install(TARGETS ImagoRef
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )
-
-qt_generate_deploy_app_script(
-    TARGET ImagoRef
-    OUTPUT_SCRIPT deploy_script
-    NO_UNSUPPORTED_PLATFORM_ERROR
-)
-install(SCRIPT ${deploy_script})

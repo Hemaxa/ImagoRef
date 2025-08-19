@@ -3,43 +3,48 @@
 <plist version="1.0">
 <dict>
     <key>CFBundleInfoDictionaryVersion</key>
-	<string>6.0</string>
-	<key>CFBundlePackageType</key>
-	<string>APPL</string>
+    <string>6.0</string>
+
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
 
     <key>CFBundleName</key>
-	<string>ImagoRef</string>
-	<key>CFBundleIdentifier</key>
-	<string>com.imago.ref</string>
-	<key>CFBundleExecutable</key>
-	<string>ImagoRef</string>
+    <string>ImagoRef</string>
+
+    <key>CFBundleIdentifier</key>
+    <string>com.imago.ref</string>
+
+    <key>CFBundleExecutable</key>
+    <string>ImagoRef</string>
 
     <key>CFBundleVersion</key>
-	<string>1.0.0</string>
-	<key>CFBundleShortVersionString</key>
-	<string>1.0</string>
+    <string>1.0.0</string>
+
+    <key>CFBundleShortVersionString</key>
+    <string>1.0</string>
 
     <key>LSMinimumSystemVersion</key>
-	<string>11.0</string>
+    <string>11.0</string>
 
     <key>NSHumanReadableCopyright</key>
-	<string>© 2025 Sergey Yashin. All rights reserved.</string>
+    <string>© 2025 Sergey Yashin. All rights reserved.</string>
 
     <key>CFBundleIconFile</key>
-	<string>icon</string>
+    <string>icon</string>
 
     <key>CFBundleDevelopmentRegion</key>
-	<string>en</string>
-	<key>CFBundleAllowMixedLocalizations</key>
-	<true/>
+    <string>ru</string>
+
+    <key>CFBundleAllowMixedLocalizations</key>
+    <true/>
 
     <key>NSPrincipalClass</key>
-	<string>NSApplication</string>
+    <string>NSApplication</string>
 
-	<key>LSApplicationCategoryType</key>
+    <key>LSApplicationCategoryType</key>
     <string>public.app-category.graphics-design</string>
 
     <key>NSSupportsAutomaticGraphicsSwitching</key>
-	<true/>
+    <true/>
 </dict>
 </plist>
