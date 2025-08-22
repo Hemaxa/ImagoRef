@@ -1,16 +1,14 @@
 # ImagoRef
 
-<p align="center">
-  <br />
-  <img src="https://img.shields.io/github/v/release/ВАШ_ЛОГИН/ImagoRef" alt="Latest Release">
-  <img src="https://img.shields.io/github/license/ВАШ_ЛОГИН/ImagoRef" alt="License">
-  <img src="https://img.shields.io/github/downloads/ВАШ_ЛОГИН/ImagoRef/total" alt="Downloads">
-</p>
+![Демонстрация работы ImagoRef](https://github.com/Hemaxa/website-imagoref/blob/d38991ccf1da5e1e6cc9ed0945f2ec3bff5ba42d/public/ImagoRefCorners.png)
 
 **ImagoRef** — это легковесное кроссплатформенное приложение, которое поможет вам собирать, организовывать и просматривать референсы для ваших творческих проектов. Забудьте о десятках открытых окон и беспорядке на рабочем столе — теперь все ваши идеи находятся на одном бесконечном холсте!
 
+<<<<<<< HEAD
 ![Демонстрация работы ImagoRef](https://github.com/Hemaxa/website-imagoref/blob/077d602a074848cf89e95855e750a4c1cb1f933c/public/work-in-progress.png)
 
+=======
+>>>>>>> cb918fc9a8ca3d5d05b44a0dc5bd6d536aba0194
 ## ✨ Ключевые возможности
 
 * **Бесконечный холст:** Организуйте столько изображений, сколько вам нужно.
