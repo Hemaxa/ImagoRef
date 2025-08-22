@@ -40,7 +40,6 @@ private:
     QGraphicsScene *m_scene;
 };
 
-
 //команда для перемещения элемента
 class MoveCommand : public QUndoCommand {
 public:
