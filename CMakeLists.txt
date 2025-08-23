@@ -193,3 +193,8 @@ if(UNIX AND NOT APPLE)
         COMMENT "Creating AppImage..."
     )
 endif()
+
+#отладочная информация
+message(STATUS "AUTOMOC enabled: ${CMAKE_AUTOMOC}")
+message(STATUS "AUTOUIC enabled: ${CMAKE_AUTOUIC}")
+message(STATUS "AUTORCC enabled: ${CMAKE_AUTORCC}")
