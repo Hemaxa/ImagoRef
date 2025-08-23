@@ -1,0 +1,128 @@
+name: Build & Release ImagoRef
+
+#триггеры для запуска рабочего процесса
+on:
+  #запускать при пуше в ветку main
+  push:
+    branches: [ main ]
+  #запускать при создании релиза
+  pull_request:
+    branches: [ main ]
+  #запускать при pull
+  release:
+    types: [ created ]
+  #запускать процесс вручную из вкладки "Actions"
+  workflow_dispatch:
+
+jobs:
+  #ЗАДАНИЕ СБОРКИ ПРОЕКТА
+  build:
+    name: Build on ${{ matrix.os }}
+    #параллельный запуск на 3-х ОС
+    strategy:
+      matrix:
+        #перечисление ОС, на которых будет осуществляться сборка
+        os: [macos-latest, windows-latest, ubuntu-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    #шаги, осуществляемые на каждой из ОС
+    steps:
+      #1) клонирование репозитория
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      #2) кэширование установки Qt
+      - name: Cache Qt
+        id: cache-qt
+        uses: actions/cache@v4
+        with:
+          path: ../Qt
+          key: ${{ runner.os }}-qt-${{ matrix.os }}-5.15.17
+
+      #3) установка Qt
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v3
+        with:
+          version: '5.15.17' #версия Qt
+          cached: ${{ steps.cache-qt.outputs.cache-hit }} #кэш уже может существовать
+
+      #4) установка NSIS (только для Windows)
+      - name: Install NSIS for CPack
+        if: matrix.os == 'windows-latest'
+        run: choco install nsis
+
+      #5) установка зависимостей для сборки (только для Linux)
+      - name: Install Linux dependencies
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgl1-mesa-glx
+
+      #6) сборка и упаковка проекта
+      - name: Build and Package
+        shell: bash
+        run: |
+          cmake -B build -DCMAKE_BUILD_TYPE=Release
+          cmake --build build --config Release
+
+          # --- Упаковка для каждой ОС ---
+          if [ "${{ matrix.os }}" == "macos-latest" ]; then
+            cmake --build build --config Release --target package
+            # Переименовываем для унификации
+            mv build/ImagoRef_v*.pkg build/ImagoRef-macOS.pkg
+
+          elif [ "${{ matrix.os }}" == "windows-latest" ]; then
+            cpack --config build/CPackConfig.xml
+            # Переименовываем для унификации
+            mv build/ImagoRef-*-win64.exe build/ImagoRef-Windows.exe
+
+          elif [ "${{ matrix.os }}" == "ubuntu-latest" ]; then
+            # Скачиваем и делаем исполняемым linuxdeployqt
+            wget -c -nv "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
+            chmod a+x linuxdeployqt-continuous-x86_64.AppImage
+            # Запускаем упаковку в AppImage
+            ./linuxdeployqt-continuous-x86_64.AppImage build/ImagoRef -appimage
+            # Переименовываем для унификации
+            mv ImagoRef-x86_64.AppImage build/ImagoRef-Linux.AppImage
+          fi
+
+      #7) сохранение установочных файлов как артефактов
+      - name: Upload Installers
+        uses: actions/upload-artifact@v4
+        with:
+          name: installers-${{ matrix.os }}
+          path: |
+            build/ImagoRef-macOS.pkg
+            build/ImagoRef-Windows.exe
+            build/ImagoRef-Linux.AppImage
+          if-no-files-found: error
+
+  #ЗАДАНИЕ СОЗДАНИЯ РЕЛИЗА
+  release:
+    name: Create GitHub Release
+    #запускается только после успешного завершения всех сборок
+    needs: build
+
+    #запускается только запущено событие release
+    if: github.event_name == 'release'
+
+    runs-on: ubuntu-latest
+
+    steps:
+      #1) скачивание всех артефактов (установщиков)
+      - name: Download all installers
+        uses: actions/download-artifact@v4
+        with:
+          path: installers
+          pattern: installers-*
+          merge-multiple: true
+
+      #2) создаем релиз и к нему прикрепляются файлы
+      - name: Create Release and Upload Assets
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            installers/ImagoRef-macOS.pkg
+            installers/ImagoRef-Windows.exe
+            installers/ImagoRef-Linux.AppImage

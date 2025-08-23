@@ -11,6 +11,7 @@
 #include <QSvgRenderer> //класс для работы с svg файлами
 #include <QPainter> //класс для рисования на виджетах
 #include <QUndoStack> //класс стека для Undo & Redo
+#include <QTextStream>
 
 //метод перекрашивания иконок
 QIcon createRecolorableIcon(const QString& path, const QColor& color, const QSize& size = QSize(24, 24)) {
