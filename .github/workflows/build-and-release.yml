@@ -28,18 +28,6 @@ jobs:
 
     #шаги, осуществляемые на каждой из ОС
     steps:
-      #0) очистка перед сборкой
-      - uses: actions/checkout@v3
-
-      - name: Clean build directory (Linux)
-        if: runner.os == 'Linux'
-        run: rm -rf build || true
-
-      - name: Clean build directory (Windows)
-        if: runner.os == 'Windows'
-        shell: pwsh
-        run: Remove-Item -Recurse -Force build
-
       #1) клонирование репозитория
       - name: Checkout code
         uses: actions/checkout@v4
