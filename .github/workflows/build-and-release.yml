@@ -57,7 +57,7 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libgl1-mesa-glx
+          sudo apt-get install -y libgl1
 
       #6) сборка и упаковка проекта
       - name: Build and Package
@@ -66,25 +66,17 @@ jobs:
           cmake -B build -DCMAKE_BUILD_TYPE=Release
           cmake --build build --config Release
 
-          # --- Упаковка для каждой ОС ---
           if [ "${{ matrix.os }}" == "macos-latest" ]; then
             cmake --build build --config Release --target package
-            # Переименовываем для унификации
             mv build/ImagoRef_v*.pkg build/ImagoRef-macOS.pkg
 
           elif [ "${{ matrix.os }}" == "windows-latest" ]; then
             cpack --config build/CPackConfig.xml
-            # Переименовываем для унификации
             mv build/ImagoRef-*-win64.exe build/ImagoRef-Windows.exe
 
           elif [ "${{ matrix.os }}" == "ubuntu-latest" ]; then
-            # Скачиваем и делаем исполняемым linuxdeployqt
-            wget -c -nv "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
-            chmod a+x linuxdeployqt-continuous-x86_64.AppImage
-            # Запускаем упаковку в AppImage
-            ./linuxdeployqt-continuous-x86_64.AppImage build/ImagoRef -appimage
-            # Переименовываем для унификации
-            mv ImagoRef-x86_64.AppImage build/ImagoRef-Linux.AppImage
+            # Теперь мы просто вызываем новую цель из CMake
+            cmake --build build --target appimage
           fi
 
       #7) сохранение установочных файлов как артефактов
@@ -93,9 +85,9 @@ jobs:
         with:
           name: installers-${{ matrix.os }}
           path: |
-            build/ImagoRef-macOS.pkg
-            build/ImagoRef-Windows.exe
-            build/ImagoRef-Linux.AppImage
+            build/ImagoRef_v*_macOS.pkg
+            build/ImagoRef_v*_Windows.exe
+            build/ImagoRef_v*_Linux.AppImage
           if-no-files-found: error
 
   #ЗАДАНИЕ СОЗДАНИЯ РЕЛИЗА
@@ -123,6 +115,6 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            installers/ImagoRef-macOS.pkg
-            installers/ImagoRef-Windows.exe
-            installers/ImagoRef-Linux.AppImage
+            installers/ImagoRef_v*_macOS.pkg
+            installers/ImagoRef_v*_Windows.exe
+            installers/ImagoRef_v*_Linux.AppImage

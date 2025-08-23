@@ -149,6 +149,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Windows" OR WIN32)
     include(InstallRequiredSystemLibraries)
     set(CPACK_PACKAGE_NAME "ImagoRef")
     set(CPACK_PACKAGE_VENDOR "Yashin Sergey")
+    set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}_v${PROJECT_VERSION}_Windows")
     set(CPACK_PACKAGE_VERSION "${ImagoRef_VERSION}")
     set(CPACK_PACKAGE_INSTALL_DIRECTORY "ImagoRef")
     set(CPACK_NSIS_MUI_ICON "${CMAKE_CURRENT_SOURCE_DIR}/res/app_icon/icon.ico")
@@ -175,4 +176,20 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Windows" OR WIN32)
     )
 
     include(CPack)
+endif()
+
+#развертывание для Linux
+if(UNIX AND NOT APPLE)
+    add_custom_target(appimage
+        #скачивание linuxdeployqt
+        COMMAND wget -c -nv "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
+        #добавление возможности исполнения linuxdeployqt
+        COMMAND chmod a+x linuxdeployqt-continuous-x86_64.AppImage
+        #запуск упаковки
+        COMMAND ./linuxdeployqt-continuous-x86_64.AppImage $<TARGET_FILE:ImagoRef> -appimage
+        #переименовывание для унификации
+        COMMAND mv ImagoRef-x86_64.AppImage ${CMAKE_BINARY_DIR}/ImagoRef_v${PROJECT_VERSION}_Linux.AppImage
+        DEPENDS ImagoRef
+        COMMENT "Creating AppImage..."
+    )
 endif()
