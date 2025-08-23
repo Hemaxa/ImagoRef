@@ -100,7 +100,7 @@ void CanvasView::dropEvent(QDropEvent *event) {
 
                 if (!pixmap.isNull()) {
                     ImageItem *imageItem = new ImageItem(pixmap, m_undoStack);
-                    imageItem->setPos(mapToScene(event->position().toPoint()));
+                    imageItem->setPos(mapToScene(event->pos()));
                     m_undoStack->push(new AddCommand(imageItem, m_scene));
                 }
             }

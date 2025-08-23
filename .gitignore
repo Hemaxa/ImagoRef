@@ -78,6 +78,3 @@ CMakeLists.txt.user*
 .rcc/
 .uic/
 /build*/
-
-# Мои исключения
-/other*/
