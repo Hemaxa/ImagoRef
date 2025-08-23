@@ -22,6 +22,9 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 
+#отключение сжатия ресурсов
+set(CMAKE_AUTORCC_OPTIONS "--no-compress")
+
 #создание переменной для src директории
 set(SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
