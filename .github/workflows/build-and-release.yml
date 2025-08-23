@@ -40,6 +40,10 @@ jobs:
         shell: pwsh
         run: Remove-Item -Recurse -Force build
 
+      #1) клонирование репозитория
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       #2) кэширование установки Qt
       - name: Cache Qt
         id: cache-qt
