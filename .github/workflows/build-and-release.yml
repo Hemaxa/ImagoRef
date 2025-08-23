@@ -38,13 +38,13 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ../Qt
-          key: ${{ runner.os }}-qt-${{ matrix.os }}-5.15.17
+          key: ${{ runner.os }}-qt-${{ matrix.os }}-5.15.2
 
       #3) установка Qt
       - name: Install Qt
         uses: jurplel/install-qt-action@v3
         with:
-          version: '5.15.17' #версия Qt
+          version: '5.15.2' #версия Qt
           cached: ${{ steps.cache-qt.outputs.cache-hit }} #кэш уже может существовать
 
       #4) установка NSIS (только для Windows)
