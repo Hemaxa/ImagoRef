@@ -2,13 +2,10 @@ name: Build & Release ImagoRef
 
 #триггеры для запуска рабочего процесса
 on:
-  #запускать при пуше в ветку main
+  #запускать при пуше в ветку dev
   push:
-    branches: [ main ]
+    branches: [ dev4 ]
   #запускать при создании релиза
-  pull_request:
-    branches: [ main ]
-  #запускать при pull
   release:
     types: [ created ]
   #запускать процесс вручную из вкладки "Actions"
@@ -22,7 +19,7 @@ jobs:
     strategy:
       matrix:
         #перечисление ОС, на которых будет осуществляться сборка
-        os: [macos-latest, windows-latest, ubuntu-latest]
+        os: [macos-latest]
 
     runs-on: ${{ matrix.os }}
 
@@ -70,35 +67,16 @@ jobs:
       - name: Build and Package
         shell: bash
         run: |
-          if [ "${{ matrix.os }}" == "macos-latest" ]; then
-              export QT_ARCH=universal
-          fi
-
           cmake -B build -DCMAKE_BUILD_TYPE=Release
           cmake --build build --config Release --parallel 4
-
-          if [ "${{ matrix.os }}" == "macos-latest" ]; then
-            cmake --build build --config Release --target package
-            mv build/ImagoRef_v*.pkg build/ImagoRef-macOS.pkg
-
-          elif [ "${{ matrix.os }}" == "windows-latest" ]; then
-            cpack --config build/CPackConfig.xml
-            mv build/ImagoRef-*-win64.exe build/ImagoRef-Windows.exe
-
-          elif [ "${{ matrix.os }}" == "ubuntu-latest" ]; then
-            # Теперь мы просто вызываем новую цель из CMake
-            cmake --build build --target appimage
-          fi
+          cmake --build build --config Release --target package
 
       #8) сохранение установочных файлов как артефактов
       - name: Upload Installers
         uses: actions/upload-artifact@v4
         with:
           name: installers-${{ matrix.os }}
-          path: |
-            build/ImagoRef_v*_macOS.pkg
-            build/ImagoRef_v*_Windows.exe
-            build/ImagoRef_v*_Linux.AppImage
+          path: build/ImagoRef_v*_macOS.pkg
           if-no-files-found: error
 
   #ЗАДАНИЕ СОЗДАНИЯ РЕЛИЗА
