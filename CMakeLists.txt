@@ -5,8 +5,7 @@ project(ImagoRef VERSION 1.0 LANGUAGES CXX)
 # Определение минимальной версии macOS
 set(CMAKE_OSX_DEPLOYMENT_TARGET "10.13" CACHE STRING "Minimum OS X deployment version" FORCE)
 
-# ИЗМЕНЕНИЕ: Оставляем только одну архитектуру для отладки
-set(CMAKE_OSX_ARCHITECTURES "x86_64" CACHE STRING "Build architectures for macOS")
+set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64" CACHE STRING "Build architectures for macOS")
 
 # Определение используемых пакетов
 find_package(Qt5 COMPONENTS Core Gui Widgets Svg REQUIRED)
