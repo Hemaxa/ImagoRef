@@ -34,6 +34,10 @@ ImageItem::ImageItem(const QPixmap &pixmap, QUndoStack *undoStack, QGraphicsItem
     m_handles.resize(8); //количесвто маркеров
 }
 
+ImageItem::~ImageItem()
+{
+}
+
 QRectF ImageItem::boundingRect() const {
     return m_currentBounds;
 }

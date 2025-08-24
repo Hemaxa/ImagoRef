@@ -11,6 +11,7 @@ class ImageItem : public QObject, public QGraphicsPixmapItem {
 public:
     //конструктор принимает QPixmap (объект кртинки) для отображения и указатель на QUndoStack
     explicit ImageItem(const QPixmap &pixmap, QUndoStack *undoStack, QGraphicsItem *parent = nullptr);
+    ~ImageItem();
 
     //метод для включения/выключения режима изменения размера
     void setResizeMode(bool enabled);
