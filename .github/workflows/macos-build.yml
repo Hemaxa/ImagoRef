@@ -13,6 +13,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Check Runner Architecture # <--- ДОБАВЬТЕ ЭТОТ ШАГ
+        run: uname -m
+
       - name: Install Qt
         uses: jurplel/install-qt-action@v3
         with:
@@ -21,9 +24,9 @@ jobs:
 
       - name: Configure and Build
         run: |
-          rm -rf build
-          cmake -B build -DCMAKE_BUILD_TYPE=Release
-          cmake --build build --config Release --target package
+        rm -rf build
+        cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64"
+        cmake --build build --config Release --target package
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
