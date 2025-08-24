@@ -50,17 +50,17 @@ endif()
 target_sources (ImagoRef PRIVATE
     ${SRC_DIR}/main.cpp
     ${SRC_DIR}/app/mainwindow.cpp
-    ${SRC_DIR}/app/mainwindow.h
+    #${SRC_DIR}/app/mainwindow.h
     ${SRC_DIR}/app/undocommands.cpp
-    ${SRC_DIR}/app/undocommands.h
+    #${SRC_DIR}/app/undocommands.h
     ${SRC_DIR}/widgets/floatingtoolbar.cpp
-    ${SRC_DIR}/widgets/floatingtoolbar.h
+    #${SRC_DIR}/widgets/floatingtoolbar.h
     ${SRC_DIR}/widgets/settingsdialog.cpp
-    ${SRC_DIR}/widgets/settingsdialog.h
+    #${SRC_DIR}/widgets/settingsdialog.h
     ${SRC_DIR}/graphics/canvasview.cpp
-    ${SRC_DIR}/graphics/canvasview.h
+    #${SRC_DIR}/graphics/canvasview.h
     ${SRC_DIR}/graphics/imageitem.cpp
-    ${SRC_DIR}/graphics/imageitem.h
+    #${SRC_DIR}/graphics/imageitem.h
     ${SRC_DIR}/../res/resources.qrc
 )
 
