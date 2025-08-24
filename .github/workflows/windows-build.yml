@@ -1,0 +1,42 @@
+name: Build Windows Installer
+
+on:
+  push:
+    branches: [ dev4 ] # Запускать при пуше в ветку dev4
+  workflow_dispatch:   # Позволяет запускать вручную
+
+jobs:
+  build-windows:
+    runs-on: windows-latest # Указываем, что сборка будет на виртуальной машине с Windows
+
+    steps:
+      # 1. Клонируем код из репозитория
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Устанавливаем нужную версию Qt
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v3
+        with:
+          version: '5.15.2'
+          arch: 'win64_msvc2019_64' # Архитектура для Windows с компилятором MSVC 2019
+          setup-python: false
+
+      # 3. Устанавливаем NSIS (система для создания установщиков)
+      - name: Install NSIS
+        uses: joncloud/nsis-action@v1
+
+      # 4. Конфигурируем проект с помощью CMake
+      - name: Configure CMake
+        run: cmake -B build -G "Visual Studio 17 2022" -DCMAKE_BUILD_TYPE=Release
+
+      # 5. Собираем проект и создаем пакет
+      - name: Build and Package
+        run: cmake --build build --config Release --target PACKAGE
+
+      # 6. Загружаем полученный .exe установщик как артефакт сборки
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-installer
+          path: build/ImagoRef-*-win64.exe
