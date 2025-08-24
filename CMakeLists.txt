@@ -52,13 +52,13 @@ target_include_directories(ImagoRef PRIVATE
 # ====================================================================
 if(APPLE)
     find_package(OpenGL REQUIRED)
-    find_package(ZLIB REQUIRED) # <-- Находим ZLIB
+    find_package(ZLIB REQUIRED)
 
     # Полный список библиотек для MACOS
     target_link_libraries(ImagoRef PRIVATE
         Qt5::Core Qt5::Widgets Qt5::Gui Qt5::Svg
         OpenGL::GL
-        ZLIB::ZLIB # <-- Подключаем ZLIB
+        ZLIB::ZLIB
         "-framework AppKit"
         "-framework Foundation"
         "-framework IOKit"
