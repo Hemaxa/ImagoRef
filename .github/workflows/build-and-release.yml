@@ -42,7 +42,7 @@ jobs:
         uses: jurplel/install-qt-action@v3
         with:
           version: '5.15.2' #версия Qt
-          arch: ${{ matrix.os == 'macos-latest' && 'universal' || 'x64' }} #универсальная архитектура для macOS
+          arch: 'clang_64' #универсальная архитектура для macOS
           cached: ${{ steps.cache-qt.outputs.cache-hit }} #кэш уже может существовать
 
       #4) установка зависимостей для macOS
