@@ -105,6 +105,10 @@ SettingsDialog::SettingsDialog(int currentGridSize, const QString &currentTheme,
     mainLayout->addWidget(buttonBox);
 }
 
+SettingsDialog::~SettingsDialog()
+{
+}
+
 int SettingsDialog::gridSize() const {
     return m_gridSizeSpinBox->value();
 }

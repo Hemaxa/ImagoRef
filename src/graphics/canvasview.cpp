@@ -44,6 +44,10 @@ CanvasView::CanvasView(QUndoStack *undoStack, QWidget *parent) :
     setFocusPolicy(Qt::StrongFocus);
 }
 
+CanvasView::~CanvasView()
+{
+}
+
 //метод отрисовки фона
 void CanvasView::drawBackground(QPainter *painter, const QRectF &rect) {
     //вызывается родительский метод, чтобы он нарисовал фон (цвет из конструктора)

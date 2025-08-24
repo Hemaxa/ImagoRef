@@ -11,6 +11,10 @@ FloatingToolBar::FloatingToolBar(QWidget *parent) : QFrame(parent) {
     m_layout->addStretch(); //добавляется "распорка", чтобы кнопки прижимались к верху
 }
 
+FloatingToolBar::~FloatingToolBar()
+{
+}
+
 void FloatingToolBar::addAction(QAction *action) {
     if (!action) return;
 

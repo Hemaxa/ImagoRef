@@ -9,6 +9,7 @@ class SettingsDialog : public QDialog {
 
 public:
     explicit SettingsDialog(int currentGridSize, const QString &currentTheme, QWidget *parent = nullptr);
+    ~SettingsDialog();
 
     int gridSize() const; //выбранный шаг сетки
     QString theme() const; //выбранная тема приложения

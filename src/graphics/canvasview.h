@@ -14,6 +14,7 @@ class CanvasView : public QGraphicsView {
 
 public:
     explicit CanvasView(QUndoStack *undoStack, QWidget *parent = nullptr);
+    ~CanvasView();
 
     int getGridSize() const;
 
