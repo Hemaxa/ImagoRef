@@ -59,10 +59,13 @@ target_link_libraries(ImagoRef PRIVATE
 # НАСТРОЙКИ ДЛЯ MACOS
 # ====================================================================
 if(APPLE)
+    find_package(OpenGL REQUIRED)
+    target_link_libraries(ImagoRef PRIVATE OpenGL::GL)
+
     set(CMAKE_OSX_DEPLOYMENT_TARGET "10.13" CACHE STRING "Minimum OS X deployment version" FORCE)
     set(CMAKE_OSX_ARCHITECTURES "x86_64;arm64" CACHE STRING "Build architectures for macOS")
 
-    # Устанавливаем свойства для создания .app бандла
+    #установка свойств для создания .app бандла
     set_target_properties(ImagoRef PROPERTIES
         MACOSX_BUNDLE TRUE
         MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/Info.plist.in"
