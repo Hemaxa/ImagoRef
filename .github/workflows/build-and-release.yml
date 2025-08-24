@@ -36,12 +36,13 @@ jobs:
         with:
           path: ../Qt
           key: ${{ runner.os }}-qt-${{ matrix.os }}-5.15.2-macos
+
       #3) установка Qt
       - name: Install Qt
         uses: jurplel/install-qt-action@v3
         with:
           version: '5.15.2' #версия Qt
-          arch: 'macos'  # Универсальная сборка Qt
+          arch: 'clang_64' #универсальная архитектура для macOS
           cached: ${{ steps.cache-qt.outputs.cache-hit }} #кэш уже может существовать
 
       #4) установка зависимостей для macOS
