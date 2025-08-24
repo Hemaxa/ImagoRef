@@ -47,20 +47,21 @@ target_include_directories(ImagoRef PRIVATE
     ${SRC_DIR}/graphics
 )
 
-#обозначение включенных библиотеки
-target_link_libraries(ImagoRef PRIVATE
-    Qt5::Core
-    Qt5::Widgets
-    Qt5::Gui
-    Qt5::Svg
-)
-
 # ====================================================================
 # НАСТРОЙКИ ДЛЯ MACOS
 # ====================================================================
 if(APPLE)
     find_package(OpenGL REQUIRED)
-    target_link_libraries(ImagoRef PRIVATE OpenGL::GL)
+
+    # НОВЫЙ, ПОЛНЫЙ СПИСОК БИБЛИОТЕК ДЛЯ MACOS
+    target_link_libraries(ImagoRef PRIVATE
+        Qt5::Core Qt5::Widgets Qt5::Gui Qt5::Svg
+        OpenGL::GL
+        "-framework AppKit"
+        "-framework Foundation"
+        "-framework IOKit"
+        "-framework CoreGraphics"
+    )
 
     set(CMAKE_OSX_DEPLOYMENT_TARGET "10.13" CACHE STRING "Minimum OS X deployment version" FORCE)
     set(CMAKE_OSX_ARCHITECTURES "x86_64;arm64" CACHE STRING "Build architectures for macOS")
@@ -83,18 +84,14 @@ if(APPLE)
     # Создание установочного .pkg пакета
     find_program(PKGBUILD_EXECUTABLE pkgbuild)
     find_program(PRODUCTBUILD_EXECUTABLE productbuild)
-
     if(PKGBUILD_EXECUTABLE AND PRODUCTBUILD_EXECUTABLE)
-        set(PACKAGE_DIR "${CMAKE_BINARY_DIR}/package")
-        add_custom_target(package
-            COMMAND ${CMAKE_COMMAND} -E make_directory "${PACKAGE_DIR}/root"
-            COMMAND ${CMAKE_COMMAND} -E copy_directory "$<TARGET_BUNDLE_DIR:ImagoRef>" "${PACKAGE_DIR}/root/ImagoRef.app"
-            COMMAND ${PKGBUILD_EXECUTABLE} --root "${PACKAGE_DIR}/root" --identifier "com.imago.ref" --version "${ImagoRef_VERSION}" --install-location "/Applications" "${PACKAGE_DIR}/ImagoRef.pkg"
-            COMMAND ${PRODUCTBUILD_EXECUTABLE} --package "${PACKAGE_DIR}/ImagoRef.pkg" "${CMAKE_BINARY_DIR}/ImagoRef_v${ImagoRef_VERSION}_macOS.pkg"
-            COMMAND ${CMAKE_COMMAND} -E remove_directory "${PACKAGE_DIR}"
-            COMMAND ${CMAKE_COMMAND} -E echo "Package created: ${CMAKE_BINARY_DIR}/ImagoRef_v${ImagoRef_VERSION}_macOS.pkg"
+        add_custom_target(package # ... остальная часть без изменений
+            COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/package/root"
+            COMMAND ${CMAKE_COMMAND} -E copy_directory "$<TARGET_BUNDLE_DIR:ImagoRef>" "${CMAKE_BINARY_DIR}/package/root/ImagoRef.app"
+            COMMAND ${PKGBUILD_EXECUTABLE} --root "${CMAKE_BINARY_DIR}/package/root" --identifier "com.imago.ref" --version "${ImagoRef_VERSION}" --install-location "/Applications" "${CMAKE_BINARY_DIR}/package/ImagoRef.pkg"
+            COMMAND ${PRODUCTBUILD_EXECUTABLE} --package "${CMAKE_BINARY_DIR}/package/ImagoRef.pkg" "${CMAKE_BINARY_DIR}/ImagoRef_v${ImagoRef_VERSION}_macOS.pkg"
+            COMMAND ${CMAKE_COMMAND} -E remove_directory "${CMAKE_BINARY_DIR}/package"
             DEPENDS ImagoRef
-            COMMENT "Creating package ImagoRef-${ImagoRef_VERSION}.pkg"
             VERBATIM
         )
     endif()
@@ -103,21 +100,22 @@ if(APPLE)
 # НАСТРОЙКИ ДЛЯ WINDOWS
 # ====================================================================
 elseif(WIN32)
+    # ДОБАВЛЯЕМ ЛИНКОВКУ С QT СПЕЦИАЛЬНО ДЛЯ WINDOWS
+    target_link_libraries(ImagoRef PRIVATE Qt5::Core Qt5::Widgets Qt5::Gui Qt5::Svg)
+
     # Устанавливаем свойство для создания оконного приложения без консоли
     set_target_properties(ImagoRef PROPERTIES WIN32_EXECUTABLE TRUE)
 
     # Добавляем файл ресурсов для иконки и метаданных в .exe
     target_sources(ImagoRef PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/resources.rc)
 
-    # --- Настройка развертывания с windeployqt ---
+    # --- Настройка развертывания с windeployqt --- (остальное без изменений)
     get_target_property(QMAKE_EXECUTABLE Qt5::qmake IMPORTED_LOCATION)
     get_filename_component(QT_BIN_DIR "${QMAKE_EXECUTABLE}" DIRECTORY)
     find_program(WINDEPLOYQT_EXECUTABLE windeployqt HINTS "${QT_BIN_DIR}")
-
     if(WINDEPLOYQT_EXECUTABLE)
         add_custom_command(TARGET ImagoRef POST_BUILD
-            COMMAND "${WINDEPLOYQT_EXECUTABLE}"
-                "$<TARGET_FILE_DIR:ImagoRef>"
+            COMMAND "${WINDEPLOYQT_EXECUTABLE}" "$<TARGET_FILE_DIR:ImagoRef>"
                 --no-compiler-runtime --no-system-d3d-compiler --no-opengl-sw --no-angle --verbose 1
             COMMENT "Deploying Qt libraries for Windows..."
         )
@@ -142,7 +140,6 @@ elseif(WIN32)
     # Устанавливаем исполняемый файл и иконку в директорию 'bin'
     install(TARGETS ImagoRef RUNTIME DESTINATION bin)
     install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/res/app_icon/icon.ico" DESTINATION bin)
-
     include(CPack)
 
 # ====================================================================
