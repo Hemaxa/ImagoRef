@@ -1,14 +1,14 @@
-name: Build macOS Package (Intel x86_64)
+name: Build macOS (Intel x86_64)
 
 on:
   push:
-    branches: [ qt5-intel ] # Запускается только для этой ветки
+    branches: [ qt5 ]
   workflow_dispatch:
 
 jobs:
   build-macos-intel:
-    name: Build for macOS (Intel)
-    runs-on: macos-latest # Используем Intel-раннер
+    name: Build macOS (Intel x86_64)
+    runs-on: macos-latest
 
     steps:
       - name: Checkout code
@@ -20,15 +20,15 @@ jobs:
           version: '5.15.2'
           arch: 'clang_64'
 
+      #сборка только под x86_64
       - name: Configure and Build
         run: |
           rm -rf build
-          # Собираем только под x86_64
-          cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64"
+          cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES=x86_64
           cmake --build build --config Release --target package
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: macos-package-x86_64
+          name: ImagoRef_macOS_package_x86_64
           path: build/ImagoRef_v*_macOS.pkg
