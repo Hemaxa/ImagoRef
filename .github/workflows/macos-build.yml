@@ -20,7 +20,7 @@ jobs:
         uses: jurplel/install-qt-action@v3
         with:
           version: '5.15.2'
-          arch: 'clang_64'
+          arch: 'mac_arm64'
 
       - name: Configure and Build
         run: |
