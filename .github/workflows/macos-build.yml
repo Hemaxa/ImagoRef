@@ -1,55 +1,34 @@
-name: Build macOS Packages (Intel & ARM)
+name: Build macOS Package (Intel x86_64)
 
 on:
   push:
-    branches: [dev4] # Убедитесь, что ветка правильная
+    branches: [ qt5-intel ] # Запускается только для этой ветки
   workflow_dispatch:
 
 jobs:
-  build-macos:
-    # Задаем матрицу для двух сборок
-    strategy:
-      matrix:
-        include:
-          - name: "macOS (Intel)"
-            runner: macos-latest # Intel-машина
-            arch: "x86_64"
-            artifact_suffix: "x86_64"
-
-          - name: "macOS (ARM)"
-            runner: macos-14 # ARM-машина
-            arch: "arm64"
-            artifact_suffix: "arm64"
-
-    # Название задачи будет включать имя из матрицы
-    name: Build ${{ matrix.name }}
-    runs-on: ${{ matrix.runner }}
+  build-macos-intel:
+    name: Build for macOS (Intel)
+    runs-on: macos-latest # Используем Intel-раннер
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Check Runner Architecture
-        run: uname -m
-
-      - name: Install Qt
+      - name: Install Qt 5
         uses: jurplel/install-qt-action@v3
         with:
           version: '5.15.2'
-          # clang_64 будет работать для обеих сборок,
-          # так как он содержит нужные библиотеки для той машины, на которой запускается.
           arch: 'clang_64'
 
       - name: Configure and Build
         run: |
           rm -rf build
-          # Передаем нужную архитектуру из матрицы в CMake
-          cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES=${{ matrix.arch }}
+          # Собираем только под x86_64
+          cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64"
           cmake --build build --config Release --target package
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          # Создаем уникальное имя для каждого артефакта
-          name: macos-package-${{ matrix.artifact_suffix }}
+          name: macos-package-x86_64
           path: build/ImagoRef_v*_macOS.pkg
