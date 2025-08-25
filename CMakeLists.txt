@@ -9,7 +9,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 #определение используемых пакетов
-find_package(Qt5 COMPONENTS Core Gui Widgets Svg REQUIRED)
+find_package(Qt6 COMPONENTS Core Gui Widgets Svg REQUIRED)
 
 #включение Qt-автоматизаций
 set(CMAKE_AUTOMOC ON)
@@ -56,10 +56,10 @@ if(APPLE)
 
     #полный список библиотек для macOS
     target_link_libraries(ImagoRef PRIVATE
-        Qt5::Core
-        Qt5::Widgets
-        Qt5::Gui
-        Qt5::Svg
+        Qt6::Core
+        Qt6::Widgets
+        Qt6::Gui
+        Qt6::Svg
         OpenGL::GL
         ZLIB::ZLIB
         "-framework AppKit"
@@ -68,8 +68,8 @@ if(APPLE)
         "-framework CoreGraphics"
     )
 
-    set(CMAKE_OSX_DEPLOYMENT_TARGET "10.13" CACHE STRING "Minimum OS X deployment version" FORCE)
-    set(CMAKE_OSX_ARCHITECTURES "x86_64;arm64" CACHE STRING "Build architectures for macOS")
+    set(CMAKE_OSX_DEPLOYMENT_TARGET "11" CACHE STRING "Minimum OS X deployment version" FORCE)
+    set(CMAKE_OSX_ARCHITECTURES "arm64" CACHE STRING "Build architectures for macOS")
 
     set_target_properties(ImagoRef PROPERTIES
         MACOSX_BUNDLE TRUE
@@ -106,17 +106,17 @@ if(APPLE)
 elseif(WIN32)
     #полный список библиотек для Windows
     target_link_libraries(ImagoRef PRIVATE
-        Qt5::Core
-        Qt5::Widgets
-        Qt5::Gui
-        Qt5::Svg
+        Qt6::Core
+        Qt6::Widgets
+        Qt6::Gui
+        Qt6::Svg
     )
 
     set_target_properties(ImagoRef PROPERTIES WIN32_EXECUTABLE TRUE)
 
     target_sources(ImagoRef PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/resources.rc)
 
-    get_target_property(QMAKE_EXECUTABLE Qt5::qmake IMPORTED_LOCATION)
+    get_target_property(QMAKE_EXECUTABLE Qt6::qmake IMPORTED_LOCATION)
     get_filename_component(QT_BIN_DIR "${QMAKE_EXECUTABLE}" DIRECTORY)
     find_program(WINDEPLOYQT_EXECUTABLE windeployqt HINTS "${QT_BIN_DIR}")
     if(WINDEPLOYQT_EXECUTABLE)
