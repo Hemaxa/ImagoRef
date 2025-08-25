@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=ImagoRef
+GenericName=Image Reference Tool
+Comment=A simple tool for viewing reference images
+Exec=ImagoRef
+Icon=ImagoRef
+Terminal=false
+Categories=Graphics;2DGraphics;

@@ -1,36 +1,33 @@
-name: Build macOS Package
+name: Build macOS (Apple Silicon)
 
 on:
   push:
-    branches: [dev4]
+    branches: [ qt6, main ]
   workflow_dispatch:
 
 jobs:
-  build-macos:
+  build-macos-arm:
+    name: Build macOS (Apple Silicon)
     runs-on: macos-14
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Check Runner Architecture
-        run: uname -m
-
-      - name: Install Qt
+      - name: Install Qt 6
         uses: jurplel/install-qt-action@v3
         with:
-          version: '5.15.2'
+          version: '6.5.0'
           arch: 'clang_64'
 
       - name: Configure and Build
         run: |
           rm -rf build
-          cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64"
+          cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES=arm64
           cmake --build build --config Release --target package
-
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: macos-package
+          name: ImagoRef_macOS_package_ARM
           path: build/ImagoRef_v*_macOS.pkg

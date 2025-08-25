@@ -1,38 +1,44 @@
-name: Build Windows Installer
+name: Build windows
 
 on:
   push:
-    branches: [ dev4 ]
+    branches: [ qt6, main ]
   workflow_dispatch:
 
 jobs:
   build-windows:
+    name: Build windows
     runs-on: windows-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install Qt
+      - name: Install Qt 6
         uses: jurplel/install-qt-action@v3
         with:
-          version: '5.15.2'
+          version: '6.5.0'
           arch: 'win64_msvc2019_64'
-          setup-python: false
 
       - name: Setup NSIS
         uses: repolevedavaj/install-nsis@v1.0.1
         with:
-          nsis-version: '3.09' # Укажем последнюю стабильную версию NSIS
+          nsis-version: '3.09'
 
       - name: Configure CMake
-        run: cmake -B build -G "Visual Studio 17 2022" -DCMAKE_BUILD_TYPE=Release
+        run: cmake -B build -G "Visual Studio 17 2022" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="${{ github.workspace }}/install"
 
-      - name: Build and Package
+      - name: Build and Install
+        run: cmake --build build --config Release --target INSTALL
+
+      - name: Deploy Qt Libraries
+        run: D:/a/ImagoRef/Qt/6.5.0/msvc2019_64/bin/windeployqt.exe --no-compiler-runtime --no-opengl-sw --verbose 1 --no-translations "${{ github.workspace }}/install/bin/ImagoRef.exe"
+
+      - name: Package
         run: cmake --build build --config Release --target PACKAGE
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: windows-installer
-          path: build/ImagoRef-*-win64.exe
+          name: ImagoRef_windows_package
+          path: build/ImagoRef_v*_windows.exe
