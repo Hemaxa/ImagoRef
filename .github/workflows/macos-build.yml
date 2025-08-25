@@ -1,13 +1,29 @@
-name: Build macOS Package
+name: Build macOS Packages (Intel & ARM)
 
 on:
   push:
-    branches: [dev4]
+    branches: [dev4] # Убедитесь, что ветка правильная
   workflow_dispatch:
 
 jobs:
   build-macos:
-    runs-on: macos-14
+    # Задаем матрицу для двух сборок
+    strategy:
+      matrix:
+        include:
+          - name: "macOS (Intel)"
+            runner: macos-latest # Intel-машина
+            arch: "x86_64"
+            artifact_suffix: "x86_64"
+
+          - name: "macOS (ARM)"
+            runner: macos-14 # ARM-машина
+            arch: "arm64"
+            artifact_suffix: "arm64"
+
+    # Название задачи будет включать имя из матрицы
+    name: Build ${{ matrix.name }}
+    runs-on: ${{ matrix.runner }}
 
     steps:
       - name: Checkout code
@@ -20,17 +36,20 @@ jobs:
         uses: jurplel/install-qt-action@v3
         with:
           version: '5.15.2'
+          # clang_64 будет работать для обеих сборок,
+          # так как он содержит нужные библиотеки для той машины, на которой запускается.
           arch: 'clang_64'
 
       - name: Configure and Build
         run: |
           rm -rf build
-          cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64"
+          # Передаем нужную архитектуру из матрицы в CMake
+          cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES=${{ matrix.arch }}
           cmake --build build --config Release --target package
-
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: macos-package
+          # Создаем уникальное имя для каждого артефакта
+          name: macos-package-${{ matrix.artifact_suffix }}
           path: build/ImagoRef_v*_macOS.pkg
