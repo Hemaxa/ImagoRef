@@ -26,7 +26,7 @@ jobs:
           nsis-version: '3.09'
 
       - name: Configure CMake
-        run: cmake -B build -G "Visual Studio 17 2022" -DCMAKE_BUILD_TYPE=Release
+        run: cmake -B build -G "Visual Studio 17 2022" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="${{ github.workspace }}/install"
 
       - name: Build and Package
         run: cmake --build build --config Release --target PACKAGE
