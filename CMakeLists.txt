@@ -122,7 +122,7 @@ elseif(WIN32)
         add_custom_command(TARGET ImagoRef POST_BUILD
             COMMAND "${WINDEPLOYQT_EXECUTABLE}" "$<TARGET_FILE:ImagoRef>"
             --no-compiler-runtime --no-system-d3d-compiler --no-opengl-sw --verbose 1
-            WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
+            WORKING_DIRECTORY "$<TARGET_FILE_DIR:ImagoRef>"
             COMMENT "Deploying Qt libraries for Windows..."
         )
     endif()
