@@ -125,7 +125,7 @@ elseif(WIN32)
     set(CPACK_PACKAGE_INSTALL_DIRECTORY "ImagoRef")
     set(CPACK_NSIS_MUI_ICON "${CMAKE_CURRENT_SOURCE_DIR}/res/app_icon/icon.ico")
     set(CPACK_NSIS_MUI_UNIICON "${CMAKE_CURRENT_SOURCE_DIR}/res/app_icon/icon.ico")
-    set(CPACK_NSIS_INSTALLED_ICON_NAME "bin\\icon.ico")
+    set(CPACK_NSIS_INSTALLED_ICON_NAME "bin/icon.ico")
     set(CPACK_NSIS_DISPLAY_NAME "ImagoRef")
     set(CPACK_NSIS_PACKAGE_NAME "ImagoRef ${ImagoRef_VERSION}")
     set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/docs/LICENSE.md")
@@ -142,10 +142,9 @@ elseif(WIN32)
         install(CODE "
             message(STATUS \"Deploying Qt libraries for Windows...\")
             execute_process(
-                COMMAND \"${WINDEPLOYQT_EXECUTABLE}\"
+                COMMAND "${WINDEPLOYQT_EXECUTABLE}"
                     --no-compiler-runtime --no-system-d3d-compiler --no-opengl-sw --verbose 1
-                    --dir \"$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/bin\"
-                    \"$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/bin/ImagoRef.exe\"
+                    "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/bin"
                 RESULT_VARIABLE result
             )
             if(NOT result EQUAL 0)
