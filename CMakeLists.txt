@@ -120,7 +120,7 @@ elseif(WIN32)
     find_program(WINDEPLOYQT_EXECUTABLE windeployqt HINTS "${QT_BIN_DIR}")
     if(WINDEPLOYQT_EXECUTABLE)
         add_custom_command(TARGET ImagoRef POST_BUILD
-            COMMAND "${WINDEPLOYQT_EXECUTABLE}" "$<TARGET_FILE_DIR:ImagoRef>"
+            COMMAND "${WINDEPLOYQT_EXECUTABLE}" "$<TARGET_FILE:ImagoRef>"
             --no-compiler-runtime --no-system-d3d-compiler --no-opengl-sw --verbose 1
             COMMENT "Deploying Qt libraries for Windows..."
         )
