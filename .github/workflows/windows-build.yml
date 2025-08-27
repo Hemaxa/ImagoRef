@@ -35,4 +35,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ImagoRef_windows_installer
-          path: build/ImagoRef-*-win64.exe
+          path: build/ImagoRef_v*_windows.exe
