@@ -118,14 +118,6 @@ elseif(WIN32)
     get_target_property(QMAKE_EXECUTABLE Qt6::qmake IMPORTED_LOCATION)
     get_filename_component(QT_BIN_DIR "${QMAKE_EXECUTABLE}" DIRECTORY)
     find_program(WINDEPLOYQT_EXECUTABLE windeployqt HINTS "${QT_BIN_DIR}")
-    if(WINDEPLOYQT_EXECUTABLE)
-        add_custom_command(TARGET ImagoRef POST_BUILD
-            COMMAND "${WINDEPLOYQT_EXECUTABLE}" "$<TARGET_FILE:ImagoRef>"
-            --no-compiler-runtime --no-system-d3d-compiler --no-opengl-sw --verbose 1
-            WORKING_DIRECTORY "$<TARGET_FILE_DIR:ImagoRef>"
-            COMMENT "Deploying Qt libraries for Windows..."
-        )
-    endif()
 
     set(CPACK_PACKAGE_NAME "ImagoRef")
     set(CPACK_PACKAGE_VENDOR "Yashin Sergey")
@@ -141,11 +133,27 @@ elseif(WIN32)
     set(CPACK_NSIS_CREATE_ICONS_EXTRA "CreateShortCut '$DESKTOP\\\\ImagoRef.lnk' '$INSTDIR\\\\bin\\\\ImagoRef.exe'")
     set(CPACK_NSIS_DELETE_ICONS_EXTRA "Delete '$DESKTOP\\\\ImagoRef.lnk'")
     set(CPACK_PACKAGE_FILE_NAME "ImagoRef_v${ImagoRef_VERSION}_windows")
-
     set(CPACK_GENERATOR "NSIS")
 
-    install(DIRECTORY "$<TARGET_FILE_DIR:ImagoRef>/" DESTINATION bin)
+    install(TARGETS ImagoRef DESTINATION bin)
     install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/res/app_icon/icon.ico" DESTINATION bin)
+
+    if(WINDEPLOYQT_EXECUTABLE)
+        install(CODE "
+            message(STATUS \"Deploying Qt libraries for Windows...\")
+            execute_process(
+                COMMAND \"${WINDEPLOYQT_EXECUTABLE}\"
+                    --no-compiler-runtime --no-system-d3d-compiler --no-opengl-sw --verbose 1
+                    --dir \"$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/bin\"
+                    \"$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/bin/ImagoRef.exe\"
+                RESULT_VARIABLE result
+            )
+            if(NOT result EQUAL 0)
+                message(FATAL_ERROR \"windeployqt failed with exit code \${result}\")
+            endif()
+        ")
+    endif()
+
     include(CPack)
 
 # ====================================================================
