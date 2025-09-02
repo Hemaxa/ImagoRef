@@ -69,7 +69,6 @@ if(APPLE)
     )
 
     set(CMAKE_OSX_DEPLOYMENT_TARGET "10.13" CACHE STRING "Minimum OS X deployment version" FORCE)
-    set(CMAKE_OSX_ARCHITECTURES "x86_64;arm64" CACHE STRING "Build architectures for macOS")
 
     set_target_properties(ImagoRef PROPERTIES
         MACOSX_BUNDLE TRUE
@@ -99,53 +98,6 @@ if(APPLE)
             VERBATIM
         )
     endif()
-
-# ====================================================================
-# НАСТРОЙКИ ДЛЯ WINDOWS
-# ====================================================================
-elseif(WIN32)
-    #полный список библиотек для Windows
-    target_link_libraries(ImagoRef PRIVATE
-        Qt5::Core
-        Qt5::Widgets
-        Qt5::Gui
-        Qt5::Svg
-    )
-
-    set_target_properties(ImagoRef PROPERTIES WIN32_EXECUTABLE TRUE)
-
-    target_sources(ImagoRef PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/resources.rc)
-
-    get_target_property(QMAKE_EXECUTABLE Qt5::qmake IMPORTED_LOCATION)
-    get_filename_component(QT_BIN_DIR "${QMAKE_EXECUTABLE}" DIRECTORY)
-    find_program(WINDEPLOYQT_EXECUTABLE windeployqt HINTS "${QT_BIN_DIR}")
-    if(WINDEPLOYQT_EXECUTABLE)
-        add_custom_command(TARGET ImagoRef POST_BUILD
-            COMMAND "${WINDEPLOYQT_EXECUTABLE}" "$<TARGET_FILE_DIR:ImagoRef>"
-                --no-compiler-runtime --no-system-d3d-compiler --no-opengl-sw --no-angle --verbose 1
-            COMMENT "Deploying Qt libraries for Windows..."
-        )
-    endif()
-
-    set(CPACK_PACKAGE_NAME "ImagoRef")
-    set(CPACK_PACKAGE_VENDOR "Yashin Sergey")
-    set(CPACK_PACKAGE_VERSION "${ImagoRef_VERSION}")
-    set(CPACK_PACKAGE_INSTALL_DIRECTORY "ImagoRef")
-    set(CPACK_NSIS_MUI_ICON "${CMAKE_CURRENT_SOURCE_DIR}/res/app_icon/icon.ico")
-    set(CPACK_NSIS_MUI_UNIICON "${CMAKE_CURRENT_SOURCE_DIR}/res/app_icon/icon.ico")
-    set(CPACK_NSIS_INSTALLED_ICON_NAME "bin\\icon.ico")
-    set(CPACK_NSIS_DISPLAY_NAME "ImagoRef")
-    set(CPACK_NSIS_PACKAGE_NAME "ImagoRef ${ImagoRef_VERSION}")
-    set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/docs/LICENSE.md")
-    set(CPACK_NSIS_MODIFY_PATH OFF)
-    set(CPACK_NSIS_CREATE_ICONS_EXTRA "CreateShortCut '$DESKTOP\\\\ImagoRef.lnk' '$INSTDIR\\\\bin\\\\ImagoRef.exe'")
-    set(CPACK_NSIS_DELETE_ICONS_EXTRA "Delete '$DESKTOP\\\\ImagoRef.lnk'")
-
-    set(CPACK_GENERATOR "NSIS")
-
-    install(DIRECTORY "$<TARGET_FILE_DIR:ImagoRef>/" DESTINATION bin)
-    install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/res/app_icon/icon.ico" DESTINATION bin)
-    include(CPack)
 
 # ====================================================================
 # НАСТРОЙКИ ДЛЯ LINUX
