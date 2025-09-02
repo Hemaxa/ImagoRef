@@ -43,11 +43,11 @@ jobs:
         run: cmake --build build
 
       - name: Create AppDir
-        run: cmake --install build --prefix AppDir
+        run: cmake --install build --prefix AppDir/usr
 
       - name: Build AppImage
         run: |
-          ./linuxdeployqt ./AppDir/bin/ImagoRef -appimage -extra-plugins=iconengines,imageformats,platformthemes
+          ./linuxdeployqt ./AppDir/usr/bin/ImagoRef -appimage -extra-plugins=iconengines,imageformats,platformthemes
 
       - name: Rename AppImage
         run: |
