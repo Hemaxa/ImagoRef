@@ -30,6 +30,12 @@ jobs:
           wget -c -nv "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage" -O linuxdeployqt
           chmod a+x linuxdeployqt
 
+      - name: Extract Version
+        id: get_version
+        run: |
+          VERSION=$(grep -oP '(?<=project\(ImagoRef VERSION )[0-9\.]+' CMakeLists.txt)
+          echo "APP_VERSION=$VERSION" >> $GITHUB_ENV
+
       - name: Configure CMake
         run: cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr
 
@@ -41,10 +47,11 @@ jobs:
 
       - name: Build AppImage
         run: |
-          ./linuxdeployqt ./AppDir/bin/ImagoRef -appimage -extra-plugins=iconengines,imageformats,platformthemes
+          ./linuxdeployqt ./AppDir/bin/ImagoRef -desktop-file=./AppDir/share/applications/Info.desktop -appimage -extra-plugins=iconengines,imageformats,platformthemes
 
       - name: Rename AppImage
-        run: mv ImagoRef-x86_64.AppImage ImagoRef_v1.0_Linux_x86_64.AppImage
+        run: |
+          mv ImagoRef-x86_64.AppImage ImagoRef_v${{ env.APP_VERSION }}_linux.AppImage
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4

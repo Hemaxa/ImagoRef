@@ -1,9 +1,9 @@
 name: Build windows
 
-# on:
-#   push:
-#     branches: [ qt6 ]
-#   workflow_dispatch:
+on:
+  push:
+    branches: [ qt6 ]
+  workflow_dispatch:
 
 jobs:
   build-windows:
