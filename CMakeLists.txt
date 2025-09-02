@@ -138,22 +138,6 @@ elseif(WIN32)
     install(TARGETS ImagoRef DESTINATION bin)
     install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/res/app_icon/icon.ico" DESTINATION bin)
 
-    if(WINDEPLOYQT_EXECUTABLE)
-        install(CODE "
-            message(STATUS \"Deploying Qt libraries for Windows...\")
-            execute_process(
-                COMMAND \"${WINDEPLOYQT_EXECUTABLE}\"
-                    --no-compiler-runtime --no-system-d3d-compiler --no-opengl-sw --verbose 1
-                    --dir \"$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/bin\"
-                    \"$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/bin/ImagoRef.exe\"
-                RESULT_VARIABLE result
-            )
-            if(NOT result EQUAL 0)
-                message(FATAL_ERROR \"windeployqt failed with exit code \${result}\")
-            endif()
-        ")
-    endif()
-
     include(CPack)
 
 # ====================================================================
