@@ -54,7 +54,7 @@ jobs:
 
       - name: Rename AppImage
         run: |
-          mv ImagoRef-x86_64.AppImage ImagoRef_v${{ env.APP_VERSION }}_linux.AppImage
+          mv ./*.AppImage ImagoRef_v${{ env.APP_VERSION }}_linux.AppImage
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
