@@ -47,6 +47,9 @@ jobs:
 
       - name: Build AppImage
         run: |
+          cp AppDir/usr/share/applications/ImagoRef.desktop AppDir/
+          cp AppDir/usr/share/icons/hicolor/256x256/apps/ImagoRef.png AppDir/
+
           ./linuxdeployqt ./AppDir/usr/bin/ImagoRef -appimage -extra-plugins=iconengines,imageformats,platformthemes
 
       - name: Rename AppImage
