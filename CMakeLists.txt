@@ -144,4 +144,29 @@ elseif(WIN32)
 # НАСТРОЙКИ ДЛЯ LINUX
 # ====================================================================
 elseif(UNIX AND NOT APPLE)
+    target_link_libraries(ImagoRef PRIVATE
+        Qt6::Core
+        Qt6::Widgets
+        Qt6::Gui
+        Qt6::Svg
+    )
+
+    configure_file(
+        "${CMAKE_CURRENT_SOURCE_DIR}/Info.desktop.in"
+        "${CMAKE_CURRENT_BINARY_DIR}/Info.desktop"
+        COPYONLY
+    )
+
+    install(TARGETS ImagoRef DESTINATION bin)
+
+    install(
+        FILES "${CMAKE_CURRENT_BINARY_DIR}/Info.desktop"
+        DESTINATION share/applications
+    )
+
+    install(
+        FILES "${CMAKE_CURRENT_SOURCE_DIR}/res/app_icon/icon.png"
+        DESTINATION share/icons/hicolor/256x256/apps
+        RENAME ImagoRef.png
+    )
 endif()

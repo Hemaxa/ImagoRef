@@ -38,3 +38,9 @@ jobs:
 
       - name: Package
         run: cmake --build build --config Release --target PACKAGE
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ImagoRef_v1.0_Windows_x86_64
+          path: build/ImagoRef_v*_windows.exe

@@ -1,0 +1,53 @@
+name: Build Linux
+
+on:
+  push:
+    branches: [ qt6 ]
+  workflow_dispatch:
+
+jobs:
+  build-linux:
+    name: Build Linux
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential libgl1-mesa-dev patchelf fakeroot
+
+      - name: Install Qt 6
+        uses: jurplel/install-qt-action@v3
+        with:
+          version: '6.5.0'
+          arch: 'gcc_64'
+
+      - name: Download linuxdeployqt
+        run: |
+          wget -c -nv "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage" -O linuxdeployqt
+          chmod a+x linuxdeployqt
+
+      - name: Configure CMake
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr
+
+      - name: Build Project
+        run: cmake --build build
+
+      - name: Create AppDir
+        run: cmake --install build --prefix AppDir
+
+      - name: Build AppImage
+        run: |
+          ./linuxdeployqt ./AppDir/usr/bin/ImagoRef -appimage -extra-plugins=iconengines,imageformats,platformthemes
+
+      - name: Rename AppImage
+        run: mv ImagoRef-x86_64.AppImage ImagoRef_v1.0_Linux_x86_64.AppImage
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ImagoRef_v1.0_Linux_x86_64
+          path: ImagoRef_v1.0_Linux_x86_64.AppImage
