@@ -47,7 +47,7 @@ jobs:
 
       - name: Build AppImage
         run: |
-          ./linuxdeployqt ./AppDir/bin/ImagoRef -desktop-file=./AppDir/share/applications/Info.desktop -appimage -extra-plugins=iconengines,imageformats,platformthemes
+          ./linuxdeployqt ./AppDir/bin/ImagoRef -appimage -extra-plugins=iconengines,imageformats,platformthemes
 
       - name: Rename AppImage
         run: |

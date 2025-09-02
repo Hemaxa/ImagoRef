@@ -162,6 +162,7 @@ elseif(UNIX AND NOT APPLE)
     install(
         FILES "${CMAKE_CURRENT_BINARY_DIR}/Info.desktop"
         DESTINATION share/applications
+        RENAME ImagoRef.desktop
     )
 
     install(
