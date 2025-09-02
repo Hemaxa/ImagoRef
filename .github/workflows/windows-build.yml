@@ -1,4 +1,4 @@
-name: Build Windows
+name: Build windows
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
 
 jobs:
   build-windows:
-    name: Build Windows
+    name: Build windows
     runs-on: windows-latest
 
     steps:

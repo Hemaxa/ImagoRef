@@ -1,4 +1,4 @@
-name: Build Linux
+name: Build linux
 
 on:
   push:
@@ -7,8 +7,8 @@ on:
 
 jobs:
   build-linux:
-    name: Build Linux
-    runs-on: ubuntu-latest
+    name: Build linux
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Checkout code
