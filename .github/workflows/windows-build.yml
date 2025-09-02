@@ -42,5 +42,5 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ImagoRef_v1.0_Windows_x86_64
+          name: ImagoRef_windows_package
           path: build/ImagoRef_v*_windows.exe

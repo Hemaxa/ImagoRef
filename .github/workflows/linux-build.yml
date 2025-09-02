@@ -17,7 +17,8 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential libgl1-mesa-dev patchelf fakeroot
+          # ИСПРАВЛЕНИЕ №1: Добавлена libfuse2
+          sudo apt-get install -y build-essential libgl1-mesa-dev patchelf fakeroot libfuse2
 
       - name: Install Qt 6
         uses: jurplel/install-qt-action@v3
@@ -41,7 +42,7 @@ jobs:
 
       - name: Build AppImage
         run: |
-          ./linuxdeployqt ./AppDir/usr/bin/ImagoRef -appimage -extra-plugins=iconengines,imageformats,platformthemes
+          ./linuxdeployqt ./AppDir/bin/ImagoRef -appimage -extra-plugins=iconengines,imageformats,platformthemes
 
       - name: Rename AppImage
         run: mv ImagoRef-x86_64.AppImage ImagoRef_v1.0_Linux_x86_64.AppImage
@@ -49,5 +50,5 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ImagoRef_v1.0_Linux_x86_64
+          name: ImagoRef_linux_package
           path: ImagoRef_v1.0_Linux_x86_64.AppImage
