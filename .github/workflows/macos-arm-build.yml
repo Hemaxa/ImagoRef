@@ -18,7 +18,7 @@ jobs:
         uses: jurplel/install-qt-action@v3
         with:
           version: '6.5.0'
-          arch: 'clang_arm64'
+          arch: 'clang_64'
 
       #сборка только под ARM
       - name: Configure and Build
