@@ -34,7 +34,7 @@ jobs:
       - name: Deploy Qt libraries
         run: |
           cd ${{ github.workspace }}/install/bin
-          windeployqt --no-compiler-runtime --no-system-d3d-compiler --no-opengl-sw --verbose 1 ImagoRef.exe
+          windeployqt --no-compiler-runtime --no-system-d3d-compiler --no-opengl-sw --verbose 1 --no-translations ImagoRef.exe
 
       - name: Package
         run: cmake --build build --config Release --target PACKAGE
