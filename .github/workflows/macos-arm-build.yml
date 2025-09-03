@@ -2,7 +2,7 @@ name: Build macOS (Apple Silicon)
 
 on:
   push:
-    branches: [ qt6 ]
+    branches: [ qt6, main ]
   workflow_dispatch:
 
 jobs:

@@ -84,15 +84,19 @@ if(APPLE)
 
     find_program(PKGBUILD_EXECUTABLE pkgbuild)
     find_program(PRODUCTBUILD_EXECUTABLE productbuild)
+
     if(PKGBUILD_EXECUTABLE AND PRODUCTBUILD_EXECUTABLE)
         add_custom_target(package
             COMMAND ${MACDEPLOYQT_EXECUTABLE} "$<TARGET_BUNDLE_DIR:ImagoRef>" -verbose=1
 
             COMMAND codesign --force --deep --sign - "$<TARGET_BUNDLE_DIR:ImagoRef>"
 
-            COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/package/root"
-            COMMAND ${CMAKE_COMMAND} -E copy_directory "$<TARGET_BUNDLE_DIR:ImagoRef>" "${CMAKE_BINARY_DIR}/package/root/ImagoRef.app"
-            COMMAND ${PKGBUILD_EXECUTABLE} --root "${CMAKE_BINARY_DIR}/package/root" --identifier "com.imago.ref" --version "${ImagoRef_VERSION}" --install-location "/Applications" "${CMAKE_BINARY_DIR}/package/ImagoRef.pkg"
+            COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/package/root/Applications"
+
+            COMMAND ${CMAKE_COMMAND} -E copy_directory "$<TARGET_BUNDLE_DIR:ImagoRef>" "${CMAKE_BINARY_DIR}/package/root/Applications/ImagoRef.app"
+
+            COMMAND ${PKGBUILD_EXECUTABLE} --root "${CMAKE_BINARY_DIR}/package/root" --identifier "com.imago.ref" --version "${ImagoRef_VERSION}" --install-location "/" "${CMAKE_BINARY_DIR}/package/ImagoRef.pkg"
+
             COMMAND ${PRODUCTBUILD_EXECUTABLE} --package "${CMAKE_BINARY_DIR}/package/ImagoRef.pkg" "${CMAKE_BINARY_DIR}/ImagoRef_v${ImagoRef_VERSION}_macOS.pkg"
             COMMAND ${CMAKE_COMMAND} -E remove_directory "${CMAKE_BINARY_DIR}/package"
             DEPENDS ImagoRef
@@ -100,45 +104,57 @@ if(APPLE)
         )
     endif()
 
-# ====================================================================
-# НАСТРОЙКИ ДЛЯ WINDOWS
-# ====================================================================
-elseif(WIN32)
-    target_link_libraries(ImagoRef PRIVATE
-        Qt6::Core
-        Qt6::Widgets
-        Qt6::Gui
-        Qt6::Svg
-    )
+    # ====================================================================
+    # НАСТРОЙКИ ДЛЯ WINDOWS
+    # ====================================================================
+    elseif(WIN32)
+        target_link_libraries(ImagoRef PRIVATE
+            Qt6::Core
+            Qt6::Widgets
+            Qt6::Gui
+            Qt6::Svg
+        )
 
-    set_target_properties(ImagoRef PROPERTIES WIN32_EXECUTABLE TRUE)
+        set_target_properties(ImagoRef PROPERTIES WIN32_EXECUTABLE TRUE)
 
-    target_sources(ImagoRef PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/resources.rc)
+        target_sources(ImagoRef PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/resources.rc)
 
-    get_target_property(QMAKE_EXECUTABLE Qt6::qmake IMPORTED_LOCATION)
-    get_filename_component(QT_BIN_DIR "${QMAKE_EXECUTABLE}" DIRECTORY)
-    find_program(WINDEPLOYQT_EXECUTABLE windeployqt HINTS "${QT_BIN_DIR}")
+        install(TARGETS ImagoRef DESTINATION bin)
+        install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/res/app_icon/icon.ico" DESTINATION bin)
 
-    set(CPACK_PACKAGE_NAME "ImagoRef")
-    set(CPACK_PACKAGE_VENDOR "Yashin Sergey")
-    set(CPACK_PACKAGE_VERSION "${ImagoRef_VERSION}")
-    set(CPACK_PACKAGE_INSTALL_DIRECTORY "ImagoRef")
-    set(CPACK_NSIS_MUI_ICON "${CMAKE_CURRENT_SOURCE_DIR}/res/app_icon/icon.ico")
-    set(CPACK_NSIS_MUI_UNIICON "${CMAKE_CURRENT_SOURCE_DIR}/res/app_icon/icon.ico")
-    set(CPACK_NSIS_INSTALLED_ICON_NAME "bin/icon.ico" CACHE STRING "" FORCE)
-    set(CPACK_NSIS_DISPLAY_NAME "ImagoRef")
-    set(CPACK_NSIS_PACKAGE_NAME "ImagoRef ${ImagoRef_VERSION}")
-    set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/docs/LICENSE.md")
-    set(CPACK_NSIS_MODIFY_PATH OFF)
-    set(CPACK_NSIS_CREATE_ICONS_EXTRA "CreateShortCut '$DESKTOP\\\\ImagoRef.lnk' '$INSTDIR\\\\bin\\\\ImagoRef.exe'")
-    set(CPACK_NSIS_DELETE_ICONS_EXTRA "Delete '$DESKTOP\\\\ImagoRef.lnk'")
-    set(CPACK_PACKAGE_FILE_NAME "ImagoRef_v${ImagoRef_VERSION}_windows")
-    set(CPACK_GENERATOR "NSIS")
+        get_target_property(QMAKE_EXECUTABLE Qt6::qmake IMPORTED_LOCATION)
+        get_filename_component(QT_BIN_DIR "${QMAKE_EXECUTABLE}" DIRECTORY)
+        find_program(WINDEPLOYQT_EXECUTABLE windeployqt HINTS "${QT_BIN_DIR}")
 
-    install(TARGETS ImagoRef DESTINATION bin)
-    install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/res/app_icon/icon.ico" DESTINATION bin)
+        install(CODE "
+            execute_process(COMMAND
+                ${WINDEPLOYQT_EXECUTABLE}
+                --no-compiler-runtime
+                --no-system-d3d-compiler
+                --no-opengl-sw
+                --verbose 1
+                --no-translations
+                \"${CMAKE_INSTALL_PREFIX}/bin/ImagoRef.exe\"
+            )
+        ")
 
-    include(CPack)
+        set(CPACK_PACKAGE_NAME "ImagoRef")
+        set(CPACK_PACKAGE_VENDOR "Yashin Sergey")
+        set(CPACK_PACKAGE_VERSION "${ImagoRef_VERSION}")
+        set(CPACK_PACKAGE_INSTALL_DIRECTORY "ImagoRef")
+        set(CPACK_NSIS_MUI_ICON "${CMAKE_CURRENT_SOURCE_DIR}/res/app_icon/icon.ico")
+        set(CPACK_NSIS_MUI_UNIICON "${CMAKE_CURRENT_SOURCE_DIR}/res/app_icon/icon.ico")
+        set(CPACK_NSIS_INSTALLED_ICON_NAME "bin/ImagoRef.exe" CACHE STRING "" FORCE) # Лучше ссылаться на exe
+        set(CPACK_NSIS_DISPLAY_NAME "ImagoRef")
+        set(CPACK_NSIS_PACKAGE_NAME "ImagoRef ${ImagoRef_VERSION}")
+        set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/docs/LICENSE.md")
+        set(CPACK_NSIS_MODIFY_PATH OFF)
+        set(CPACK_NSIS_CREATE_ICONS_EXTRA "CreateShortCut '$DESKTOP\\\\ImagoRef.lnk' '$INSTDIR\\\\bin\\\\ImagoRef.exe'")
+        set(CPACK_NSIS_DELETE_ICONS_EXTRA "Delete '$DESKTOP\\\\ImagoRef.lnk'")
+        set(CPACK_PACKAGE_FILE_NAME "ImagoRef_v${ImagoRef_VERSION}_windows")
+        set(CPACK_GENERATOR "NSIS")
+
+        include(CPack)
 
 # ====================================================================
 # НАСТРОЙКИ ДЛЯ LINUX
