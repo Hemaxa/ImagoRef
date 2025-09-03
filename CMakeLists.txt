@@ -123,37 +123,6 @@ if(WIN32)
     install(TARGETS ImagoRef DESTINATION bin)
     install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/res/app_icon/icon.ico" DESTINATION bin)
 
-    get_target_property(QMAKE_EXECUTABLE Qt6::qmake IMPORTED_LOCATION)
-    get_filename_component(QT_BIN_DIR "${QMAKE_EXECUTABLE}" DIRECTORY)
-
-    find_program(WINDEPLOYQT_EXECUTABLE windeployqt HINTS "${QT_BIN_DIR}")
-
-    install(CODE "
-        message(STATUS \"Running windeployqt...\")
-        message(STATUS \"Executable: ${WINDEPLOYQT_EXECUTABLE}\")
-        message(STATUS \"Target: ${CMAKE_INSTALL_PREFIX}/bin/ImagoRef.exe\")
-        execute_process(
-            COMMAND
-                ${WINDEPLOYQT_EXECUTABLE}
-                --no-compiler-runtime
-                --no-system-d3d-compiler
-                --no-opengl-sw
-                --verbose 1
-                --no-translations
-                \"${CMAKE_INSTALL_PREFIX}/bin/ImagoRef.exe\"
-            RESULT_VARIABLE res
-            OUTPUT_VARIABLE out
-            ERROR_VARIABLE err
-        )
-        message(STATUS \"windeployqt finished with code: ${res}\")
-        if(out)
-            message(STATUS \"windeployqt stdout: ${out}\")
-        endif()
-        if(err)
-            message(STATUS \"windeployqt stderr: ${err}\")
-        endif()
-    ")
-
     set(CPACK_PACKAGE_NAME "ImagoRef")
     set(CPACK_PACKAGE_VENDOR "Yashin Sergey")
     set(CPACK_PACKAGE_VERSION "${ImagoRef_VERSION}")
