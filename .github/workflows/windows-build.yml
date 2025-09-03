@@ -32,7 +32,7 @@ jobs:
         run: cmake --build build --config Release --target INSTALL
 
       - name: Deploy Qt Libraries
-        run: D:/a/ImagoRef/Qt/6.5.0/msvc2019_64/bin/windeployqt.exe --no-compiler-runtime --no-opengl-sw --verbose 1 "${{ github.workspace }}/install/bin/ImagoRef.exe"
+        run: D:/a/ImagoRef/Qt/6.5.0/msvc2019_64/bin/windeployqt.exe --no-compiler-runtime --no-opengl-sw --verbose 1 --no-translations "${{ github.workspace }}/install/bin/ImagoRef.exe"
 
       - name: Package
         run: cmake --build build --config Release --target PACKAGE
