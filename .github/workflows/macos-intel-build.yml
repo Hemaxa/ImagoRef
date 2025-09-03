@@ -8,7 +8,7 @@ on:
 jobs:
   build-macos-intel:
     name: Build macOS (Intel x86_64)
-    runs-on: macos-latest
+    runs-on: macos-14
 
     steps:
       - name: Checkout code
@@ -20,7 +20,6 @@ jobs:
           version: '5.15.2'
           arch: 'clang_64'
 
-      #сборка только под x86_64
       - name: Configure and Build
         run: |
           rm -rf build
