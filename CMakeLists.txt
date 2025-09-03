@@ -128,7 +128,7 @@ if(WIN32)
 
     find_program(WINDEPLOYQT_EXECUTABLE windeployqt HINTS "${QT_BIN_DIR}")
 
-    iinstall(CODE "
+    install(CODE "
         message(STATUS \"Running windeployqt...\")
         message(STATUS \"Executable: ${WINDEPLOYQT_EXECUTABLE}\")
         message(STATUS \"Target: ${CMAKE_INSTALL_PREFIX}/bin/ImagoRef.exe\")
