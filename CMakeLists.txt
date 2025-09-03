@@ -83,17 +83,23 @@ if(APPLE)
 
     find_program(PKGBUILD_EXECUTABLE pkgbuild)
     find_program(PRODUCTBUILD_EXECUTABLE productbuild)
+
     if(PKGBUILD_EXECUTABLE AND PRODUCTBUILD_EXECUTABLE)
         add_custom_target(package
             COMMAND ${MACDEPLOYQT_EXECUTABLE} "$<TARGET_BUNDLE_DIR:ImagoRef>" -verbose=1
 
             COMMAND codesign --force --deep --sign - "$<TARGET_BUNDLE_DIR:ImagoRef>"
 
-            COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/package/root"
-            COMMAND ${CMAKE_COMMAND} -E copy_directory "$<TARGET_BUNDLE_DIR:ImagoRef>" "${CMAKE_BINARY_DIR}/package/root/ImagoRef.app"
-            COMMAND ${PKGBUILD_EXECUTABLE} --root "${CMAKE_BINARY_DIR}/package/root" --identifier "com.imago.ref" --version "${ImagoRef_VERSION}" --install-location "/Applications" "${CMAKE_BINARY_DIR}/package/ImagoRef.pkg"
-            COMMAND ${PRODUCTBUILD_EXECUTABLE} --package "${CMAKE_BINARY_DIR}/package/ImagoRef.pkg" "${CMAKE_BINARY_DIR}/ImagoRef_v${ImagoRef_VERSION}_macOS.pkg"
+            COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/package/root/Applications"
+
+            COMMAND ${CMAKE_COMMAND} -E copy_directory "$<TARGET_BUNDLE_DIR:ImagoRef>" "${CMAKE_BINARY_DIR}/package/root/Applications/ImagoRef.app"
+
+            COMMAND ${PKGBUILD_EXECUTABLE} --root "${CMAKE_BINARY_DIR}/package/root" --identifier "com.imago.ref" --version "${ImagoRef_VERSION}" --install-location "/" "${CMAKE_BINARY_DIR}/package/ImagoRef.pkg" [cite: 8]
+
+            COMMAND ${PRODUCTBUILD_EXECUTABLE} --package "${CMAKE_BINARY_DIR}/package/ImagoRef.pkg" "${CMAKE_BINARY_DIR}/ImagoRef_v${ImagoRef_VERSION}_macOS.pkg" [cite: 8]
+
             COMMAND ${CMAKE_COMMAND} -E remove_directory "${CMAKE_BINARY_DIR}/package"
+
             DEPENDS ImagoRef
             VERBATIM
         )

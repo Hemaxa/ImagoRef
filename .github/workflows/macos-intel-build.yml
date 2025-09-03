@@ -2,7 +2,7 @@ name: Build macOS (Intel x86_64)
 
 on:
   push:
-    branches: [ qt5 ]
+    branches: [ qt5, main ]
   workflow_dispatch:
 
 jobs:
