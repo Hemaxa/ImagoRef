@@ -5,15 +5,14 @@ First off, thank you for considering contributing to ImagoRef! Your interest and
 To ensure a smooth and effective process for everyone, please take a moment to read through these guidelines.
 
 ### Code of Conduct
-This project and everyone participating in it is governed by the ImagoRef Code of Conduct. By participating, you are expected to uphold this code. Please report any unacceptable behavior.
+This project and everyone participating in it is governed by the [ImagoRef Code of Conduct](). By participating, you are expected to uphold this code. Please report any unacceptable behavior.
 
 ### How Can I Contribute?
-
 #### Reporting Bugs
 If you encounter a bug, please ensure the following before creating an issue:
 
 1) You are using the latest version of ImagoRef.
-2) You have checked the existing [Issues](#https://github.com/Hemaxa/ImagoRef/issues) to see if a similar bug has already been reported.
+2) You have checked the existing [Issues](https://github.com/Hemaxa/ImagoRef/issues) to see if a similar bug has already been reported.
 
 If the bug is new, please create a new issue and provide as much information as possible:
 
@@ -62,7 +61,6 @@ cmake --build .
 ```
 
 #### 2) Pull Request Process
-
 1. **Fork** the repository (click the "Fork" button in the top-right corner of the page).
 
 2. **Create a new branch** in your fork for your changes. Use a descriptive name for the branch, for example:
