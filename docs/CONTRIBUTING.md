@@ -13,22 +13,22 @@ This project and everyone participating in it is governed by the ImagoRef Code o
 If you encounter a bug, please ensure the following before creating an issue:
 
 1) You are using the latest version of ImagoRef.
-2) You have checked the existing Issues to see if a similar bug has already been reported.
+2) You have checked the existing [Issues](#https://github.com/Hemaxa/ImagoRef/issues) to see if a similar bug has already been reported.
 
 If the bug is new, please create a new issue and provide as much information as possible:
 
-* A clear and descriptive title that summarizes the problem.
-* Steps to reproduce the bug. Be as specific as possible.
-* What was the expected behavior?
-* What was the actual behavior? (Include screenshots if helpful).
-* Your system information: Operating System, Qt version (if known), etc.
+* **A clear and descriptive title** that summarizes the problem.
+* **Steps to reproduce the bug.** Be as specific as possible.
+* **What was the expected behavior?**
+* **What was the actual behavior?** (Include screenshots if helpful).
+* **Your system information:** Operating System, Qt version (if known), etc.
 
 #### Suggesting Enhancements
 We are always open to new ideas! If you have a suggestion for a new feature or an improvement to an existing one, please create a new issue:
 
 * Use a clear and descriptive title.
-* Explain in detail what problem your idea solves.
-* Describe how you imagine the new feature should work. Mockups or diagrams are welcome!
+* Explain in detail **what problem your idea solves**.
+* Describe **how you imagine the new feature should work**. Mockups or diagrams are welcome!
 
 ### Development and Submitting Changes
 If you want to fix a bug or implement a new feature, here’s how to get started.
