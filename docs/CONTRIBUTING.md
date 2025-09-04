@@ -1,78 +1,104 @@
-# Как внести свой вклад в ImagoRef
+# Contributing to ImagoRef
 
-Во-первых, спасибо за ваш интерес к ImagoRef! Мы рады, что вы хотите помочь. Каждое, даже самое небольшое, участие очень ценно для нас.
+First off, thank you for considering contributing to ImagoRef! Your interest and effort help make this project better for everyone. We welcome any contribution, whether it's reporting a bug, suggesting a new feature, improving documentation, or writing code.
 
-Этот документ содержит набор правил и рекомендаций, которые помогут вам сделать свой вклад максимально простым и эффективным.
+To ensure a smooth and effective process for everyone, please take a moment to read through these guidelines.
 
-## Кодекс Поведения (Code of Conduct)
+### Code of Conduct
+This project and everyone participating in it is governed by the ImagoRef Code of Conduct. By participating, you are expected to uphold this code. Please report any unacceptable behavior.
 
-Чтобы наше сообщество было открытым и дружелюбным, мы придерживаемся [Кодекса Поведения](./CODE_OF_CONDUCT.md). Участвуя в жизни проекта, вы обязуетесь следовать его принципам. Пожалуйста, ознакомьтесь с ним.
+### How Can I Contribute?
 
-## Как я могу помочь?
+#### Reporting Bugs
+If you encounter a bug, please ensure the following before creating an issue:
 
-Существует множество способов внести свой вклад, и не все из них связаны с написанием кода.
+1) You are using the latest version of ImagoRef.
+2) You have checked the existing Issues to see if a similar bug has already been reported.
 
-* **Сообщения об ошибках.** Если вы нашли что-то, что работает не так, как ожидалось.
-* **Предложения по улучшению.** Если у вас есть идея о новой функции или улучшении существующей.
-* **Улучшение документации.** Если вы нашли опечатку, ошибку или считаете, что какой-то раздел можно объяснить лучше.
-* **Написание кода.** Если вы хотите исправить ошибку или реализовать новую функцию.
+If the bug is new, please create a new issue and provide as much information as possible:
 
-### Сообщения об ошибках
+* A clear and descriptive title that summarizes the problem.
+* Steps to reproduce the bug. Be as specific as possible.
+* What was the expected behavior?
+* What was the actual behavior? (Include screenshots if helpful).
+* Your system information: Operating System, Qt version (if known), etc.
 
-Перед тем как сообщить об ошибке, пожалуйста, [проверьте список существующих задач (Issues)](https://github.com/YAkor/ImagoRef/issues), чтобы убедиться, что о ней не сообщали ранее.
+#### Suggesting Enhancements
+We are always open to new ideas! If you have a suggestion for a new feature or an improvement to an existing one, please create a new issue:
 
-При создании отчета об ошибке, пожалуйста, включите как можно больше деталей:
-* **Версия ImagoRef**, которую вы используете.
-* **Версия вашей операционной системы** (например, Windows 11, macOS Sonoma 14.5).
-* **Четкое описание шагов** для воспроизведения ошибки.
-* **Что вы ожидали увидеть** и **что произошло на самом деле**.
-* **Скриншоты или GIF-анимации**, если это возможно. Они очень помогают!
+* Use a clear and descriptive title.
+* Explain in detail what problem your idea solves.
+* Describe how you imagine the new feature should work. Mockups or diagrams are welcome!
 
-### Предложения по улучшению
+### Development and Submitting Changes
+If you want to fix a bug or implement a new feature, here’s how to get started.
 
-Мы всегда рады новым идеям! При создании предложения, пожалуйста, подробно опишите:
-1.  **Проблему**, которую решает ваша идея. Почему это улучшение будет полезно для пользователей ImagoRef?
-2.  **Ваше предложение.** Как именно вы предлагаете реализовать эту функцию?
-3.  **Альтернативы**, если вы их рассматривали.
+#### 1) Setting Up Your Environment
+To build the project, you will need:
 
-## Процесс разработки и Pull Request
+* Git
+* A C++ compiler (e.g., MSVC on Windows, GCC/Clang on Linux/macOS)
+* CMake (version 3.16 or higher)
+* The Qt library (Qt 6.x is recommended)
 
-Если вы готовы внести изменения в код, следуйте этим шагам:
+**Build Steps:**
 
-1.  **Сделайте форк репозитория.**
+```bash
+#clone your fork of the repository
+git clone https://github.com/Hemaxa/ImagoRef.git
+cd ImagoRef
 
-2.  **Клонируйте свой форк на ваш компьютер:**
-    ```bash
-    git clone https://github.com/Hemaxa/ImagoRef.git
-    ```
+#create a build directory (for an out-of-source build)
+mkdir build
+cd build
 
-3.  **Создайте новую ветку для ваших изменений.** Называйте ветку осмысленно, например:
-    ```bash
-    # Для новой функции
-    git checkout -b feature/add-new-export-format
+#configure the project using CMake
+#if Qt is not in your system's PATH, you must provide the path to it:
+#cmake .. -DCMAKE_PREFIX_PATH=/path/to/your/qt/version
+cmake ..
 
-    # Для исправления ошибки
-    git checkout -b bugfix/fix-image-rendering-issue
-    ```
+#build the project
+cmake --build .
+```
 
-4.  **Внесите свои изменения в код.**
+#### 2) Pull Request Process
 
-5.  **Убедитесь, что код соответствует стилю проекта.** (Если у вас есть линтеры или тесты, запустите их).
+1. **Fork** the repository (click the "Fork" button in the top-right corner of the page).
 
-6.  **Сделайте коммит ваших изменений.** Пишите понятные сообщения для коммитов. Мы придерживаемся простого стиля:
-    * `Feat: Добавлена поддержка формата WEBP`
-    * `Fix: Исправлено падение при открытии поврежденных файлов`
-    * `Docs: Обновлен раздел установки в README`
+2. **Create a new branch** in your fork for your changes. Use a descriptive name for the branch, for example:
 
-7.  **Отправьте изменения в ваш форк:**
-    ```bash
-    git push origin НАЗВАНИЕ-ВАШЕЙ-ВЕТКИ
-    ```
+```bash
+#for a new feature
+git checkout -b feature/add-image-rotation
 
-8.  **Создайте Pull Request** из вашего форка в основной репозиторий ImagoRef.
-    * Дайте вашему Pull Request понятное название.
-    * В описании подробно объясните, **что** и **зачем** вы сделали. Если ваши изменения исправляют существующую задачу (Issue), обязательно укажите её номер (например, `Closes #123`).
+#for a bug fix
+git checkout -b fix/crash-on-drag-drop
+```
 
-После этого мы рассмотрим ваш Pull Request, возможно, оставим комментарии или попросим внести правки, и после одобрения вольем ваши изменения в основной проект.
+3. **Make your changes.** Write clean code that follows the project's existing style.
 
-Еще раз спасибо за ваше время и желание сделать ImagoRef лучше!
+4. **Commit your changes.** Use clear and concise commit messages.
+
+```bash
+git commit -m "feat: Add image rotation with QTransform"
+```
+
+5. **Push your changes** to your forked repository on GitHub.
+
+```bash
+git push origin feature/add-image-rotation
+```
+
+6. **Open a Pull Request (PR)** from your branch to the *main* branch of the original ImagoRef repository.
+
+* Provide a clear title and description for your PR.
+* If your PR fixes an existing issue, link it by including *Closes #123* (where *123* is the issue number) in the PR description.
+
+#### 3)Coding Style
+To maintain a clean and readable codebase, please try to follow these guidelines:
+
+* **Consistency:** follow the coding style already present in the project. It is generally close to the official Qt/C++ style guide.
+* **Naming:** use *camelCase* for variables and functions. Class names should use *PascalCase* (*MyCoolClass*).
+* **Comments:** add comments to explain complex or non-obvious sections of your code.
+
+Thank you again for your contribution!
