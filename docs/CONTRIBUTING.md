@@ -94,7 +94,7 @@ git push origin feature/add-image-rotation
 * Provide a clear title and description for your PR.
 * If your PR fixes an existing issue, link it by including *Closes #123* (where *123* is the issue number) in the PR description.
 
-#### 3)Coding Style
+#### 3) Coding Style
 To maintain a clean and readable codebase, please try to follow these guidelines:
 
 * **Consistency:** follow the coding style already present in the project. It is generally close to the official Qt/C++ style guide.

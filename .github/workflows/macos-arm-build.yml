@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-macos-intel:
+  build-macos-arm:
     name: Build macOS (Apple Silicon)
     runs-on: macos-14
 
