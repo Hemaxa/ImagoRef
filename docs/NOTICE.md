@@ -3,7 +3,6 @@
 This project uses the following third-party software:
 
 ### Qt Toolkit
-
 1) **License:** GNU Lesser General Public License (LGPL) version 3
 2) **Website:** https://www.qt.io
 3) **Source Code:** https://download.qt.io/official_releases/qt/

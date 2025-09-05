@@ -8,6 +8,7 @@ To ensure a smooth and effective process for everyone, please take a moment to r
 This project and everyone participating in it is governed by the [ImagoRef Code of Conduct](). By participating, you are expected to uphold this code. Please report any unacceptable behavior.
 
 ### How Can I Contribute?
+
 #### Reporting Bugs
 If you encounter a bug, please ensure the following before creating an issue:
 
