@@ -115,7 +115,6 @@ if(APPLE)
 
             #настройка .pkg
             COMMAND ${PRODUCTBUILD_EXECUTABLE}
-                --license "${CMAKE_CURRENT_SOURCE_DIR}/docs/LICENSE.md"
                 --package "${CMAKE_BINARY_DIR}/package/ImagoRef.pkg" "${CMAKE_BINARY_DIR}/ImagoRef_v${ImagoRef_VERSION}_macOS.pkg"
 
             #удаление временной директории
