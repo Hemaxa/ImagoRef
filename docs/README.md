@@ -1,3 +1,3 @@
 # ImagoRef
 
-![ImagoRef](https://github.com/Hemaxa/website-imagoref/blob/d38991ccf1da5e1e6cc9ed0945f2ec3bff5ba42d/public/ImagoRefCorners.png)
+![ImagoRef](https://github.com/Hemaxa/ImagoRef/blob/395b4fde8db2288142e7e75bb466d7516bca76e7/graphics/ImagoRef.png)

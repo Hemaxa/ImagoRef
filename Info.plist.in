@@ -27,13 +27,13 @@
     <string>10.13</string>
 
     <key>NSHumanReadableCopyright</key>
-    <string>© 2025 Yashin Sergey. All rights reserved.</string>
+    <string>© 2025 YAstra Company. All rights reserved.</string>
 
     <key>CFBundleIconFile</key>
     <string>icon</string>
 
     <key>CFBundleDevelopmentRegion</key>
-    <string>ru</string>
+    <string>en</string>
 
     <key>CFBundleAllowMixedLocalizations</key>
     <true/>
