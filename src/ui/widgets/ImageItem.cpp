@@ -1,14 +1,14 @@
-#include "imageitem.h"
-#include "undocommands.h"
+#include "ImageItem.h"     // ✅
+#include "UndoRedoTool.h"  // ✅
 
-#include <QPen> //модуль для рисования контуров, определяет свойсво пера
-#include <QPainter> //модуль для рисования
-#include <QGraphicsSceneMouseEvent> //класс для обработки событий мыши в сцене
-#include <QGuiApplication> //класс для работы с графическим интерфейсом
-#include <QCursor> //класс для работы с курсором мыши
-#include <QStyleOptionGraphicsItem> //класс для работы со стилем элемента
-#include <QUndoStack> //стек для Undo & Redo
-#include <QTransform> //трансформация координат
+#include <QPen>
+#include <QPainter>
+#include <QGraphicsSceneMouseEvent>
+#include <QGuiApplication>
+#include <QCursor>
+#include <QStyleOptionGraphicsItem>
+#include <QUndoStack>
+#include <QTransform>
 
 ImageItem::ImageItem(const QPixmap &pixmap, QUndoStack *undoStack, QGraphicsItem *parent)
     : QObject(nullptr),
@@ -17,21 +17,10 @@ ImageItem::ImageItem(const QPixmap &pixmap, QUndoStack *undoStack, QGraphicsItem
     m_undoStack(undoStack)
 {
     m_currentBounds = pixmap.rect();
-
-    //установка точки транформации в центре картинки
     setTransformOriginPoint(m_currentBounds.center());
-
-    //установка флагов, которые делают элемент интерактивным (то, что можно делать с изображением)
-    //1. ItemIsSelectable - можно выделять
-    //2. ItemIsMovable - можно перемещать мышью
-    //3. ItemSendsGeometryChanges - отправляет сигнал при изменении геометрии
     setFlags(QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemSendsGeometryChanges);
-
-    //обработка событий наведения мыши
     setAcceptHoverEvents(true);
-
-    //обработка добавления маркеров
-    m_handles.resize(8); //количесвто маркеров
+    m_handles.resize(8);
 }
 
 ImageItem::~ImageItem()
@@ -42,33 +31,26 @@ QRectF ImageItem::boundingRect() const {
     return m_currentBounds;
 }
 
-//метод включения режима изменения размера
 void ImageItem::setResizeMode(bool enabled) {
-    if (m_isResizing == enabled) return; //ничего не делать, если уже режим изменения размера
-
+    if (m_isResizing == enabled) return;
     m_isResizing = enabled;
     if (m_isResizing) {
-        setFlag(ItemIsMovable, false); //запрет на перемещение при активном изменении размера
-        updateHandlesPos(); //вычисление позиции маркеров
+        setFlag(ItemIsMovable, false);
+        updateHandlesPos();
     } else {
         setFlag(ItemIsMovable, true);
     }
-    update(); //перерисовка элемента
+    update();
 }
 
-//метод отризовки рамки и маркеров изменения изображения
 void ImageItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
     painter->setRenderHint(QPainter::SmoothPixmapTransform);
-    //вызывается родительский метод, чтобы само изображение нарисовалось
     painter->drawPixmap(boundingRect(), pixmap(), pixmap().rect());
 
-
-    //если курсор находится над элементом или выделен - русиется рамку
     if ((option->state & QStyle::State_Selected) || m_isHovered) {
         painter->setPen(QPen(Qt::white, 2, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
         painter->drawRect(boundingRect());
     }
-    //если активен режим изменения размера, рисуются маркеры
     if (m_isResizing) {
         painter->setBrush(Qt::white);
         painter->setPen(QPen(Qt::black, 2));
@@ -78,10 +60,9 @@ void ImageItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
     }
 }
 
-//метод просчета позиций маркеров изменения размера
 void ImageItem::updateHandlesPos() {
     const QRectF br = boundingRect();
-    const qreal hs = m_handleSize / 2.0; //половина изображения
+    const qreal hs = m_handleSize / 2.0;
     m_handles[0].setRect(br.topLeft().x() - hs, br.topLeft().y() - hs, m_handleSize, m_handleSize); //TopLeft
     m_handles[1].setRect(br.center().x() - hs, br.top() - hs, m_handleSize, m_handleSize); //Top
     m_handles[2].setRect(br.topRight().x() - hs, br.topRight().y() - hs, m_handleSize, m_handleSize); //TopRight
@@ -101,7 +82,6 @@ ImageItem::Handle ImageItem::getHandleAt(const QPointF &pos) {
     return None;
 }
 
-//метод изменения курсора
 void ImageItem::setCursorForHandle(Handle handle) {
     switch (handle) {
     case TopLeft:
@@ -121,14 +101,12 @@ void ImageItem::setCursorForHandle(Handle handle) {
     }
 }
 
-//срабатывает, когда курсор мыши входит в границы элемента
 void ImageItem::hoverEnterEvent(QGraphicsSceneHoverEvent *event) {
-    m_isHovered = true; //установка флага
-    update(); //запрашивается перерисовку элемента, чтобы paint() был вызван снова
+    m_isHovered = true;
+    update();
     QGraphicsPixmapItem::hoverEnterEvent(event);
 }
 
-//срабатывает, когда курсор мыши покидает границы элемента
 void ImageItem::hoverLeaveEvent(QGraphicsSceneHoverEvent *event) {
     m_isHovered = false;
     setCursor(Qt::ArrowCursor);
@@ -136,7 +114,6 @@ void ImageItem::hoverLeaveEvent(QGraphicsSceneHoverEvent *event) {
     QGraphicsPixmapItem::hoverLeaveEvent(event);
 }
 
-//обработка событий мыши для изменения размера
 void ImageItem::mousePressEvent(QGraphicsSceneMouseEvent *event) {
     m_initialPos = this->pos();
     m_initialRect = this->boundingRect();
@@ -151,11 +128,9 @@ void ImageItem::mousePressEvent(QGraphicsSceneMouseEvent *event) {
             return;
         }
     }
-    //если не в режиме изменения или клик не по маркеру, вызывается стандартное поведение
     QGraphicsPixmapItem::mousePressEvent(event);
 }
 
-//метод выполняется при каждом движении мыши с зажатой кнопкой
 void ImageItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event) {
     if (m_isResizing && m_activeHandle != None) {
         QRectF newSceneRect = m_initialSceneRect;
@@ -206,7 +181,6 @@ void ImageItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event) {
     QGraphicsPixmapItem::mouseMoveEvent(event);
 }
 
-//метод выполняется при отпускании клавиши мыши
 void ImageItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event) {
     if (m_isResizing && m_activeHandle != None) {
         if (m_currentBounds != m_initialRect || pos() != m_initialPos) {
@@ -227,7 +201,6 @@ void ImageItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event) {
     QGraphicsPixmapItem::mouseReleaseEvent(event);
 }
 
-//метод установки новой геометрии элемента
 void ImageItem::setGeometry(const QRectF &bounds, const QPointF &pos) {
     prepareGeometryChange();
     setPos(pos);
@@ -238,14 +211,11 @@ void ImageItem::setGeometry(const QRectF &bounds, const QPointF &pos) {
     update();
 }
 
-//метод установки угла поворота
 void ImageItem::setRotation(qreal angle) {
-    //вращение происходит вокруг точки, заданной в setTransformOriginPoint()
     QGraphicsPixmapItem::setRotation(angle);
     update();
 }
 
-//метод получения текущего угла поворота
 qreal ImageItem::rotation() const {
     return QGraphicsPixmapItem::rotation();
 }

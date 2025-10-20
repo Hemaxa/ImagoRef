@@ -295,3 +295,26 @@ SettingsDialog QSpinBox::up-arrow {
 SettingsDialog QSpinBox::down-arrow {
     image: url(:/icons/icons/arrow-down-dark.svg);
 }
+
+#welcomeTitle {
+    font-size: 72px;
+    font-weight: bold;
+    color: #e0e0e0;
+}
+
+#welcomeButton {
+    font-size: 18px;
+    padding: 10px 20px;
+    color: white;
+    background-color: #E67E22;
+    border: none;
+    border-radius: 5px;
+}
+
+#welcomeButton:hover {
+    background-color: #F39C12;
+}
+
+#welcomeButton:pressed {
+    background-color: #D35400;
+}

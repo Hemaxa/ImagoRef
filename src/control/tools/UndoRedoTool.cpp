@@ -1,4 +1,6 @@
-#include "undocommands.h"
+#include "UndoRedoTool.h" // ✅
+#include "ImageItem.h"    // ✅
+#include <QGraphicsScene>
 
 //AddCommand
 AddCommand::AddCommand(ImageItem *item, QGraphicsScene *scene, QUndoCommand *parent)
@@ -7,7 +9,7 @@ AddCommand::AddCommand(ImageItem *item, QGraphicsScene *scene, QUndoCommand *par
 }
 
 AddCommand::~AddCommand() {
-    if (m_item && !m_item->scene()) {
+    if (m_item && !m_item->scene() && m_isInitialAdd) {
         delete m_item;
     }
 }
@@ -26,7 +28,6 @@ void AddCommand::redo() {
 RemoveCommand::RemoveCommand(const QList<QGraphicsItem*> &items, QGraphicsScene *scene, QUndoCommand *parent)
     : QUndoCommand(parent), m_scene(scene) {
     setText(QString("Удаление %1 элементов").arg(items.count()));
-    //безопасное преобразование указателей
     for (QGraphicsItem* item : items) {
         if (ImageItem* imageItem = dynamic_cast<ImageItem*>(item)) {
             m_items.append(imageItem);
@@ -37,7 +38,7 @@ RemoveCommand::RemoveCommand(const QList<QGraphicsItem*> &items, QGraphicsScene 
 RemoveCommand::~RemoveCommand() {
     if (!m_items.isEmpty() && m_items.first() && !m_items.first()->scene()) {
         for (QPointer<ImageItem> item : m_items) {
-            if (item) { //удаление, только если объект существует
+            if (item) {
                 delete item;
             }
         }
@@ -46,7 +47,7 @@ RemoveCommand::~RemoveCommand() {
 
 void RemoveCommand::undo() {
     for (QPointer<ImageItem> item : m_items) {
-        if (item) { //проверка, не был ли объект удален
+        if (item) {
             m_scene->addItem(item);
         }
     }
@@ -54,7 +55,7 @@ void RemoveCommand::undo() {
 
 void RemoveCommand::redo() {
     for (QPointer<ImageItem> item : m_items) {
-        if (item) { //проверка, не был ли объект удален
+        if (item) {
             m_scene->removeItem(item);
         }
     }
@@ -63,7 +64,6 @@ void RemoveCommand::redo() {
 //MoveCommand
 MoveCommand::MoveCommand(QGraphicsItem *item, const QPointF &oldPos, QUndoCommand *parent)
     : QUndoCommand(parent), m_oldPos(oldPos) {
-    //безопасное приведение и сохранение
     if ((m_item = dynamic_cast<ImageItem*>(item))) {
         m_newPos = m_item->pos();
     }
@@ -71,14 +71,14 @@ MoveCommand::MoveCommand(QGraphicsItem *item, const QPointF &oldPos, QUndoComman
 }
 
 void MoveCommand::undo() {
-    if (m_item) { //безопасная проверка
+    if (m_item) {
         m_item->setPos(m_oldPos);
         if(m_item->scene()) m_item->scene()->update();
     }
 }
 
 void MoveCommand::redo() {
-    if (m_item) { //безопасная проверка
+    if (m_item) {
         m_item->setPos(m_newPos);
         if(m_item->scene()) m_item->scene()->update();
     }
@@ -95,11 +95,11 @@ ResizeCommand::ResizeCommand(ImageItem *item, const QRectF &oldRect, const QPoin
 }
 
 void ResizeCommand::undo() {
-    if (m_item) m_item->setGeometry(m_oldRect, m_oldPos); //безопасная проверка
+    if (m_item) m_item->setGeometry(m_oldRect, m_oldPos);
 }
 
 void ResizeCommand::redo() {
-    if (m_item) m_item->setGeometry(m_newRect, m_newPos); //безопасная проверка
+    if (m_item) m_item->setGeometry(m_newRect, m_newPos);
 }
 
 //RotateCommand

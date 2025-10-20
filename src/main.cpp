@@ -1,13 +1,40 @@
-#include "mainwindow.h"
-#include <QApplication> //класс приложения Qt
+#include "WelcomeWindow.h" // ✅
+#include "MainWindow.h"    // ✅
+
+#include <QApplication>
+#include <QFile>
 
 int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
 
-    MainWindow window; //создание экземпляра главного окна приложеня
+    QFile file(":/themes/themes/imago.qss");
+    if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        app.setStyleSheet(file.readAll());
+        file.close();
+    }
 
-    window.show();
+    WelcomeWindow welcomeWindow;
+    MainWindow mainWindow;
 
-    //главный цикл обработки событий
-    return app.exec();
+    QObject::connect(&welcomeWindow, &WelcomeWindow::newBoardRequested, [&]() {
+        mainWindow.show();
+        welcomeWindow.accept();
+    });
+
+    QObject::connect(&welcomeWindow, &WelcomeWindow::openBoardRequested, [&]() {
+        if (mainWindow.openBoard())
+        {
+            mainWindow.show();
+            welcomeWindow.accept();
+        }
+    });
+
+    if (welcomeWindow.exec() == QDialog::Accepted)
+    {
+        return app.exec();
+    }
+    else
+    {
+        return 0;
+    }
 }

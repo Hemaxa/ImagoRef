@@ -24,27 +24,54 @@ add_executable(ImagoRef)
 
 #обозначение исходных файлов
 target_sources (ImagoRef PRIVATE
-    ${SRC_DIR}/main.cpp
-    ${SRC_DIR}/app/mainwindow.cpp
-    ${SRC_DIR}/app/mainwindow.h
-    ${SRC_DIR}/app/undocommands.cpp
-    ${SRC_DIR}/app/undocommands.h
-    ${SRC_DIR}/widgets/floatingtoolbar.cpp
-    ${SRC_DIR}/widgets/floatingtoolbar.h
-    ${SRC_DIR}/widgets/settingsdialog.cpp
-    ${SRC_DIR}/widgets/settingsdialog.h
-    ${SRC_DIR}/graphics/canvasview.cpp
-    ${SRC_DIR}/graphics/canvasview.h
-    ${SRC_DIR}/graphics/imageitem.cpp
-    ${SRC_DIR}/graphics/imageitem.h
+    ${SRC_DIR}/Main.cpp
+
+    # --- Control ---
+    ${SRC_DIR}/control/BaseTool.h
+    ${SRC_DIR}/control/BaseTool.cpp         # <-- БЫЛ ПРОПУЩЕН
+
+    # --- Tools ---
+    ${SRC_DIR}/control/tools/DeleteTool.h
+    ${SRC_DIR}/control/tools/DeleteTool.cpp
+    ${SRC_DIR}/control/tools/GridSnapTool.h
+    ${SRC_DIR}/control/tools/GridSnapTool.cpp
+    ${SRC_DIR}/control/tools/PasteTool.h
+    ${SRC_DIR}/control/tools/PasteTool.cpp
+    ${SRC_DIR}/control/tools/ResizeTool.h     # <-- БЫЛ ПРОПУЩЕН
+    ${SRC_DIR}/control/tools/ResizeTool.cpp   # <-- БЫЛ ПРОПУЩЕН
+    ${SRC_DIR}/control/tools/RotateTool.h     # <-- БЫЛ ПРОПУЩЕН
+    ${SRC_DIR}/control/tools/RotateTool.cpp   # <-- БЫЛ ПРОПУЩЕН
+    ${SRC_DIR}/control/tools/ZoomTool.h       # <-- БЫЛ ПРОПУЩЕН
+    ${SRC_DIR}/control/tools/ZoomTool.cpp     # <-- БЫЛ ПРОПУЩЕН
+    ${SRC_DIR}/control/tools/UndoRedoTool.h   # <-- ПЕРЕИМЕНОВАН
+    ${SRC_DIR}/control/tools/UndoRedoTool.cpp # <-- ПЕРЕИМЕНОВАН
+
+    # --- UI Windows ---
+    ${SRC_DIR}/ui/windows/MainWindow.h
+    ${SRC_DIR}/ui/windows/MainWindow.cpp
+    ${SRC_DIR}/ui/windows/SettingsWindow.h
+    ${SRC_DIR}/ui/windows/SettingsWindow.cpp
+    ${SRC_DIR}/ui/windows/WelcomeWindow.h
+    ${SRC_DIR}/ui/windows/WelcomeWindow.cpp
+
+    # --- UI Widgets ---
+    ${SRC_DIR}/ui/widgets/CanvasView.h
+    ${SRC_DIR}/ui/widgets/CanvasView.cpp
+    ${SRC_DIR}/ui/widgets/FloatingToolbar.h
+    ${SRC_DIR}/ui/widgets/FloatingToolbar.cpp
+    ${SRC_DIR}/ui/widgets/ImageItem.h
+    ${SRC_DIR}/ui/widgets/ImageItem.cpp
+
     ${SRC_DIR}/../res/resources.qrc
 )
 
 #директории с заголовочными файлами
 target_include_directories(ImagoRef PRIVATE
-    ${SRC_DIR}/app
-    ${SRC_DIR}/widgets
-    ${SRC_DIR}/graphics
+    ${SRC_DIR}
+    ${SRC_DIR}/control
+    ${SRC_DIR}/control/tools
+    ${SRC_DIR}/ui/widgets
+    ${SRC_DIR}/ui/windows
 )
 
 # ====================================================================
@@ -78,7 +105,7 @@ if(APPLE)
     #задание свойств конечного файла (Info.plist.in)
     set_target_properties(ImagoRef PROPERTIES
         MACOSX_BUNDLE TRUE
-        MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/Info.plist.in"
+        MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/packs/Info.plist.in"
     )
 
     #поиск необходимых утилит для сборки проекта
@@ -88,7 +115,7 @@ if(APPLE)
 
     #копирование иконки в .app
     add_custom_command(TARGET ImagoRef POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/res/app_icon/icon.icns" "$<TARGET_BUNDLE_DIR:ImagoRef>/Contents/Resources/icon.icns"
+        COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/res/app-icon/icon.icns" "$<TARGET_BUNDLE_DIR:ImagoRef>/Contents/Resources/icon.icns"
     )
 
     #создание и настройка .pkg
