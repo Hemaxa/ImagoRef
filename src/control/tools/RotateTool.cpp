@@ -1,7 +1,8 @@
-#include "RotateTool.h"    // ✅
-#include "CanvasView.h"    // ✅
-#include "ImageItem.h"     // ✅
-#include "UndoRedoTool.h"  // ✅
+#include "RotateTool.h"
+#include "CanvasView.h"
+#include "ImageItem.h"
+#include "StackManager.h"
+
 #include <QGraphicsScene>
 #include <QUndoStack>
 

@@ -1,5 +1,6 @@
-#include "UndoRedoTool.h" // ✅
-#include "ImageItem.h"    // ✅
+#include "StackManager.h"
+#include "ImageItem.h"
+
 #include <QGraphicsScene>
 
 //AddCommand

@@ -1,5 +1,5 @@
-#include "ImageItem.h"     // ✅
-#include "UndoRedoTool.h"  // ✅
+#include "ImageItem.h"
+#include "StackManager.h"
 
 #include <QPen>
 #include <QPainter>

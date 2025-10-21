@@ -1,4 +1,5 @@
 #pragma once
+
 #include <QMainWindow>
 
 class CanvasView;
@@ -6,8 +7,9 @@ class FloatingToolBar;
 class QAction;
 class QKeyEvent;
 class QUndoStack;
+class SettingsManager;
+class ThemeManager;
 
-// ✅ Fwd-декларации без путей
 class BaseTool;
 class DeleteTool;
 class PasteTool;
@@ -25,6 +27,7 @@ public:
     ~MainWindow();
 
     bool openBoard();
+    void applyInitialSettings();
 
 protected:
     void keyPressEvent(QKeyEvent *event) override;
@@ -38,8 +41,7 @@ private slots:
 private:
     void createActions();
     void createToolBar();
-    void createTools(); // ✅
-    void applyTheme(const QString &themeName);
+    void createTools();
 
     void loadBoardFromFile(const QString &filePath);
     void saveBoardToFile(const QString &filePath);
@@ -48,10 +50,8 @@ private:
     CanvasView *m_canvasView;
     FloatingToolBar *m_toolBar;
     QUndoStack *m_undoStack;
-    QString m_currentThemeName;
     QString m_currentFilePath;
 
-    // ✅ Указатели на инструменты
     DeleteTool* m_deleteTool;
     PasteTool* m_pasteTool;
     GridSnapTool* m_snapToGridTool;
@@ -59,7 +59,6 @@ private:
     RotateTool* m_rotateTool;
     ZoomTool* m_zoomTool;
 
-    // ... (все QAction) ...
     QAction *m_openAction;
     QAction *m_saveAction;
     QAction *m_saveAsAction;

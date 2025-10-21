@@ -1,7 +1,7 @@
-#include "GridSnapTool.h"  // ✅
-#include "CanvasView.h"    // ✅
-#include "ImageItem.h"     // ✅
-#include "UndoRedoTool.h"  // ✅
+#include "GridSnapTool.h"
+#include "CanvasView.h"
+#include "ImageItem.h"
+#include "StackManager.h"
 
 #include <QGraphicsScene>
 #include <QUndoStack>

@@ -1,5 +1,5 @@
-#include "ZoomTool.h"    // ✅
-#include "CanvasView.h"  // ✅
+#include "ZoomTool.h"
+#include "CanvasView.h"
 
 void ZoomTool::zoomIn()
 {

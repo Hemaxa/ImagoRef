@@ -1,6 +1,7 @@
-#include "CanvasView.h"    // ✅
-#include "ImageItem.h"     // ✅
-#include "UndoRedoTool.h"  // ✅
+#include "CanvasView.h"
+#include "ImageItem.h"
+#include "StackManager.h"
+#include "ThemeManager.h"
 
 #include <QGraphicsScene>
 #include <QPainter>
@@ -17,19 +18,26 @@
 #include <QUrl>
 #include <QUndoStack>
 
-CanvasView::CanvasView(QUndoStack *undoStack, QWidget *parent) :
-    QGraphicsView(parent),
-    m_undoStack(undoStack),
-    // ⛔️ m_supportedFormats УДАЛЕН ⛔️
-    m_isPanning(false)
+CanvasView::CanvasView(QUndoStack *undoStack, QWidget *parent) : QGraphicsView(parent), m_undoStack(undoStack), m_isPanning(false)
 {
+    //создание сцены и связывание ее с просмотром
     m_scene = new QGraphicsScene(this);
     setScene(m_scene);
+
+    //разрешение на принятие "брошенных" на виджет файлов (для Drag & Drop)
     setAcceptDrops(true);
+
+    //сглаживание для более красивой графики
     setRenderHint(QPainter::Antialiasing);
+
+    //устанавливается режим перетаскивания, RubberBandDrag позволяет выделять несколько элементов рамкой
     setDragMode(QGraphicsView::RubberBandDrag);
+
+    //задание шага сетки по умолчанию
     m_gridSize = 25;
-    m_gridDotColor = QColor(60, 60, 60);
+    m_gridDotColor = ThemeManager::instance().getColor("gridColor");
+
+    //установка фокуса на виджет
     setFocusPolicy(Qt::StrongFocus);
 }
 

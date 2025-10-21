@@ -1,7 +1,7 @@
-#include "PasteTool.h"     // ✅
-#include "CanvasView.h"    // ✅
-#include "ImageItem.h"     // ✅
-#include "UndoRedoTool.h"  // ✅
+#include "PasteTool.h"
+#include "CanvasView.h"
+#include "ImageItem.h"
+#include "StackManager.h"
 
 #include <QGuiApplication>
 #include <QClipboard>
@@ -10,12 +10,8 @@
 #include <QFileInfo>
 #include <QImageReader>
 #include <QUndoStack>
-//#include <QViewport>
 
-PasteTool::PasteTool(QObject* parent)
-    : BaseTool(parent), m_supportedFormats(QImageReader::supportedImageFormats())
-{
-}
+PasteTool::PasteTool(QObject* parent) : BaseTool(parent), m_supportedFormats(QImageReader::supportedImageFormats()) {}
 
 void PasteTool::execute()
 {

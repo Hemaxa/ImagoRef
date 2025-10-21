@@ -1,5 +1,7 @@
-#include "WelcomeWindow.h" // ✅
-#include "MainWindow.h"    // ✅
+#include "WelcomeWindow.h"
+#include "MainWindow.h"
+#include "SettingsManager.h"
+#include "ThemeManager.h"
 
 #include <QApplication>
 #include <QFile>
@@ -7,14 +9,16 @@
 int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
 
-    QFile file(":/themes/themes/imago.qss");
-    if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        app.setStyleSheet(file.readAll());
-        file.close();
-    }
+    // Загружаем настройки (тему, размер сетки)
+    SettingsManager::instance().loadSettings();
+
+    // Применяем тему до создания виджетов
+    ThemeManager::instance().applyTheme(SettingsManager::instance().getThemeName());
 
     WelcomeWindow welcomeWindow;
     MainWindow mainWindow;
+
+    mainWindow.applyInitialSettings();
 
     QObject::connect(&welcomeWindow, &WelcomeWindow::newBoardRequested, [&]() {
         mainWindow.show();

@@ -1,4 +1,5 @@
 #pragma once
+
 #include <QGraphicsPixmapItem> //класс Qt для отображения картинки
 #include <QObject> //базовый класс для большинсва объектов в Qt
 

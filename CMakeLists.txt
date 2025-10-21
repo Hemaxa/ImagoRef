@@ -26,35 +26,35 @@ add_executable(ImagoRef)
 target_sources (ImagoRef PRIVATE
     ${SRC_DIR}/Main.cpp
 
-    # --- Control ---
+    #control
     ${SRC_DIR}/control/BaseTool.h
-    ${SRC_DIR}/control/BaseTool.cpp         # <-- БЫЛ ПРОПУЩЕН
+    ${SRC_DIR}/control/BaseTool.cpp
 
-    # --- Tools ---
+    #tools
     ${SRC_DIR}/control/tools/DeleteTool.h
     ${SRC_DIR}/control/tools/DeleteTool.cpp
     ${SRC_DIR}/control/tools/GridSnapTool.h
     ${SRC_DIR}/control/tools/GridSnapTool.cpp
     ${SRC_DIR}/control/tools/PasteTool.h
     ${SRC_DIR}/control/tools/PasteTool.cpp
-    ${SRC_DIR}/control/tools/ResizeTool.h     # <-- БЫЛ ПРОПУЩЕН
-    ${SRC_DIR}/control/tools/ResizeTool.cpp   # <-- БЫЛ ПРОПУЩЕН
-    ${SRC_DIR}/control/tools/RotateTool.h     # <-- БЫЛ ПРОПУЩЕН
-    ${SRC_DIR}/control/tools/RotateTool.cpp   # <-- БЫЛ ПРОПУЩЕН
-    ${SRC_DIR}/control/tools/ZoomTool.h       # <-- БЫЛ ПРОПУЩЕН
-    ${SRC_DIR}/control/tools/ZoomTool.cpp     # <-- БЫЛ ПРОПУЩЕН
-    ${SRC_DIR}/control/tools/UndoRedoTool.h   # <-- ПЕРЕИМЕНОВАН
-    ${SRC_DIR}/control/tools/UndoRedoTool.cpp # <-- ПЕРЕИМЕНОВАН
+    ${SRC_DIR}/control/tools/ResizeTool.h
+    ${SRC_DIR}/control/tools/ResizeTool.cpp
+    ${SRC_DIR}/control/tools/RotateTool.h
+    ${SRC_DIR}/control/tools/RotateTool.cpp
+    ${SRC_DIR}/control/tools/ZoomTool.h
+    ${SRC_DIR}/control/tools/ZoomTool.cpp
 
-    # --- UI Windows ---
-    ${SRC_DIR}/ui/windows/MainWindow.h
-    ${SRC_DIR}/ui/windows/MainWindow.cpp
-    ${SRC_DIR}/ui/windows/SettingsWindow.h
-    ${SRC_DIR}/ui/windows/SettingsWindow.cpp
-    ${SRC_DIR}/ui/windows/WelcomeWindow.h
-    ${SRC_DIR}/ui/windows/WelcomeWindow.cpp
+    #managers
+    ${SRC_DIR}/ui/managers/AnimationManager.h
+    ${SRC_DIR}/ui/managers/AnimationManager.cpp
+    ${SRC_DIR}/ui/managers/SettingsManager.h
+    ${SRC_DIR}/ui/managers/SettingsManager.cpp
+    ${SRC_DIR}/ui/managers/StackManager.h
+    ${SRC_DIR}/ui/managers/StackManager.cpp
+    ${SRC_DIR}/ui/managers/ThemeManager.h
+    ${SRC_DIR}/ui/managers/ThemeManager.cpp
 
-    # --- UI Widgets ---
+    #widgets
     ${SRC_DIR}/ui/widgets/CanvasView.h
     ${SRC_DIR}/ui/widgets/CanvasView.cpp
     ${SRC_DIR}/ui/widgets/FloatingToolbar.h
@@ -62,14 +62,23 @@ target_sources (ImagoRef PRIVATE
     ${SRC_DIR}/ui/widgets/ImageItem.h
     ${SRC_DIR}/ui/widgets/ImageItem.cpp
 
+    #windows
+    ${SRC_DIR}/ui/windows/MainWindow.h
+    ${SRC_DIR}/ui/windows/MainWindow.cpp
+    ${SRC_DIR}/ui/windows/SettingsWindow.h
+    ${SRC_DIR}/ui/windows/SettingsWindow.cpp
+    ${SRC_DIR}/ui/windows/WelcomeWindow.h
+    ${SRC_DIR}/ui/windows/WelcomeWindow.cpp
+
     ${SRC_DIR}/../res/resources.qrc
 )
 
 #директории с заголовочными файлами
 target_include_directories(ImagoRef PRIVATE
-    ${SRC_DIR}
     ${SRC_DIR}/control
     ${SRC_DIR}/control/tools
+
+    ${SRC_DIR}/ui/managers
     ${SRC_DIR}/ui/widgets
     ${SRC_DIR}/ui/windows
 )

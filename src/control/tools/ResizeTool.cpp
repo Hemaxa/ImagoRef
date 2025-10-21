@@ -1,6 +1,7 @@
-#include "ResizeTool.h"  // ✅
-#include "CanvasView.h"  // ✅
-#include "ImageItem.h"   // ✅
+#include "ResizeTool.h"
+#include "CanvasView.h"
+#include "ImageItem.h"
+
 #include <QGraphicsScene>
 
 void ResizeTool::execute()

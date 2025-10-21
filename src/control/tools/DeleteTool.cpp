@@ -1,6 +1,6 @@
-#include "DeleteTool.h"    // ✅
-#include "CanvasView.h"    // ✅
-#include "UndoRedoTool.h"  // ✅
+#include "DeleteTool.h"
+#include "CanvasView.h"
+#include "StackManager.h"
 
 #include <QGraphicsScene>
 #include <QUndoStack>
