@@ -254,7 +254,7 @@ SettingsDialog QSpinBox::down-arrow {
 }
 
 /* Окно приветствия */
-#welcomeTitle {
+#welcomeTitleLabel {
     font-size: 72px;
     font-weight: bold;
     color: #e0e0e0;
@@ -273,4 +273,31 @@ SettingsDialog QSpinBox::down-arrow {
 #welcomeButton:pressed {
     background-color: #D35400;
     color: white;
+}
+
+/* --- Стили WelcomeWindow --- */
+
+/* Делаем фон самого диалога прозрачным.
+  Наш paintEvent() будет рисовать на нем паттерн.
+*/
+QDialog#welcomeDialog {
+    background: transparent;
+    border: none;
+}
+
+/* Критически важный фикс:
+  Убираем фон у QLabel'а с логотипом.
+*/
+QDialog#welcomeDialog QLabel#welcomeLogoLabel {
+    background: transparent;
+}
+
+/* Убираем фон у текста "Recent projects"
+  и задаем ему цвет из переменной темы.
+*/
+QDialog#welcomeDialog QLabel#recentProjectsLabel {
+    background: transparent;
+    color: #141414; /* (или @textSecondary, в зависимости от твоей темы) */
+    font-size: 26px;
+    font-weight: bold;
 }

@@ -29,4 +29,8 @@
         <file>icons/rotate-left.svg</file>
         <file>icons/rotate-right.svg</file>
     </qresource>
+    <qresource prefix="/graphics">
+        <file>graphics/text-logo.png</file>
+        <file>graphics/pattern.png</file>
+    </qresource>
 </RCC>

@@ -205,6 +205,24 @@ if(WIN32)
     set(CPACK_PACKAGE_FILE_NAME "ImagoRef_v${ImagoRef_VERSION}_windows")
     set(CPACK_GENERATOR "NSIS")
     set(CPACK_INSTALLED_DIRECTORIES "${CMAKE_INSTALL_PREFIX};.")
+
+# 1. Создаем переменную с командами для NSIS (запись в реестр)
+    #    Мы создаем тип файла "ImagoRef.Board"
+    set(CPACK_NSIS_EXTRA_INSTALL_COMMANDS
+        "WriteRegStr HKCR '.iref' '' 'ImagoRef.Board' \n \
+         WriteRegStr HKCR 'ImagoRef.Board' '' 'ImagoRef доска' \n \
+         WriteRegStr HKCR 'ImagoRef.Board\\\\DefaultIcon' '' '$INSTDIR\\\\\\\\bin\\\\\\\\ImagoRef.exe,1' \n \
+         WriteRegStr HKCR 'ImagoRef.Board\\\\shell' '' 'open' \n \
+         WriteRegStr HKCR 'ImagoRef.Board\\\\shell\\\\open' '' 'Открыть в ImagoRef' \n \
+         WriteRegStr HKCR 'ImagoRef.Board\\\\shell\\\\open\\\\command' '' '\"$INSTDIR\\\\\\\\bin\\\\\\\\ImagoRef.exe\" \"%1\"' \n "
+    )
+
+    # 2. Добавляем команды для удаления этих ключей при деинсталляции
+    set(CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS
+        "DeleteRegKey HKCR '.iref' \n \
+         DeleteRegKey HKCR 'ImagoRef.Board' \n "
+    )
+    # === КОНЕЦ БЛОКА ===
     include(CPack)
 endif()
 
