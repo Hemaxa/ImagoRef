@@ -33,15 +33,15 @@ class ImageItemModel : public QAbstractListModel {
 
 public:
     enum Roles {
-        IdRole = Qt::UserRole + 1,
-        SourceRole,
-        XRole,
-        YRole,
-        WidthRole,
-        HeightRole,
-        RotationRole,
-        ZValueRole,
-        SelectedRole
+        IdRole = Qt::UserRole + 1, // Уникальный ID (строка)
+        SourceRole,                // URL источника изображение
+        XRole,                     // Позиция X
+        YRole,                     // Позиция Y
+        WidthRole,                 // Ширина
+        HeightRole,                // Высота
+        RotationRole,              // Угол поворота (градусы)
+        ZValueRole,                // Z-index (слой)
+        SelectedRole               // Статус выделения (bool)
     };
 
     explicit ImageItemModel(QObject *parent = nullptr);

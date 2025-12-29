@@ -16,11 +16,16 @@ class BoardController : public QObject {
     QML_ELEMENT
 
     Q_PROPERTY(ImageItemModel* model READ model CONSTANT)
+    // Текущий путь к файлу доски
     Q_PROPERTY(QString currentFilePath READ currentFilePath NOTIFY filePathChanged)
+    // Заголовок окна (зависит от имени файла)
     Q_PROPERTY(QString windowTitle READ windowTitle NOTIFY filePathChanged)
+    // Состояния для кнопок Undo/Redo
     Q_PROPERTY(bool canUndo READ canUndo NOTIFY undoStateChanged)
     Q_PROPERTY(bool canRedo READ canRedo NOTIFY redoStateChanged)
+    // Размер сетки (в пикселях)
     Q_PROPERTY(int gridSize READ gridSize WRITE setGridSize NOTIFY gridSizeChanged)
+    // Есть ли выделенные элементы (для активации кнопок инструментов)
     Q_PROPERTY(bool hasSelection READ hasSelection NOTIFY selectionChanged)
 
 public:
@@ -61,7 +66,8 @@ public:
     Q_INVOKABLE void undo();
     Q_INVOKABLE void redo();
 
-    // Уведомление об изменении позиции/размера (для создания Undo команд)
+    // Методы для отслеживания начала и конца перемещения/изменения размера.
+    // Необходимы для создания одной команды Undo после завершения интерактивного действия в QML.
     Q_INVOKABLE void beginMove(int index);
     Q_INVOKABLE void endMove(int index, qreal newX, qreal newY);
     Q_INVOKABLE void beginResize(int index);

@@ -1,13 +1,10 @@
-/**
- * @brief Main.cpp - точка входа приложения ImagoRef (QML версия).
- * Инициализирует QML движок и регистрирует C++ типы.
- */
+//main.cpp - точка входа для приложения, инициализирует QML движок и регистрирует C++ типы
 
-#include <QGuiApplication>
-#include <QQmlApplicationEngine>
-#include <QQmlContext>
-#include <QQuickStyle>
-#include <QIcon>
+#include <QGuiApplication> //основной класс для GUI-приложений без виджетов
+#include <QQmlApplicationEngine> //движок, который загружает и управляет QML
+#include <QQmlContext> //позволяет передавать данные из C++ в QML
+#include <QQuickStyle> //стили для QML
+#include <QIcon> //иконки для QML
 
 #include "SettingsManager.h"
 #include "ThemeManager.h"
@@ -16,9 +13,10 @@
 
 int main(int argc, char *argv[])
 {
+    //создание объекта приложения
     QGuiApplication app(argc, argv);
     
-    // Установка информации о приложении
+    //установка информации о приложении
     app.setOrganizationName("ImagoRef");
     app.setApplicationName("ImagoRef");
     app.setApplicationVersion("1.0");
