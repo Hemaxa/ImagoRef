@@ -8,79 +8,57 @@ project(ImagoRef VERSION 1.0 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-#определение используемых пакетов
-find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Svg)
+#определение используемых пакетов (Qt Quick вместо Widgets)
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Quick QuickControls2 Qml Svg)
 
 #включение Qt-автоматизаций
 set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 
 #создание переменной для src директории
 set(SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 #создание исполняемого файла
-add_executable(ImagoRef)
+qt_add_executable(ImagoRef
+    ${SRC_DIR}/main.cpp
+)
 
-#обозначение исходных файлов
-target_sources (ImagoRef PRIVATE
-    ${SRC_DIR}/Main.cpp
+#backend C++ исходники
+target_sources(ImagoRef PRIVATE
+    #backend
+    ${SRC_DIR}/backend/SettingsManager.h
+    ${SRC_DIR}/backend/SettingsManager.cpp
+    ${SRC_DIR}/backend/ThemeManager.h
+    ${SRC_DIR}/backend/ThemeManager.cpp
+    ${SRC_DIR}/backend/BoardController.h
+    ${SRC_DIR}/backend/BoardController.cpp
+    ${SRC_DIR}/backend/ImageItemModel.h
+    ${SRC_DIR}/backend/ImageItemModel.cpp
+    ${SRC_DIR}/backend/UndoCommands.h
+    ${SRC_DIR}/backend/UndoCommands.cpp
+)
 
-    #control
-    ${SRC_DIR}/control/BaseTool.h
-    ${SRC_DIR}/control/BaseTool.cpp
-
-    #tools
-    ${SRC_DIR}/control/tools/DeleteTool.h
-    ${SRC_DIR}/control/tools/DeleteTool.cpp
-    ${SRC_DIR}/control/tools/GridSnapTool.h
-    ${SRC_DIR}/control/tools/GridSnapTool.cpp
-    ${SRC_DIR}/control/tools/PasteTool.h
-    ${SRC_DIR}/control/tools/PasteTool.cpp
-    ${SRC_DIR}/control/tools/ResizeTool.h
-    ${SRC_DIR}/control/tools/ResizeTool.cpp
-    ${SRC_DIR}/control/tools/RotateTool.h
-    ${SRC_DIR}/control/tools/RotateTool.cpp
-    ${SRC_DIR}/control/tools/ZoomTool.h
-    ${SRC_DIR}/control/tools/ZoomTool.cpp
-
-    #managers
-    ${SRC_DIR}/ui/managers/AnimationManager.h
-    ${SRC_DIR}/ui/managers/AnimationManager.cpp
-    ${SRC_DIR}/ui/managers/SettingsManager.h
-    ${SRC_DIR}/ui/managers/SettingsManager.cpp
-    ${SRC_DIR}/ui/managers/StackManager.h
-    ${SRC_DIR}/ui/managers/StackManager.cpp
-    ${SRC_DIR}/ui/managers/ThemeManager.h
-    ${SRC_DIR}/ui/managers/ThemeManager.cpp
-
-    #widgets
-    ${SRC_DIR}/ui/widgets/CanvasView.h
-    ${SRC_DIR}/ui/widgets/CanvasView.cpp
-    ${SRC_DIR}/ui/widgets/FloatingToolbar.h
-    ${SRC_DIR}/ui/widgets/FloatingToolbar.cpp
-    ${SRC_DIR}/ui/widgets/ImageItem.h
-    ${SRC_DIR}/ui/widgets/ImageItem.cpp
-
-    #windows
-    ${SRC_DIR}/ui/windows/MainWindow.h
-    ${SRC_DIR}/ui/windows/MainWindow.cpp
-    ${SRC_DIR}/ui/windows/SettingsWindow.h
-    ${SRC_DIR}/ui/windows/SettingsWindow.cpp
-    ${SRC_DIR}/ui/windows/WelcomeWindow.h
-    ${SRC_DIR}/ui/windows/WelcomeWindow.cpp
-
-    ${SRC_DIR}/../res/resources.qrc
+#добавление QML модуля
+qt_add_qml_module(ImagoRef
+    URI ImagoRef
+    VERSION 1.0
+    QML_FILES
+        src/qml/Main.qml
+        src/qml/WelcomeWindow.qml
+        src/qml/MainWindow.qml
+        src/qml/SettingsWindow.qml
+        src/qml/components/CanvasView.qml
+        src/qml/components/ImageItem.qml
+        src/qml/components/FloatingToolbar.qml
+        src/qml/components/ImagoToolButton.qml
+        src/qml/components/ResizeHandles.qml
+    RESOURCES
+        res/resources.qrc
 )
 
 #директории с заголовочными файлами
 target_include_directories(ImagoRef PRIVATE
-    ${SRC_DIR}/control
-    ${SRC_DIR}/control/tools
-
-    ${SRC_DIR}/ui/managers
-    ${SRC_DIR}/ui/widgets
-    ${SRC_DIR}/ui/windows
+    ${SRC_DIR}/backend
 )
 
 # ====================================================================
@@ -94,9 +72,12 @@ if(APPLE)
     #подключение необходимых библиотек
     target_link_libraries(ImagoRef PRIVATE
         Qt6::Core
-        Qt6::Widgets
+        Qt6::Quick
+        Qt6::QuickControls2
+        Qt6::Qml
         Qt6::Gui
         Qt6::Svg
+
         OpenGL::GL
         ZLIB::ZLIB
         "-framework AppKit"
@@ -131,7 +112,7 @@ if(APPLE)
     if(PKGBUILD_EXECUTABLE AND PRODUCTBUILD_EXECUTABLE)
         add_custom_target(package
             #запуск macdeployqt
-            COMMAND ${MACDEPLOYQT_EXECUTABLE} "$<TARGET_BUNDLE_DIR:ImagoRef>" -verbose=1
+            COMMAND ${MACDEPLOYQT_EXECUTABLE} "$<TARGET_BUNDLE_DIR:ImagoRef>" -qmldir=${SRC_DIR}/qml -verbose=1
 
             #подпись приложения
             COMMAND codesign --force --deep --sign - "$<TARGET_BUNDLE_DIR:ImagoRef>"
@@ -169,7 +150,9 @@ if(WIN32)
     #подключение необходимых библиотек
     target_link_libraries(ImagoRef PRIVATE
         Qt6::Core
-        Qt6::Widgets
+        Qt6::Quick
+        Qt6::QuickControls2
+        Qt6::Qml
         Qt6::Gui
         Qt6::Svg
     )
@@ -206,23 +189,19 @@ if(WIN32)
     set(CPACK_GENERATOR "NSIS")
     set(CPACK_INSTALLED_DIRECTORIES "${CMAKE_INSTALL_PREFIX};.")
 
-# 1. Создаем переменную с командами для NSIS (запись в реестр)
-    #    Мы создаем тип файла "ImagoRef.Board"
     set(CPACK_NSIS_EXTRA_INSTALL_COMMANDS
-        "WriteRegStr HKCR '.iref' '' 'ImagoRef.Board' \n \
-         WriteRegStr HKCR 'ImagoRef.Board' '' 'ImagoRef доска' \n \
-         WriteRegStr HKCR 'ImagoRef.Board\\\\DefaultIcon' '' '$INSTDIR\\\\\\\\bin\\\\\\\\ImagoRef.exe,1' \n \
-         WriteRegStr HKCR 'ImagoRef.Board\\\\shell' '' 'open' \n \
-         WriteRegStr HKCR 'ImagoRef.Board\\\\shell\\\\open' '' 'Открыть в ImagoRef' \n \
-         WriteRegStr HKCR 'ImagoRef.Board\\\\shell\\\\open\\\\command' '' '\"$INSTDIR\\\\\\\\bin\\\\\\\\ImagoRef.exe\" \"%1\"' \n "
+        "WriteRegStr HKCR '.iref' '' 'ImagoRef.Board' \\n \
+         WriteRegStr HKCR 'ImagoRef.Board' '' 'ImagoRef доска' \\n \
+         WriteRegStr HKCR 'ImagoRef.Board\\\\DefaultIcon' '' '$INSTDIR\\\\\\\\bin\\\\\\\\ImagoRef.exe,1' \\n \
+         WriteRegStr HKCR 'ImagoRef.Board\\\\shell' '' 'open' \\n \
+         WriteRegStr HKCR 'ImagoRef.Board\\\\shell\\\\open' '' 'Открыть в ImagoRef' \\n \
+         WriteRegStr HKCR 'ImagoRef.Board\\\\shell\\\\open\\\\command' '' '\"$INSTDIR\\\\\\\\bin\\\\\\\\ImagoRef.exe\" \"%1\"' \\n "
     )
 
-    # 2. Добавляем команды для удаления этих ключей при деинсталляции
     set(CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS
-        "DeleteRegKey HKCR '.iref' \n \
-         DeleteRegKey HKCR 'ImagoRef.Board' \n "
+        "DeleteRegKey HKCR '.iref' \\n \
+         DeleteRegKey HKCR 'ImagoRef.Board' \\n "
     )
-    # === КОНЕЦ БЛОКА ===
     include(CPack)
 endif()
 
@@ -233,7 +212,9 @@ if(UNIX AND NOT APPLE)
     #подключение необходимых библиотек
     target_link_libraries(ImagoRef PRIVATE
         Qt6::Core
-        Qt6::Widgets
+        Qt6::Quick
+        Qt6::QuickControls2
+        Qt6::Qml
         Qt6::Gui
         Qt6::Svg
     )

@@ -1,52 +1,57 @@
-//Main - входная точка приложения. Инициализирует компоненты в правильном порядке.
+/**
+ * @brief Main.cpp - точка входа приложения ImagoRef (QML версия).
+ * Инициализирует QML движок и регистрирует C++ типы.
+ */
 
-#include "WelcomeWindow.h"
-#include "MainWindow.h"
+#include <QGuiApplication>
+#include <QQmlApplicationEngine>
+#include <QQmlContext>
+#include <QQuickStyle>
+#include <QIcon>
+
 #include "SettingsManager.h"
 #include "ThemeManager.h"
+#include "BoardController.h"
+#include "ImageItemModel.h"
 
-#include <QApplication> //класс приложения Qt
-#include <QFile>
+int main(int argc, char *argv[])
+{
+    QGuiApplication app(argc, argv);
+    
+    // Установка информации о приложении
+    app.setOrganizationName("ImagoRef");
+    app.setApplicationName("ImagoRef");
+    app.setApplicationVersion("1.0");
+    app.setWindowIcon(QIcon(":/app-icon/app-icon/icon.icns"));
+    
+    // Установка стиля Quick Controls (для корректной кастомизации)
+    QQuickStyle::setStyle("Basic");
 
-int main(int argc, char *argv[]) {
-    //создание главного класса приложения Qt
-    QApplication app(argc, argv);
-
-    //загрузка настроек приложения
+    // Загрузка настроек
     SettingsManager::instance().loadSettings();
 
-    //применение темы
-    ThemeManager::instance().applyTheme(SettingsManager::instance().getThemeName());
+    // Применение начальной темы
+    ThemeManager::instance().applyTheme(SettingsManager::instance().themeName());
 
-    //создание экземпляров стартового и главного окон
-    WelcomeWindow welcomeWindow;
-    MainWindow mainWindow;
+    // Создание QML движка
+    QQmlApplicationEngine engine;
 
-    //применение настроек приложения
-    mainWindow.applyInitialSettings();
+    // Регистрация контекстных свойств (синглтоны)
+    engine.rootContext()->setContextProperty("Settings", &SettingsManager::instance());
+    engine.rootContext()->setContextProperty("Theme", &ThemeManager::instance());
 
-    //создание нового окна приложения
-    QObject::connect(&welcomeWindow, &WelcomeWindow::newBoardRequested, [&]() {
-        mainWindow.show();
-        welcomeWindow.accept();
-    });
-
-    //открытие уже существующей доски
-    QObject::connect(&welcomeWindow, &WelcomeWindow::openBoardRequested, [&]() {
-        if (mainWindow.openBoard())
-        {
-            mainWindow.show();
-            welcomeWindow.accept();
-        }
-    });
-
-    //запуск стартового окна в режиме модального диалога
-    if (welcomeWindow.exec() == QDialog::Accepted)
-    {
-        return app.exec();
+    // Загрузка главного QML файла из модуля Qt6
+    const QUrl url(QStringLiteral("qrc:/ImagoRef/src/qml/Main.qml"));
+    
+    QObject::connect(&engine, &QQmlApplicationEngine::objectCreationFailed,
+                     &app, []() { QCoreApplication::exit(-1); },
+                     Qt::QueuedConnection);
+    
+    engine.load(url);
+    
+    if (engine.rootObjects().isEmpty()) {
+        return -1;
     }
-    else
-    {
-        return 0;
-    }
+
+    return app.exec();
 }
