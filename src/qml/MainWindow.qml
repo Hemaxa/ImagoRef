@@ -19,17 +19,32 @@ Item {
         id: canvasView
         anchors.fill: parent
         controller: root.controller
+        z: 0
     }
     
     // Плавающая панель инструментов
     FloatingToolbar {
         id: toolbar
         controller: root.controller
+        z: 100
         
         x: 15
         y: 15
         
+        // Подключаем все сигналы
         onSettingsClicked: root.settingsRequested()
+        onOpenClicked: fileOpenDialog.open()
+        onSaveClicked: {
+            if (controller.currentFilePath !== "") {
+                controller.saveBoard()
+            } else {
+                fileSaveDialog.open()
+            }
+        }
+        onSaveAsClicked: fileSaveDialog.open()
+        onZoomInClicked: canvasView.zoomIn()
+        onZoomOutClicked: canvasView.zoomOut()
+        onResizeModeClicked: canvasView.toggleResizeMode()
         
         // Состояние видимости
         state: "visible"
@@ -63,7 +78,7 @@ Item {
     
     // Delete - удалить выделенные
     Shortcut {
-        sequences: [StandardKey.Delete, "Backspace"]
+        sequences: ["Delete", "Backspace"]
         onActivated: controller.deleteSelected()
     }
     
@@ -75,6 +90,30 @@ Item {
             var scenePos = canvasView.mapToScene(center)
             controller.pasteFromClipboard(scenePos.x, scenePos.y)
         }
+    }
+    
+    // Open
+    Shortcut {
+        sequence: StandardKey.Open
+        onActivated: fileOpenDialog.open()
+    }
+    
+    // Save
+    Shortcut {
+        sequence: StandardKey.Save
+        onActivated: {
+            if (controller.currentFilePath !== "") {
+                controller.saveBoard()
+            } else {
+                fileSaveDialog.open()
+            }
+        }
+    }
+    
+    // Save As
+    Shortcut {
+        sequence: StandardKey.SaveAs
+        onActivated: fileSaveDialog.open()
     }
     
     // Snap to grid
@@ -107,12 +146,12 @@ Item {
     
     // Zoom
     Shortcut {
-        sequences: [StandardKey.ZoomIn, "Ctrl+=", "Ctrl++"]
+        sequences: ["Ctrl+=", "Ctrl++"]
         onActivated: canvasView.zoomIn()
     }
     
     Shortcut {
-        sequences: [StandardKey.ZoomOut, "Ctrl+-"]
+        sequences: ["Ctrl+-"]
         onActivated: canvasView.zoomOut()
     }
     

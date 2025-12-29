@@ -11,7 +11,14 @@ Rectangle {
     
     required property BoardController controller
     
+    // Сигналы для действий, требующих внешнего контекста
     signal settingsClicked()
+    signal openClicked()
+    signal saveClicked()
+    signal saveAsClicked()
+    signal zoomInClicked()
+    signal zoomOutClicked()
+    signal resizeModeClicked()
     
     width: 58
     height: toolbarLayout.height + 16
@@ -29,19 +36,22 @@ Rectangle {
         
         // Файловые операции
         ImagoToolButton {
-            iconSource: "qrc:/icons/icons/paste.svg"
+            iconSource: "qrc:/icons/icons/open.svg"
             tooltip: "Открыть"
             shortcutText: "Ctrl+O"
+            onClicked: root.openClicked()
         }
         ImagoToolButton {
-            iconSource: "qrc:/icons/icons/paste.svg"
+            iconSource: "qrc:/icons/icons/save.svg"
             tooltip: "Сохранить"
             shortcutText: "Ctrl+S"
+            onClicked: root.saveClicked()
         }
         ImagoToolButton {
-            iconSource: "qrc:/icons/icons/paste.svg"
+            iconSource: "qrc:/icons/icons/save.svg"
             tooltip: "Сохранить как"
             shortcutText: "Ctrl+Shift+S"
+            onClicked: root.saveAsClicked()
         }
         
         ToolbarSeparator {}
@@ -73,6 +83,7 @@ Rectangle {
             iconSource: "qrc:/icons/icons/resize.svg"
             tooltip: "Изменить размер"
             shortcutText: "Ctrl+E"
+            onClicked: root.resizeModeClicked()
         }
         ImagoToolButton {
             iconSource: "qrc:/icons/icons/rotate-left.svg"
@@ -94,11 +105,13 @@ Rectangle {
             iconSource: "qrc:/icons/icons/zoom-in.svg"
             tooltip: "Приблизить"
             shortcutText: "Ctrl++"
+            onClicked: root.zoomInClicked()
         }
         ImagoToolButton {
             iconSource: "qrc:/icons/icons/zoom-out.svg"
             tooltip: "Отдалить"
             shortcutText: "Ctrl+-"
+            onClicked: root.zoomOutClicked()
         }
         
         ToolbarSeparator {}

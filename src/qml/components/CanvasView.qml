@@ -84,14 +84,23 @@ Item {
             scale: zoomLevel
             transformOrigin: Item.TopLeft
             
-            // Сетка точек - оптимизированная версия с debounce
+            // Область для клика по пустому месту (z=0)
+            MouseArea {
+                id: backgroundClickArea
+                anchors.fill: parent
+                z: 0
+                acceptedButtons: Qt.LeftButton
+                onClicked: controller.clearSelection()
+            }
+            
+            // Сетка точек (z=1)
             Item {
                 id: gridLayer
                 anchors.fill: parent
+                z: 1
                 
                 property int gridSize: Math.max(controller.gridSize, 20)
                 
-                // Таймер для debounce перерисовки сетки
                 Timer {
                     id: gridUpdateTimer
                     interval: 50
@@ -146,13 +155,14 @@ Item {
                 Component.onCompleted: gridRepeater.updateGrid()
             }
             
-            // Изображения
+            // Изображения (z=10 и выше)
             Repeater {
                 id: imagesRepeater
                 model: controller.model
                 
                 delegate: ImageItem {
                     id: imgDelegate
+                    z: 10 + imgDelegate.index
                     
                     // Required properties для ролей модели
                     required property int index
@@ -182,7 +192,7 @@ Item {
         }
     }
     
-    // Обработка колесика мыши (зум)
+    // Обработка колесика мыши (зум) - глобальный
     WheelHandler {
         onWheel: function(event) {
             if (event.modifiers & Qt.ControlModifier) {
@@ -196,23 +206,19 @@ Item {
         }
     }
     
-    // Обработка мыши (панорамирование средней кнопкой)
+    // Обработка средней кнопки мыши для панорамирования
     MouseArea {
         id: panMouseArea
         anchors.fill: parent
-        acceptedButtons: Qt.MiddleButton | Qt.LeftButton
+        acceptedButtons: Qt.MiddleButton
         
         property point lastPos
         property bool isPanning: false
         
         onPressed: function(mouse) {
-            if (mouse.button === Qt.MiddleButton) {
-                isPanning = true
-                lastPos = Qt.point(mouse.x, mouse.y)
-                cursorShape = Qt.ClosedHandCursor
-            } else if (mouse.button === Qt.LeftButton) {
-                controller.clearSelection()
-            }
+            isPanning = true
+            lastPos = Qt.point(mouse.x, mouse.y)
+            cursorShape = Qt.ClosedHandCursor
         }
         
         onPositionChanged: function(mouse) {
@@ -226,13 +232,9 @@ Item {
         }
         
         onReleased: function(mouse) {
-            if (mouse.button === Qt.MiddleButton) {
-                isPanning = false
-                cursorShape = Qt.ArrowCursor
-            }
+            isPanning = false
+            cursorShape = Qt.ArrowCursor
         }
-        
-        propagateComposedEvents: true
     }
     
     // Drag & Drop
