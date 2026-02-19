@@ -276,60 +276,19 @@ Item {
         }
     }
     
-    // Кнопки управления
-    Row {
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: -40 / zoomLevel
-        spacing: 10 / zoomLevel
-        z: 100
-        
-        Button {
-            width: 80 / zoomLevel
-            height: 30 / zoomLevel
-            text: "✓ Применить"
-            font.pixelSize: 12 / zoomLevel
-            
-            background: Rectangle {
-                color: "#22C55E"
-                radius: 4 / zoomLevel
-            }
-            
-            contentItem: Text {
-                text: parent.text
-                color: "white"
-                horizontalAlignment: Text.AlignHCenter
-                verticalAlignment: Text.AlignVCenter
-                font.pixelSize: parent.font.pixelSize
-            }
-            
-            onClicked: {
-                // Передаём координаты относительно отображаемого размера
-                // C++ сам конвертирует в координаты оригинального изображения
-                root.cropApplied(cropX, cropY, cropW, cropH)
-            }
+    // Обработка клавиш
+    focus: true
+    Keys.onPressed: function(event) {
+        if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
+            root.cropApplied(cropX, cropY, cropW, cropH)
+            event.accepted = true
+        } else if (event.key === Qt.Key_Escape) {
+            root.cropCancelled()
+            event.accepted = true
         }
-        
-        Button {
-            width: 80 / zoomLevel
-            height: 30 / zoomLevel
-            text: "✕ Отмена"
-            font.pixelSize: 12 / zoomLevel
-            
-            background: Rectangle {
-                color: "#EF4444"
-                radius: 4 / zoomLevel
-            }
-            
-            contentItem: Text {
-                text: parent.text
-                color: "white"
-                horizontalAlignment: Text.AlignHCenter
-                verticalAlignment: Text.AlignVCenter
-                font.pixelSize: parent.font.pixelSize
-            }
-            
-            onClicked: root.cropCancelled()
-        }
+    }
+    
+    onVisibleChanged: {
+        if (visible) forceActiveFocus()
     }
 }

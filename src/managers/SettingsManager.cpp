@@ -24,12 +24,14 @@ void SettingsManager::loadSettings()
 {
     m_themeName = m_settings.value("theme/name", "imago").toString();
     m_gridSize = m_settings.value("canvas/gridSize", 25).toInt();
+    m_canvasPattern = m_settings.value("canvas/pattern", "dots").toString();
 }
 
 void SettingsManager::saveSettings()
 {
     m_settings.setValue("theme/name", m_themeName);
     m_settings.setValue("canvas/gridSize", m_gridSize);
+    m_settings.setValue("canvas/pattern", m_canvasPattern);
 }
 
 QString SettingsManager::themeName() const
@@ -57,5 +59,19 @@ void SettingsManager::setGridSize(int size)
         m_gridSize = size;
         saveSettings();
         emit gridSizeChanged();
+    }
+}
+
+QString SettingsManager::canvasPattern() const
+{
+    return m_canvasPattern;
+}
+
+void SettingsManager::setCanvasPattern(const QString& pattern)
+{
+    if (m_canvasPattern != pattern) {
+        m_canvasPattern = pattern;
+        saveSettings();
+        emit canvasPatternChanged();
     }
 }

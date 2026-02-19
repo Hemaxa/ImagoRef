@@ -287,6 +287,12 @@ void BoardController::toggleSelection(int index)
     emit selectionChanged();
 }
 
+void BoardController::deselectItem(int index)
+{
+    m_model->setSelected(index, false);
+    emit selectionChanged();
+}
+
 void BoardController::selectAll()
 {
     for (int i = 0; i < m_model->count(); ++i) {
@@ -322,6 +328,40 @@ void BoardController::selectInRect(qreal x, qreal y, qreal width, qreal height, 
     emit selectionChanged();
 }
 
+int BoardController::hitTest(qreal x, qreal y) const
+{
+    // Обходим элементы с конца (верхние слои сначала)
+    for (int i = m_model->count() - 1; i >= 0; --i) {
+        ImageData item = m_model->getItem(i);
+        QRectF rect(item.x, item.y, item.width, item.height);
+        if (rect.contains(x, y)) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+qreal BoardController::getItemX(int index) const
+{
+    if (index >= 0 && index < m_model->count())
+        return m_model->getItem(index).x;
+    return 0;
+}
+
+qreal BoardController::getItemY(int index) const
+{
+    if (index >= 0 && index < m_model->count())
+        return m_model->getItem(index).y;
+    return 0;
+}
+
+bool BoardController::isItemSelected(int index) const
+{
+    if (index >= 0 && index < m_model->count())
+        return m_model->getItem(index).selected;
+    return false;
+}
+
 // ============ Инструменты ============
 
 void BoardController::deleteSelected()
@@ -348,6 +388,9 @@ void BoardController::snapToGrid()
         ImageData item = m_model->getItem(i);
         qreal newX = std::round(item.x / m_gridSize) * m_gridSize;
         qreal newY = std::round(item.y / m_gridSize) * m_gridSize;
+        
+        qDebug() << "Snap item" << i << "from" << item.x << "," << item.y 
+                 << "to" << newX << "," << newY << "gridSize:" << m_gridSize;
 
         if (item.x != newX || item.y != newY) {
             m_undoStack->push(new MoveImageCommand(
@@ -384,30 +427,54 @@ void BoardController::cropImage(int index, qreal cropX, qreal cropY, qreal cropW
     if (item.pixmap.isNull()) return;
     
     // Координаты пришли в системе отображения (item.width x item.height)
-    // Нужно конвертировать в систему оригинального изображения (pixmap.width x pixmap.height)
-    qreal scaleToOriginalX = static_cast<qreal>(item.pixmap.width()) / item.width;
-    qreal scaleToOriginalY = static_cast<qreal>(item.pixmap.height()) / item.height;
+    // Non-descructive crop logic
     
-    int origCropX = qBound(0, static_cast<int>(cropX * scaleToOriginalX), item.pixmap.width() - 1);
-    int origCropY = qBound(0, static_cast<int>(cropY * scaleToOriginalY), item.pixmap.height() - 1);
-    int origCropW = qBound(1, static_cast<int>(cropWidth * scaleToOriginalX), item.pixmap.width() - origCropX);
-    int origCropH = qBound(1, static_cast<int>(cropHeight * scaleToOriginalY), item.pixmap.height() - origCropY);
+    // 1. Calculate scale between Visual Item and Source Image
+    // If currently cropped, the visual width corresponds to cropWidth in source.
+    // If not cropped, visual width corresponds to pixmap width.
+    qreal sourceWidth = (item.cropWidth > 0) ? item.cropWidth : item.pixmap.width();
+    qreal sourceHeight = (item.cropHeight > 0) ? item.cropHeight : item.pixmap.height();
     
-    // Вырезаем часть изображения
-    QPixmap croppedPixmap = item.pixmap.copy(origCropX, origCropY, origCropW, origCropH);
+    qreal scaleX = sourceWidth / item.width;
+    qreal scaleY = sourceHeight / item.height;
     
-    if (croppedPixmap.isNull()) return;
+    // 2. Calculate new crop rect in Source Coordinates
+    // Current offset in source
+    qreal currentSourceX = (item.cropWidth > 0) ? item.cropX : 0;
+    qreal currentSourceY = (item.cropHeight > 0) ? item.cropY : 0;
     
-    // Обновляем позицию и размер в системе отображения
-    qreal newX = item.x + cropX;
-    qreal newY = item.y + cropY;
-    qreal newW = cropWidth;
-    qreal newH = cropHeight;
+    qreal newSourceCropX = currentSourceX + (cropX * scaleX);
+    qreal newSourceCropY = currentSourceY + (cropY * scaleY);
+    qreal newSourceCropW = cropWidth * scaleX;
+    qreal newSourceCropH = cropHeight * scaleY;
     
-    // Обновляем модель
-    m_model->updatePixmap(index, croppedPixmap);
+    // 3. Update Model
+    // We update position and size of the item to match the visual crop area,
+    // so the image appears to be "cut" in place without scaling.
+    
+    // New item position (visual on canvas)
+    // Rotate the visual offset (cropX, cropY) by item rotation to map to scene?
+    // Wait, ImageItem local coordinates (cropX, cropY) are pre-rotation.
+    // If we change item.x/y, we move the origin.
+    // To keep pixels in place:
+    // P_screen = P_item_origin + R * P_local
+    // New P_item_origin needs to be such that new (0,0) matches old (cropX, cropY).
+    // New Origin = Old Origin + R * (cropX, cropY)
+    
+    qreal rad = item.rotation * M_PI / 180.0;
+    qreal dx = cropX * std::cos(rad) - cropY * std::sin(rad);
+    qreal dy = cropX * std::sin(rad) + cropY * std::cos(rad);
+    
+    qreal newX = item.x + dx;
+    qreal newY = item.y + dy;
+    
+    m_undoStack->beginMacro("Обрезка изображения");
+    
+    m_model->updateCrop(index, newSourceCropX, newSourceCropY, newSourceCropW, newSourceCropH);
+    m_model->updateSize(index, cropWidth, cropHeight);
     m_model->updatePosition(index, newX, newY);
-    m_model->updateSize(index, newW, newH);
+    
+    m_undoStack->endMacro();
 }
 
 // ============ Undo/Redo ============

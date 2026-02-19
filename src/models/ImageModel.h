@@ -19,6 +19,12 @@ struct ImageData {
     qreal rotation = 0; //угол
     qreal zValue = 0; //уровень
     bool selected = false; //флаг выбора
+    
+    // Параметры обрезки (в координатах исходного изображения)
+    qreal cropX = 0;
+    qreal cropY = 0;
+    qreal cropWidth = 0;  // 0 означает "нет обрезки" (полная ширина)
+    qreal cropHeight = 0; // 0 означает "нет обрезки" (полная высота)
 };
 
 class ImageItemModel : public QAbstractListModel {
@@ -38,7 +44,11 @@ public:
         HeightRole,                // Высота
         RotationRole,              // Угол поворота (градусы)
         ZValueRole,                // Z-index (слой)
-        SelectedRole               // Статус выделения (bool)
+        SelectedRole,              // Статус выделения (bool)
+        CropXRole,                 // Обрезка X (исходные координаты)
+        CropYRole,                 // Обрезка Y (исходные координаты)
+        CropWidthRole,             // Обрезка Width (исходные координаты)
+        CropHeightRole             // Обрезка Height (исходные координаты)
     };
 
     explicit ImageItemModel(QObject *parent = nullptr);
@@ -56,7 +66,7 @@ public:
     void removeImage(int index);
     void removeById(const QString &id);
     void clear();
-    ImageData getItem(int index) const;
+    Q_INVOKABLE ImageData getItem(int index) const;
     int indexById(const QString &id) const;
     
     // Для сериализации
@@ -70,6 +80,9 @@ public:
     Q_INVOKABLE void setSelected(int index, bool selected);
     Q_INVOKABLE void clearSelection();
     Q_INVOKABLE QVariantList selectedIndices() const;
+    
+    // Обновление обрезки (non-destructive)
+    Q_INVOKABLE void updateCrop(int index, qreal x, qreal y, qreal width, qreal height);
     
     // Обновление пиксмапа (для обрезки)
     void updatePixmap(int index, const QPixmap &pixmap);

@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Controls
+import ImagoRef
 
 /**
  * ToolButton.qml - анимированная кнопка для панели инструментов.
@@ -22,8 +23,8 @@ AbstractButton {
     
     background: Rectangle {
         radius: 6
-        color: root.pressed ? "#5a5a5a" : 
-               root.hovered ? "#505050" : "transparent"
+        color: root.pressed ? Theme.accentPressedColor : 
+               root.hovered ? Theme.accentHoverColor : "transparent"
     }
     
     contentItem: Item {

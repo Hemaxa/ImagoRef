@@ -81,7 +81,7 @@ Item {
                 }
                 
                 onPressed: function(mouse) {
-                    lastPos = mapToItem(root.parent, mouse.x, mouse.y)
+                    lastPos = mapToItem(target.parent, mouse.x, mouse.y)
                     root.startPos = Qt.point(target.x, target.y)
                     root.startSize = Qt.size(target.width, target.height)
                     controller.beginResize(itemIndex)
@@ -90,9 +90,12 @@ Item {
                 onPositionChanged: function(mouse) {
                     if (!pressed) return
                     
-                    var pos = mapToItem(root.parent, mouse.x, mouse.y)
-                    var dx = (pos.x - lastPos.x) / zoomLevel
-                    var dy = (pos.y - lastPos.y) / zoomLevel
+                    // Map to Scene (target.parent) because target moves/resizes
+                    var pos = mapToItem(target.parent, mouse.x, mouse.y)
+                    
+                    // Delta in Scene coordinates (no need to divide by zoomLevel)
+                    var dx = pos.x - lastPos.x
+                    var dy = pos.y - lastPos.y
                     lastPos = pos
                     
                     var newX = target.x

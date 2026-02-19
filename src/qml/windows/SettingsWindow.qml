@@ -25,6 +25,7 @@ Dialog {
     onAccepted: {
         Settings.gridSize = gridSizeSpinBox.value
         Settings.themeName = themeComboBox.currentValue
+        Settings.canvasPattern = patternComboBox.currentValue
         Theme.applyTheme(themeComboBox.currentValue)
     }
     
@@ -143,6 +144,35 @@ Dialog {
                             
                             Component.onCompleted: {
                                 currentIndex = indexOfValue(Settings.themeName)
+                            }
+                        }
+                    }
+                    
+                    // Паттерн рабочей области
+                    RowLayout {
+                        spacing: 30
+                        
+                        Label {
+                            text: "Паттерн холста:"
+                            color: Theme.textColor
+                        }
+                        
+                        ComboBox {
+                            id: patternComboBox
+                            Layout.preferredWidth: 200
+                            
+                            model: ListModel {
+                                ListElement { text: "Точки"; value: "dots" }
+                                ListElement { text: "Сетка"; value: "grid" }
+                                ListElement { text: "Крестики"; value: "cross" }
+                                ListElement { text: "Без паттерна"; value: "none" }
+                            }
+                            
+                            textRole: "text"
+                            valueRole: "value"
+                            
+                            Component.onCompleted: {
+                                currentIndex = indexOfValue(Settings.canvasPattern)
                             }
                         }
                     }

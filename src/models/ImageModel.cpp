@@ -30,6 +30,10 @@ QVariant ImageItemModel::data(const QModelIndex &index, int role) const
     case RotationRole: return item.rotation;
     case ZValueRole: return item.zValue;
     case SelectedRole: return item.selected;
+    case CropXRole: return item.cropX;
+    case CropYRole: return item.cropY;
+    case CropWidthRole: return item.cropWidth;
+    case CropHeightRole: return item.cropHeight;
     default: return QVariant();
     }
 }
@@ -64,6 +68,18 @@ bool ImageItemModel::setData(const QModelIndex &index, const QVariant &value, in
     case SelectedRole:
         if (item.selected != value.toBool()) { item.selected = value.toBool(); changed = true; }
         break;
+    case CropXRole:
+        if (item.cropX != value.toReal()) { item.cropX = value.toReal(); changed = true; }
+        break;
+    case CropYRole:
+        if (item.cropY != value.toReal()) { item.cropY = value.toReal(); changed = true; }
+        break;
+    case CropWidthRole:
+        if (item.cropWidth != value.toReal()) { item.cropWidth = value.toReal(); changed = true; }
+        break;
+    case CropHeightRole:
+        if (item.cropHeight != value.toReal()) { item.cropHeight = value.toReal(); changed = true; }
+        break;
     default:
         return false;
     }
@@ -85,7 +101,11 @@ QHash<int, QByteArray> ImageItemModel::roleNames() const
         {HeightRole, "modelHeight"},
         {RotationRole, "modelRotation"},
         {ZValueRole, "zValue"},
-        {SelectedRole, "selected"}
+        {SelectedRole, "modelSelected"},
+        {CropXRole, "modelCropX"},
+        {CropYRole, "modelCropY"},
+        {CropWidthRole, "modelCropWidth"},
+        {CropHeightRole, "modelCropHeight"}
     };
 }
 
@@ -231,6 +251,20 @@ void ImageItemModel::clearSelection()
             emit dataChanged(modelIndex, modelIndex, {SelectedRole});
         }
     }
+}
+
+void ImageItemModel::updateCrop(int index, qreal x, qreal y, qreal width, qreal height)
+{
+    if (index < 0 || index >= m_items.count())
+        return;
+
+    m_items[index].cropX = x;
+    m_items[index].cropY = y;
+    m_items[index].cropWidth = width;
+    m_items[index].cropHeight = height;
+    
+    QModelIndex modelIndex = createIndex(index, 0);
+    emit dataChanged(modelIndex, modelIndex, {CropXRole, CropYRole, CropWidthRole, CropHeightRole});
 }
 
 QVariantList ImageItemModel::selectedIndices() const

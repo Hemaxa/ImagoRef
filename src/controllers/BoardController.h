@@ -54,10 +54,19 @@ public:
     
     // Выделение
     Q_INVOKABLE void selectItem(int index, bool addToSelection = false);
+    Q_INVOKABLE void deselectItem(int index);
     Q_INVOKABLE void toggleSelection(int index);
     Q_INVOKABLE void selectAll();
     Q_INVOKABLE void clearSelection();
     Q_INVOKABLE void selectInRect(qreal x, qreal y, qreal width, qreal height, bool addToSelection = false);
+
+    // Hit-test: определяет индекс верхнего элемента под точкой (или -1)
+    Q_INVOKABLE int hitTest(qreal x, qreal y) const;
+
+    // QML-доступ к свойствам элемента (так как ImageData не Q_GADGET)
+    Q_INVOKABLE qreal getItemX(int index) const;
+    Q_INVOKABLE qreal getItemY(int index) const;
+    Q_INVOKABLE bool isItemSelected(int index) const;
 
     // Инструменты
     Q_INVOKABLE void deleteSelected();

@@ -60,6 +60,7 @@ void ThemeManager::loadThemeFromFile(const QString& themeName)
 
 void ThemeManager::parseThemeColors(const QString& styleSheet)
 {
+    // Парсим все переменные формата @key: value;
     QRegularExpression regex("@(\\w+):\\s*([^;]+);");
     auto it = regex.globalMatch(styleSheet);
 
@@ -67,27 +68,32 @@ void ThemeManager::parseThemeColors(const QString& styleSheet)
         QRegularExpressionMatch match = it.next();
         QString key = match.captured(1);
         QString value = match.captured(2).trimmed();
-        value = value.section("/*", 0, 0).trimmed();
-        
-        if (!value.isEmpty()) {
-            // Маппинг переменных из QSS в наши свойства
-            if (key == "iconColor") {
-                m_themeColors["iconColor"] = QColor(value);
-                m_themeColors["accentColor"] = QColor(value);
-            } else if (key == "gridColor") {
-                m_themeColors["gridColor"] = QColor(value);
-            }
-        }
-    }
 
-    // Парсинг дополнительных цветов из CSS правил
-    QRegularExpression bgRegex("background-color:\\s*([^;]+);");
-    auto bgIt = bgRegex.globalMatch(styleSheet);
-    if (bgIt.hasNext()) {
-        QRegularExpressionMatch match = bgIt.next();
-        QString value = match.captured(1).trimmed();
-        if (value.startsWith("#")) {
-            m_themeColors["backgroundColor"] = QColor(value);
+        // Удаляем комментарии после значения
+        value = value.section("/*", 0, 0).trimmed();
+        if (value.isEmpty()) continue;
+
+        // Парсим цвет — поддержка hex (#rrggbb) и rgba(r,g,b,a)
+        QColor color;
+        if (value.startsWith("rgba(")) {
+            // rgba(r, g, b, a) — a может быть целым (0-255) или дробным (0.0-1.0)
+            QRegularExpression rgbaRegex("rgba\\((\\d+)\\s*,\\s*(\\d+)\\s*,\\s*(\\d+)\\s*,\\s*([\\d.]+)\\)");
+            auto rgbaMatch = rgbaRegex.match(value);
+            if (rgbaMatch.hasMatch()) {
+                int r = rgbaMatch.captured(1).toInt();
+                int g = rgbaMatch.captured(2).toInt();
+                int b = rgbaMatch.captured(3).toInt();
+                double a = rgbaMatch.captured(4).toDouble();
+                // Если a > 1, трактуем как 0-255; иначе как 0.0-1.0
+                int alpha = (a > 1.0) ? static_cast<int>(a) : static_cast<int>(a * 255);
+                color = QColor(r, g, b, alpha);
+            }
+        } else {
+            color = QColor(value);
+        }
+
+        if (color.isValid()) {
+            m_themeColors[key] = color;
         }
     }
 }

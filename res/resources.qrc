@@ -11,10 +11,13 @@
         <file>themes/imago.qss</file>
     </qresource>
     <qresource prefix="/icons">
+        <file>icons/crop.svg</file>
         <file>icons/delete.svg</file>
         <file>icons/grid.svg</file>
+        <file>icons/open.svg</file>
         <file>icons/paste.svg</file>
         <file>icons/resize.svg</file>
+        <file>icons/save.svg</file>
         <file>icons/settings.svg</file>
         <file>icons/zoom-in.svg</file>
         <file>icons/zoom-out.svg</file>

@@ -23,7 +23,7 @@ Rectangle {
     
     width: 58
     height: toolbarLayout.height + 16
-    color: Qt.rgba(31/255, 31/255, 31/255, 0.9)
+    color: Theme.panelColor
     border.color: Theme.borderColor
     border.width: 3
     radius: 12

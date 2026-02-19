@@ -3,27 +3,38 @@ import QtQuick.Controls
 import ImagoRef
 
 /**
- * ImageItem.qml - отображение одного изображения на холсте.
- * Поддерживает выделение, перемещение и изменение размера.
+ * ImageItem.qml — отображение одного изображения на холсте.
+ * Поддерживает выделение (визуальное), перемещение (drag) и ресайз.
+ * Клик-выделение обрабатывается из CanvasView через hitTest.
  */
 Item {
     id: root
-    
+
     // Свойства из модели
-    property int itemIndex: -1
-    property url imageSource
+    required property string itemId // если есть
+    required property url source
+    
+    // Новые роли обрезки (используем названия, заданные в roleNames)
+    required property real modelCropX
+    required property real modelCropY
+    required property real modelCropWidth
+    required property real modelCropHeight
+    
+    property int itemIndex: index
+    property url imageSource: source
     property real itemWidth: 100
     property real itemHeight: 100
     property bool selected: false
     property bool resizeMode: false
     property bool cropMode: false
+    property bool enableDrag: true
     property real zoomLevel: 1.0
-    
+
     required property BoardController controller
-    
+
     width: itemWidth
     height: itemHeight
-    
+
     // Изображение
     Image {
         id: image
@@ -32,30 +43,35 @@ Item {
         fillMode: Image.Stretch
         smooth: true
         mipmap: true
+        
+        // Non-destructive crop
+        sourceClipRect: (root.modelCropWidth > 0 && root.modelCropHeight > 0) 
+                        ? Qt.rect(root.modelCropX, root.modelCropY, root.modelCropWidth, root.modelCropHeight) 
+                        : undefined
     }
-    
-    // Рамка при наведении (серая)
+
+    // Рамка при наведении (полупрозрачная белая)
     Rectangle {
         id: hoverBorder
         anchors.fill: parent
         color: "transparent"
         border.color: Qt.rgba(1, 1, 1, 0.5)
-        border.width: (!root.selected && mouseArea.containsMouse) ? Math.max(2 / zoomLevel, 1) : 0
-        visible: !root.selected && mouseArea.containsMouse
+        border.width: (!root.selected && hoverArea.containsMouse) ? Math.max(2 / zoomLevel, 1) : 0
+        visible: !root.selected && hoverArea.containsMouse
     }
-    
-    // Рамка выделения (яркая синяя)
+
+    // Рамка выделения (яркий акцентный цвет)
     Rectangle {
         id: selectionBorder
         anchors.fill: parent
         anchors.margins: -2 / zoomLevel
         color: "transparent"
-        border.color: "#3B82F6"
+        border.color: Theme.accentColor
         border.width: root.selected ? Math.max(3 / zoomLevel, 2) : 0
         visible: root.selected
         radius: 2 / zoomLevel
     }
-    
+
     // Внутренняя белая рамка для контраста
     Rectangle {
         id: selectionBorderInner
@@ -65,17 +81,17 @@ Item {
         border.width: root.selected ? Math.max(1 / zoomLevel, 1) : 0
         visible: root.selected
     }
-    
-    // Маркеры изменения размера - показываются когда объект выделен
+
+    // Маркеры изменения размера
     ResizeHandles {
         id: resizeHandles
-        visible: root.selected
+        visible: root.selected && root.resizeMode
         target: root
         zoomLevel: root.zoomLevel
         controller: root.controller
         itemIndex: root.itemIndex
     }
-    
+
     // Оверлей обрезки
     CropOverlay {
         id: cropOverlay
@@ -84,61 +100,30 @@ Item {
         zoomLevel: root.zoomLevel
         controller: root.controller
         itemIndex: root.itemIndex
-        
+
         onCropApplied: function(cropX, cropY, cropWidth, cropHeight) {
             controller.cropImage(itemIndex, cropX, cropY, cropWidth, cropHeight)
         }
-        
+
         onCropCancelled: {
             root.cropMode = false
         }
     }
-    
-    // Обработка мыши
+
+    // Hover-зона — только для отслеживания наведения (без перехвата событий)
     MouseArea {
-        id: mouseArea
+        id: hoverArea
         anchors.fill: parent
         hoverEnabled: true
-        
-        drag.target: (root.resizeMode || root.cropMode) ? null : root
-        drag.threshold: 0
-        
-        property point pressPos
-        property point itemStartPos
-        
-        onPressed: function(mouse) {
-            // Ctrl — toggle выделения
-            if (mouse.modifiers & Qt.ControlModifier) {
-                controller.toggleSelection(itemIndex)
-            }
-            // Shift — добавить к выделению
-            else if (mouse.modifiers & Qt.ShiftModifier) {
-                controller.selectItem(itemIndex, true)
-            }
-            // Обычный клик
-            else if (!root.selected) {
-                controller.selectItem(itemIndex, false)
-            }
-            
-            // Запоминаем начальную позицию для undo (только если не Ctrl)
-            if (!(mouse.modifiers & Qt.ControlModifier)) {
-                pressPos = Qt.point(mouse.x, mouse.y)
-                itemStartPos = Qt.point(root.x, root.y)
-                controller.beginMove(itemIndex)
-            }
+        acceptedButtons: Qt.NoButton  // Не перехватываем клики
+        propagateComposedEvents: true
+
+        cursorShape: {
+            if (root.resizeMode || root.cropMode)
+                return Qt.ArrowCursor
+            if (root.selected)
+                return Qt.OpenHandCursor
+            return Qt.ArrowCursor
         }
-        
-        onReleased: function(mouse) {
-            // Создаем undo команду если позиция изменилась
-            if (root.x !== itemStartPos.x || root.y !== itemStartPos.y) {
-                controller.endMove(itemIndex, root.x, root.y)
-                // Обновляем модель
-                controller.model.updatePosition(itemIndex, root.x, root.y)
-            }
-        }
-        
-        cursorShape: (resizeMode || cropMode) ? Qt.ArrowCursor : 
-                     (drag.active ? Qt.ClosedHandCursor : 
-                     (containsMouse ? Qt.OpenHandCursor : Qt.ArrowCursor))
     }
 }

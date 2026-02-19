@@ -3,8 +3,16 @@
 /* (Этот блок будет вырезан и не попадет в qApp->setStyleSheet)      */
 /* =================================================================== */
 
+@backgroundColor: #1e1e2e;
+@textColor: #cdd6f4;
+@accentColor: #E67E22;
+@accentHoverColor: #D35400;
+@accentPressedColor: #A04000;
 @iconColor: #E67E22;
 @gridColor: #3c3c3c;
+@borderColor: #585b70;
+@panelColor: rgba(30, 30, 46, 230);
+@controlBackground: #313244;
 
 /* =================================================================== */
 /* ПАЛИТРА ЦВЕТОВ ТЕМЫ (ДЛЯ ИНФОРМАЦИИ)                                 */

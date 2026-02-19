@@ -2,6 +2,19 @@
 /* ПАЛИТРА ЦВЕТОВ ТЕМЫ                                                 */
 /* =================================================================== */
 
+/* Переменные темы — парсятся ThemeManager */
+@backgroundColor: #F0FFF0;
+@textColor: #556B2F;
+@accentColor: #B4D8B4;
+@accentHoverColor: #D9EAD9;
+@accentPressedColor: #CFE2CF;
+@iconColor: #556B2F;
+@gridColor: #E0EEE0;
+@borderColor: #E0EEE0;
+@panelColor: rgba(248, 255, 248, 230);
+@controlBackground: #FFFFFF;
+
+
 /*
     ОСНОВНЫЕ
     ЦВЕТ ХОЛСТА: #F0FFF0
