@@ -1,5 +1,5 @@
 #include "BoardController.h"
-#include "UndoCommands.h"
+#include "StackController.h"
 #include "SettingsManager.h"
 
 #include <QFile>
@@ -280,6 +280,13 @@ void BoardController::selectItem(int index, bool addToSelection)
     emit selectionChanged();
 }
 
+void BoardController::toggleSelection(int index)
+{
+    ImageData item = m_model->getItem(index);
+    m_model->setSelected(index, !item.selected);
+    emit selectionChanged();
+}
+
 void BoardController::selectAll()
 {
     for (int i = 0; i < m_model->count(); ++i) {
@@ -291,6 +298,27 @@ void BoardController::selectAll()
 void BoardController::clearSelection()
 {
     m_model->clearSelection();
+    emit selectionChanged();
+}
+
+void BoardController::selectInRect(qreal x, qreal y, qreal width, qreal height, bool addToSelection)
+{
+    QRectF selectionRect(x, y, width, height);
+    selectionRect = selectionRect.normalized();
+    
+    if (!addToSelection) {
+        m_model->clearSelection();
+    }
+    
+    for (int i = 0; i < m_model->count(); ++i) {
+        ImageData item = m_model->getItem(i);
+        QRectF itemRect(item.x, item.y, item.width, item.height);
+        
+        if (selectionRect.intersects(itemRect)) {
+            m_model->setSelected(i, true);
+        }
+    }
+    
     emit selectionChanged();
 }
 
@@ -346,6 +374,40 @@ void BoardController::rotateSelected(qreal angleDelta)
     }
 
     m_undoStack->endMacro();
+}
+
+void BoardController::cropImage(int index, qreal cropX, qreal cropY, qreal cropWidth, qreal cropHeight)
+{
+    if (index < 0 || index >= m_model->count()) return;
+    
+    ImageData item = m_model->getItem(index);
+    if (item.pixmap.isNull()) return;
+    
+    // Координаты пришли в системе отображения (item.width x item.height)
+    // Нужно конвертировать в систему оригинального изображения (pixmap.width x pixmap.height)
+    qreal scaleToOriginalX = static_cast<qreal>(item.pixmap.width()) / item.width;
+    qreal scaleToOriginalY = static_cast<qreal>(item.pixmap.height()) / item.height;
+    
+    int origCropX = qBound(0, static_cast<int>(cropX * scaleToOriginalX), item.pixmap.width() - 1);
+    int origCropY = qBound(0, static_cast<int>(cropY * scaleToOriginalY), item.pixmap.height() - 1);
+    int origCropW = qBound(1, static_cast<int>(cropWidth * scaleToOriginalX), item.pixmap.width() - origCropX);
+    int origCropH = qBound(1, static_cast<int>(cropHeight * scaleToOriginalY), item.pixmap.height() - origCropY);
+    
+    // Вырезаем часть изображения
+    QPixmap croppedPixmap = item.pixmap.copy(origCropX, origCropY, origCropW, origCropH);
+    
+    if (croppedPixmap.isNull()) return;
+    
+    // Обновляем позицию и размер в системе отображения
+    qreal newX = item.x + cropX;
+    qreal newY = item.y + cropY;
+    qreal newW = cropWidth;
+    qreal newH = cropHeight;
+    
+    // Обновляем модель
+    m_model->updatePixmap(index, croppedPixmap);
+    m_model->updatePosition(index, newX, newY);
+    m_model->updateSize(index, newW, newH);
 }
 
 // ============ Undo/Redo ============

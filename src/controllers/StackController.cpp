@@ -1,5 +1,5 @@
-#include "UndoCommands.h"
-#include "ImageItemModel.h"
+#include "StackController.h"
+#include "ImageModel.h"
 
 // ============ AddImageCommand ============
 

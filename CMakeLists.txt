@@ -23,42 +23,46 @@ qt_add_executable(ImagoRef
     ${SRC_DIR}/main.cpp
 )
 
-#backend C++ исходники
 target_sources(ImagoRef PRIVATE
-    #backend
-    ${SRC_DIR}/backend/SettingsManager.h
-    ${SRC_DIR}/backend/SettingsManager.cpp
-    ${SRC_DIR}/backend/ThemeManager.h
-    ${SRC_DIR}/backend/ThemeManager.cpp
-    ${SRC_DIR}/backend/BoardController.h
-    ${SRC_DIR}/backend/BoardController.cpp
-    ${SRC_DIR}/backend/ImageItemModel.h
-    ${SRC_DIR}/backend/ImageItemModel.cpp
-    ${SRC_DIR}/backend/UndoCommands.h
-    ${SRC_DIR}/backend/UndoCommands.cpp
+    ${SRC_DIR}/controllers/BoardController.h
+    ${SRC_DIR}/controllers/BoardController.cpp
+    ${SRC_DIR}/controllers/StackController.h
+    ${SRC_DIR}/controllers/StackController.cpp
+
+    ${SRC_DIR}/managers/SettingsManager.h
+    ${SRC_DIR}/managers/SettingsManager.cpp
+    ${SRC_DIR}/managers/ThemesManager.h
+    ${SRC_DIR}/managers/ThemesManager.cpp
+
+    ${SRC_DIR}/models/ImageModel.h
+    ${SRC_DIR}/models/ImageModel.cpp
 )
 
-#добавление QML модуля
 qt_add_qml_module(ImagoRef
     URI ImagoRef
     VERSION 1.0
     QML_FILES
         src/qml/Main.qml
-        src/qml/WelcomeWindow.qml
-        src/qml/MainWindow.qml
-        src/qml/SettingsWindow.qml
+
+        src/qml/windows/WelcomeWindow.qml
+        src/qml/windows/MainWindow.qml
+        src/qml/windows/SettingsWindow.qml
+
         src/qml/components/CanvasView.qml
         src/qml/components/ImageItem.qml
         src/qml/components/FloatingToolbar.qml
         src/qml/components/ImagoToolButton.qml
         src/qml/components/ResizeHandles.qml
+        src/qml/components/CropOverlay.qml
     RESOURCES
         res/resources.qrc
 )
 
 #директории с заголовочными файлами
 target_include_directories(ImagoRef PRIVATE
-    ${SRC_DIR}/backend
+    ${SRC_DIR}/controllers
+    ${SRC_DIR}/managers
+    ${SRC_DIR}/models
 )
 
 # ====================================================================

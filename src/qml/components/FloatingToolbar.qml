@@ -19,6 +19,7 @@ Rectangle {
     signal zoomInClicked()
     signal zoomOutClicked()
     signal resizeModeClicked()
+    signal cropModeClicked()
     
     width: 58
     height: toolbarLayout.height + 16
@@ -84,6 +85,13 @@ Rectangle {
             tooltip: "Изменить размер"
             shortcutText: "Ctrl+E"
             onClicked: root.resizeModeClicked()
+        }
+        ImagoToolButton {
+            iconSource: "qrc:/icons/icons/crop.svg"
+            tooltip: "Обрезать"
+            shortcutText: "Ctrl+Shift+X"
+            onClicked: root.cropModeClicked()
+            enabled: controller.hasSelection
         }
         ImagoToolButton {
             iconSource: "qrc:/icons/icons/rotate-left.svg"

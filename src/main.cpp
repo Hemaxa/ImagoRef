@@ -7,46 +7,35 @@
 #include <QIcon> //иконки для QML
 
 #include "SettingsManager.h"
-#include "ThemeManager.h"
-#include "BoardController.h"
-#include "ImageItemModel.h"
+#include "ThemesManager.h"
 
 int main(int argc, char *argv[])
 {
     //создание объекта приложения
     QGuiApplication app(argc, argv);
     
-    //установка информации о приложении
-    app.setOrganizationName("ImagoRef");
-    app.setApplicationName("ImagoRef");
-    app.setApplicationVersion("1.0");
-    app.setWindowIcon(QIcon(":/app-icon/app-icon/icon.icns"));
-    
-    // Установка стиля Quick Controls (для корректной кастомизации)
+    //установка стиля Quick Controls (для корректной кастомизации интерфейса)
     QQuickStyle::setStyle("Basic");
 
-    // Загрузка настроек
+    //загрузка пользовательских настроек
     SettingsManager::instance().loadSettings();
-
-    // Применение начальной темы
     ThemeManager::instance().applyTheme(SettingsManager::instance().themeName());
 
-    // Создание QML движка
+    //создание QML движка
     QQmlApplicationEngine engine;
 
-    // Регистрация контекстных свойств (синглтоны)
+    //регистрация контекстных свойств (синглтоны)
     engine.rootContext()->setContextProperty("Settings", &SettingsManager::instance());
     engine.rootContext()->setContextProperty("Theme", &ThemeManager::instance());
 
-    // Загрузка главного QML файла из модуля Qt6
+    //загрузка главного QML файла из модуля Qt6
     const QUrl url(QStringLiteral("qrc:/ImagoRef/src/qml/Main.qml"));
     
-    QObject::connect(&engine, &QQmlApplicationEngine::objectCreationFailed,
-                     &app, []() { QCoreApplication::exit(-1); },
-                     Qt::QueuedConnection);
-    
+    //URL для загрузки главного QML файла
+    QObject::connect(&engine, &QQmlApplicationEngine::objectCreationFailed, &app, []() { QCoreApplication::exit(-1); }, Qt::QueuedConnection);
     engine.load(url);
     
+    //проверка, что загруженные объекты не пустые
     if (engine.rootObjects().isEmpty()) {
         return -1;
     }

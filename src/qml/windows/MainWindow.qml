@@ -3,7 +3,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Dialogs
 import ImagoRef
-import "components"
+import "../components"
 
 /**
  * MainWindow.qml - главное окно приложения с холстом и панелью инструментов.
@@ -45,6 +45,7 @@ Item {
         onZoomInClicked: canvasView.zoomIn()
         onZoomOutClicked: canvasView.zoomOut()
         onResizeModeClicked: canvasView.toggleResizeMode()
+        onCropModeClicked: canvasView.toggleCropMode()
         
         // Состояние видимости
         state: "visible"

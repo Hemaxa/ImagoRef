@@ -33,4 +33,13 @@
         <file>graphics/text-logo.png</file>
         <file>graphics/pattern.png</file>
     </qresource>
+    <qresource prefix="/welcome">
+        <file>welcome/logo.svg</file>
+        <file>welcome/project-frame.svg</file>
+        <file>welcome/mascot.svg</file>
+        <file>welcome/deco-triangle.svg</file>
+        <file>welcome/deco-zigzag.svg</file>
+        <file>welcome/deco-star.svg</file>
+        <file>welcome/deco-dots.svg</file>
+    </qresource>
 </RCC>

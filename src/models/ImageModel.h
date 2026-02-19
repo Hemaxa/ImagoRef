@@ -1,34 +1,31 @@
+//ImageModel - модель для хранения списка изображений на холсте
+
 #pragma once
 
-#include <QAbstractListModel>
-#include <QPixmap>
-#include <QUrl>
+#include <QAbstractListModel> //списки в Qt
+#include <QPixmap> //изображения в Qt
+#include <QUrl> //класс для работы с путями
 #include <QtQml/qqml.h>
 
-/**
- * @brief ImageData - структура данных для хранения информации об изображении.
- */
+//ImageData - структура данных для хранения информации об изображении
 struct ImageData {
-    QString id;           // Уникальный идентификатор
-    QUrl source;          // Путь к изображению
-    QPixmap pixmap;       // Оригинальный пиксмап
-    qreal x = 0;
-    qreal y = 0;
-    qreal width = 0;
-    qreal height = 0;
-    qreal rotation = 0;
-    qreal zValue = 0;
-    bool selected = false;
+    QString id; //уникальный идентификатор
+    QUrl source; //путь к изображению
+    QPixmap pixmap; //оригинальный пиксмап
+    qreal x = 0; //координата x
+    qreal y = 0; //координата y
+    qreal width = 0; //ширина
+    qreal height = 0; //высота
+    qreal rotation = 0; //угол
+    qreal zValue = 0; //уровень
+    bool selected = false; //флаг выбора
 };
 
-/**
- * @brief ImageItemModel - модель для хранения списка изображений на холсте.
- * Используется Repeater в QML для отображения изображений.
- */
 class ImageItemModel : public QAbstractListModel {
     Q_OBJECT
-    QML_ELEMENT
+    QML_ELEMENT //позволяет создавать класс из QML
 
+    //свойства, доступные в QML
     Q_PROPERTY(int count READ count NOTIFY countChanged)
 
 public:
@@ -73,6 +70,9 @@ public:
     Q_INVOKABLE void setSelected(int index, bool selected);
     Q_INVOKABLE void clearSelection();
     Q_INVOKABLE QVariantList selectedIndices() const;
+    
+    // Обновление пиксмапа (для обрезки)
+    void updatePixmap(int index, const QPixmap &pixmap);
 
 signals:
     void countChanged();

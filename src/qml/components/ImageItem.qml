@@ -16,6 +16,7 @@ Item {
     property real itemHeight: 100
     property bool selected: false
     property bool resizeMode: false
+    property bool cropMode: false
     property real zoomLevel: 1.0
     
     required property BoardController controller
@@ -31,33 +32,66 @@ Item {
         fillMode: Image.Stretch
         smooth: true
         mipmap: true
-        
-        // Если source пустой, используем pixmap из модели
-        Component.onCompleted: {
-            if (source === "") {
-                // Fallback - получить данные из контроллера
-            }
-        }
     }
     
-    // Рамка выделения
+    // Рамка при наведении (серая)
+    Rectangle {
+        id: hoverBorder
+        anchors.fill: parent
+        color: "transparent"
+        border.color: Qt.rgba(1, 1, 1, 0.5)
+        border.width: (!root.selected && mouseArea.containsMouse) ? Math.max(2 / zoomLevel, 1) : 0
+        visible: !root.selected && mouseArea.containsMouse
+    }
+    
+    // Рамка выделения (яркая синяя)
     Rectangle {
         id: selectionBorder
         anchors.fill: parent
+        anchors.margins: -2 / zoomLevel
         color: "transparent"
-        border.color: "white"
-        border.width: (root.selected || mouseArea.containsMouse) ? 2 / zoomLevel : 0
-        visible: root.selected || mouseArea.containsMouse
+        border.color: "#3B82F6"
+        border.width: root.selected ? Math.max(3 / zoomLevel, 2) : 0
+        visible: root.selected
+        radius: 2 / zoomLevel
     }
     
-    // Маркеры изменения размера
+    // Внутренняя белая рамка для контраста
+    Rectangle {
+        id: selectionBorderInner
+        anchors.fill: parent
+        color: "transparent"
+        border.color: "white"
+        border.width: root.selected ? Math.max(1 / zoomLevel, 1) : 0
+        visible: root.selected
+    }
+    
+    // Маркеры изменения размера - показываются когда объект выделен
     ResizeHandles {
         id: resizeHandles
-        visible: root.resizeMode
+        visible: root.selected
         target: root
         zoomLevel: root.zoomLevel
         controller: root.controller
         itemIndex: root.itemIndex
+    }
+    
+    // Оверлей обрезки
+    CropOverlay {
+        id: cropOverlay
+        visible: root.cropMode && root.selected
+        target: root
+        zoomLevel: root.zoomLevel
+        controller: root.controller
+        itemIndex: root.itemIndex
+        
+        onCropApplied: function(cropX, cropY, cropWidth, cropHeight) {
+            controller.cropImage(itemIndex, cropX, cropY, cropWidth, cropHeight)
+        }
+        
+        onCropCancelled: {
+            root.cropMode = false
+        }
     }
     
     // Обработка мыши
@@ -66,24 +100,32 @@ Item {
         anchors.fill: parent
         hoverEnabled: true
         
-        drag.target: root.resizeMode ? null : root
+        drag.target: (root.resizeMode || root.cropMode) ? null : root
         drag.threshold: 0
         
         property point pressPos
         property point itemStartPos
         
         onPressed: function(mouse) {
-            // Выделение
+            // Ctrl — toggle выделения
             if (mouse.modifiers & Qt.ControlModifier) {
+                controller.toggleSelection(itemIndex)
+            }
+            // Shift — добавить к выделению
+            else if (mouse.modifiers & Qt.ShiftModifier) {
                 controller.selectItem(itemIndex, true)
-            } else if (!root.selected) {
+            }
+            // Обычный клик
+            else if (!root.selected) {
                 controller.selectItem(itemIndex, false)
             }
             
-            // Запоминаем начальную позицию для undo
-            pressPos = Qt.point(mouse.x, mouse.y)
-            itemStartPos = Qt.point(root.x, root.y)
-            controller.beginMove(itemIndex)
+            // Запоминаем начальную позицию для undo (только если не Ctrl)
+            if (!(mouse.modifiers & Qt.ControlModifier)) {
+                pressPos = Qt.point(mouse.x, mouse.y)
+                itemStartPos = Qt.point(root.x, root.y)
+                controller.beginMove(itemIndex)
+            }
         }
         
         onReleased: function(mouse) {
@@ -95,7 +137,7 @@ Item {
             }
         }
         
-        cursorShape: resizeMode ? Qt.ArrowCursor : 
+        cursorShape: (resizeMode || cropMode) ? Qt.ArrowCursor : 
                      (drag.active ? Qt.ClosedHandCursor : 
                      (containsMouse ? Qt.OpenHandCursor : Qt.ArrowCursor))
     }

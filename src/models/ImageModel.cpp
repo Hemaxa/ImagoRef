@@ -1,4 +1,4 @@
-#include "ImageItemModel.h"
+#include "ImageModel.h"
 #include <QUuid>
 
 ImageItemModel::ImageItemModel(QObject *parent)
@@ -242,4 +242,15 @@ QVariantList ImageItemModel::selectedIndices() const
         }
     }
     return result;
+}
+
+void ImageItemModel::updatePixmap(int index, const QPixmap &pixmap)
+{
+    if (index < 0 || index >= m_items.count())
+        return;
+
+    m_items[index].pixmap = pixmap;
+    // Pixmap не привязан к роли в QML, но можно оповестить об изменении source
+    QModelIndex modelIndex = createIndex(index, 0);
+    emit dataChanged(modelIndex, modelIndex, {SourceRole});
 }

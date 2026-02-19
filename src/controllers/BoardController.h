@@ -5,7 +5,7 @@
 #include <QUndoStack>
 #include <QtQml/qqml.h>
 
-#include "ImageItemModel.h"
+#include "ImageModel.h"
 
 /**
  * @brief BoardController - главный контроллер приложения для QML.
@@ -54,13 +54,16 @@ public:
     
     // Выделение
     Q_INVOKABLE void selectItem(int index, bool addToSelection = false);
+    Q_INVOKABLE void toggleSelection(int index);
     Q_INVOKABLE void selectAll();
     Q_INVOKABLE void clearSelection();
+    Q_INVOKABLE void selectInRect(qreal x, qreal y, qreal width, qreal height, bool addToSelection = false);
 
     // Инструменты
     Q_INVOKABLE void deleteSelected();
     Q_INVOKABLE void snapToGrid();
     Q_INVOKABLE void rotateSelected(qreal angleDelta);
+    Q_INVOKABLE void cropImage(int index, qreal cropX, qreal cropY, qreal cropWidth, qreal cropHeight);
 
     // Undo/Redo
     Q_INVOKABLE void undo();

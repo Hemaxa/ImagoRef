@@ -1,4 +1,4 @@
-#include "ThemeManager.h"
+#include "ThemesManager.h"
 
 #include <QFile>
 #include <QTextStream>
