@@ -362,6 +362,20 @@ bool BoardController::isItemSelected(int index) const
     return false;
 }
 
+qreal BoardController::getItemWidth(int index) const
+{
+    if (index >= 0 && index < m_model->count())
+        return m_model->getItem(index).width;
+    return 0;
+}
+
+qreal BoardController::getItemHeight(int index) const
+{
+    if (index >= 0 && index < m_model->count())
+        return m_model->getItem(index).height;
+    return 0;
+}
+
 // ============ Инструменты ============
 
 void BoardController::deleteSelected()
@@ -382,15 +396,16 @@ void BoardController::snapToGrid()
 {
     if (m_gridSize <= 0) return;
 
+    QVariantList indices = m_model->selectedIndices();
+    if (indices.isEmpty()) return;
+
     m_undoStack->beginMacro("Привязка к сетке");
 
-    for (int i = 0; i < m_model->count(); ++i) {
+    for (const QVariant &v : indices) {
+        int i = v.toInt();
         ImageData item = m_model->getItem(i);
         qreal newX = std::round(item.x / m_gridSize) * m_gridSize;
         qreal newY = std::round(item.y / m_gridSize) * m_gridSize;
-        
-        qDebug() << "Snap item" << i << "from" << item.x << "," << item.y 
-                 << "to" << newX << "," << newY << "gridSize:" << m_gridSize;
 
         if (item.x != newX || item.y != newY) {
             m_undoStack->push(new MoveImageCommand(
@@ -430,8 +445,6 @@ void BoardController::cropImage(int index, qreal cropX, qreal cropY, qreal cropW
     // Non-descructive crop logic
     
     // 1. Calculate scale between Visual Item and Source Image
-    // If currently cropped, the visual width corresponds to cropWidth in source.
-    // If not cropped, visual width corresponds to pixmap width.
     qreal sourceWidth = (item.cropWidth > 0) ? item.cropWidth : item.pixmap.width();
     qreal sourceHeight = (item.cropHeight > 0) ? item.cropHeight : item.pixmap.height();
     
@@ -439,7 +452,6 @@ void BoardController::cropImage(int index, qreal cropX, qreal cropY, qreal cropW
     qreal scaleY = sourceHeight / item.height;
     
     // 2. Calculate new crop rect in Source Coordinates
-    // Current offset in source
     qreal currentSourceX = (item.cropWidth > 0) ? item.cropX : 0;
     qreal currentSourceY = (item.cropHeight > 0) ? item.cropY : 0;
     
@@ -448,19 +460,7 @@ void BoardController::cropImage(int index, qreal cropX, qreal cropY, qreal cropW
     qreal newSourceCropW = cropWidth * scaleX;
     qreal newSourceCropH = cropHeight * scaleY;
     
-    // 3. Update Model
-    // We update position and size of the item to match the visual crop area,
-    // so the image appears to be "cut" in place without scaling.
-    
-    // New item position (visual on canvas)
-    // Rotate the visual offset (cropX, cropY) by item rotation to map to scene?
-    // Wait, ImageItem local coordinates (cropX, cropY) are pre-rotation.
-    // If we change item.x/y, we move the origin.
-    // To keep pixels in place:
-    // P_screen = P_item_origin + R * P_local
-    // New P_item_origin needs to be such that new (0,0) matches old (cropX, cropY).
-    // New Origin = Old Origin + R * (cropX, cropY)
-    
+    // 3. Calculate new position
     qreal rad = item.rotation * M_PI / 180.0;
     qreal dx = cropX * std::cos(rad) - cropY * std::sin(rad);
     qreal dy = cropX * std::sin(rad) + cropY * std::cos(rad);
@@ -468,13 +468,14 @@ void BoardController::cropImage(int index, qreal cropX, qreal cropY, qreal cropW
     qreal newX = item.x + dx;
     qreal newY = item.y + dy;
     
-    m_undoStack->beginMacro("Обрезка изображения");
-    
-    m_model->updateCrop(index, newSourceCropX, newSourceCropY, newSourceCropW, newSourceCropH);
-    m_model->updateSize(index, cropWidth, cropHeight);
-    m_model->updatePosition(index, newX, newY);
-    
-    m_undoStack->endMacro();
+    // Push undo command
+    m_undoStack->push(new CropImageCommand(
+        m_model, index,
+        QPointF(item.x, item.y), QSizeF(item.width, item.height),
+        QRectF(item.cropX, item.cropY, item.cropWidth, item.cropHeight),
+        QPointF(newX, newY), QSizeF(cropWidth, cropHeight),
+        QRectF(newSourceCropX, newSourceCropY, newSourceCropW, newSourceCropH)
+    ));
 }
 
 // ============ Undo/Redo ============

@@ -82,8 +82,8 @@ Item {
                 
                 onPressed: function(mouse) {
                     lastPos = mapToItem(target.parent, mouse.x, mouse.y)
-                    root.startPos = Qt.point(target.x, target.y)
-                    root.startSize = Qt.size(target.width, target.height)
+                    root.startPos = Qt.point(controller.getItemX(itemIndex), controller.getItemY(itemIndex))
+                    root.startSize = Qt.size(controller.getItemWidth(itemIndex), controller.getItemHeight(itemIndex))
                     controller.beginResize(itemIndex)
                 }
                 
@@ -93,15 +93,16 @@ Item {
                     // Map to Scene (target.parent) because target moves/resizes
                     var pos = mapToItem(target.parent, mouse.x, mouse.y)
                     
-                    // Delta in Scene coordinates (no need to divide by zoomLevel)
+                    // Delta in Scene coordinates
                     var dx = pos.x - lastPos.x
                     var dy = pos.y - lastPos.y
                     lastPos = pos
                     
-                    var newX = target.x
-                    var newY = target.y
-                    var newW = target.itemWidth
-                    var newH = target.itemHeight
+                    // Читаем текущие значения из модели (не из target, чтобы не ломать bindings)
+                    var newX = controller.getItemX(itemIndex)
+                    var newY = controller.getItemY(itemIndex)
+                    var newW = controller.getItemWidth(itemIndex)
+                    var newH = controller.getItemHeight(itemIndex)
                     
                     // Пропорциональное изменение при Shift
                     var keepAspect = mouse.modifiers & Qt.ShiftModifier
@@ -152,24 +153,27 @@ Item {
                         }
                     }
                     
-                    // Минимальный размер
+                    // Минимальный размер — обновляем через модель, чтобы не ломать bindings
                     if (newW >= 20 && newH >= 20) {
-                        target.x = newX
-                        target.y = newY
-                        target.itemWidth = newW
-                        target.itemHeight = newH
+                        controller.model.updatePosition(itemIndex, newX, newY)
+                        controller.model.updateSize(itemIndex, newW, newH)
                     }
                 }
                 
                 onReleased: {
-                    if (target.x !== startPos.x || target.y !== startPos.y ||
-                        target.itemWidth !== startSize.width || target.itemHeight !== startSize.height) {
-                        controller.endResize(itemIndex, target.x, target.y, target.itemWidth, target.itemHeight)
-                        controller.model.updatePosition(itemIndex, target.x, target.y)
-                        controller.model.updateSize(itemIndex, target.itemWidth, target.itemHeight)
+                    // Читаем финальные значения из модели
+                    var finalX = controller.getItemX(itemIndex)
+                    var finalY = controller.getItemY(itemIndex)
+                    var finalW = controller.getItemWidth(itemIndex)
+                    var finalH = controller.getItemHeight(itemIndex)
+                    
+                    if (finalX !== startPos.x || finalY !== startPos.y ||
+                        finalW !== startSize.width || finalH !== startSize.height) {
+                        controller.endResize(itemIndex, finalX, finalY, finalW, finalH)
                     }
                 }
             }
         }
     }
 }
+

@@ -42,8 +42,7 @@ ApplicationWindow {
         anchors.centerIn: parent
         
         onNewBoardRequested: {
-            root.width = 1280
-            root.height = 800
+            root.showMaximized()
             boardController.newBoard()
             mainLoader.active = true
             welcomeDialog.close()
@@ -51,8 +50,7 @@ ApplicationWindow {
         
         onOpenBoardRequested: function(fileUrl) {
             if (boardController.openBoard(fileUrl)) {
-                root.width = 1280
-                root.height = 800
+                root.showMaximized()
                 mainLoader.active = true
                 welcomeDialog.close()
             }

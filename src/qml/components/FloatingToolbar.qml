@@ -20,6 +20,11 @@ Rectangle {
     signal zoomOutClicked()
     signal resizeModeClicked()
     signal cropModeClicked()
+    signal pasteClicked()
+    
+    // Состояние активных инструментов
+    property bool resizeModeActive: false
+    property bool cropModeActive: false
     
     width: 58
     height: toolbarLayout.height + 16
@@ -62,7 +67,7 @@ Rectangle {
             iconSource: "qrc:/icons/icons/paste.svg"
             tooltip: "Вставить"
             shortcutText: "Ctrl+V"
-            onClicked: controller.pasteFromClipboard(0, 0)
+            onClicked: root.pasteClicked()
         }
         ImagoToolButton {
             iconSource: "qrc:/icons/icons/delete.svg"
@@ -84,12 +89,14 @@ Rectangle {
             iconSource: "qrc:/icons/icons/resize.svg"
             tooltip: "Изменить размер"
             shortcutText: "Ctrl+E"
+            active: root.resizeModeActive
             onClicked: root.resizeModeClicked()
         }
         ImagoToolButton {
             iconSource: "qrc:/icons/icons/crop.svg"
             tooltip: "Обрезать"
             shortcutText: "Ctrl+Shift+X"
+            active: root.cropModeActive
             onClicked: root.cropModeClicked()
             enabled: controller.hasSelection
         }

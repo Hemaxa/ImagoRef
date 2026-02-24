@@ -66,6 +66,8 @@ public:
     // QML-доступ к свойствам элемента (так как ImageData не Q_GADGET)
     Q_INVOKABLE qreal getItemX(int index) const;
     Q_INVOKABLE qreal getItemY(int index) const;
+    Q_INVOKABLE qreal getItemWidth(int index) const;
+    Q_INVOKABLE qreal getItemHeight(int index) const;
     Q_INVOKABLE bool isItemSelected(int index) const;
 
     // Инструменты

@@ -163,7 +163,6 @@ Dialog {
                             
                             model: ListModel {
                                 ListElement { text: "Точки"; value: "dots" }
-                                ListElement { text: "Сетка"; value: "grid" }
                                 ListElement { text: "Крестики"; value: "cross" }
                                 ListElement { text: "Без паттерна"; value: "none" }
                             }

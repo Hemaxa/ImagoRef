@@ -13,19 +13,19 @@ Item {
     required property BoardController controller
 
     // Уровень зума
-    property real zoomLevel: 1.0
-    property real minZoom: 0.25
+    property real zoomLevel: 0.5
+    property real minZoom: 0.1
     property real maxZoom: 5.0
 
     // Режимы инструментов
     property bool resizeMode: false
     property bool cropMode: false
 
-    // Паттерн сетки ("dots", "grid", "cross", "none")
+    // Паттерн сетки ("dots", "cross", "none")
     property string canvasPattern: Settings.canvasPattern
 
     // Размер сцены
-    readonly property real sceneSize: 10000
+    readonly property real sceneSize: 20000
 
     // Публичные методы зума
     function zoomIn() {
@@ -57,7 +57,10 @@ Item {
 
     function toggleResizeMode() {
         resizeMode = !resizeMode
-        if (resizeMode) cropMode = false
+        if (resizeMode) {
+            cropMode = false
+            limitSelectionToOne()
+        }
     }
 
     function exitResizeMode() {
@@ -66,11 +69,28 @@ Item {
 
     function toggleCropMode() {
         cropMode = !cropMode
-        if (cropMode) resizeMode = false
+        if (cropMode) {
+            resizeMode = false
+            limitSelectionToOne()
+        }
     }
 
     function exitCropMode() {
         cropMode = false
+    }
+
+    // Ограничивает выделение одним элементом (для инструментов resize/crop)
+    function limitSelectionToOne() {
+        var found = false
+        for (var i = 0; i < controller.model.count; i++) {
+            if (controller.isItemSelected(i)) {
+                if (found) {
+                    controller.deselectItem(i)
+                } else {
+                    found = true
+                }
+            }
+        }
     }
 
     // Фон рабочей области
@@ -110,7 +130,7 @@ Item {
                 id: gridPattern
                 anchors.fill: parent
                 anchors.margins: root.canvasPattern === "dots" || root.canvasPattern === "cross" ? -patternCanvas.gSize / 2 : 0
-                z: 1
+                z: 0
                 fillMode: Image.Tile
                 visible: root.canvasPattern !== "none"
                 source: patternCanvas.ready ? patternCanvas.toDataURL() : ""
@@ -141,15 +161,6 @@ Item {
                         ctx.beginPath()
                         ctx.arc(s / 2, s / 2, 1.5, 0, 2 * Math.PI)
                         ctx.fill()
-                    } else if (pattern === "grid") {
-                        // Линии по краям тайла
-                        ctx.lineWidth = 0.5
-                        ctx.beginPath()
-                        ctx.moveTo(0, 0)
-                        ctx.lineTo(s, 0)
-                        ctx.moveTo(0, 0)
-                        ctx.lineTo(0, s)
-                        ctx.stroke()
                     } else if (pattern === "cross") {
                         // Крестик в ЦЕНТРЕ тайла
                         var cx = s / 2
@@ -171,6 +182,16 @@ Item {
                 onPatternChanged: { ready = false; requestPaint() }
                 onGSizeChanged: { width = Math.max(gSize, 20); height = Math.max(gSize, 20); ready = false; requestPaint() }
                 Component.onCompleted: requestPaint()
+            }
+
+            // Визуальная граница рабочей области
+            Rectangle {
+                id: sceneBorder
+                anchors.fill: parent
+                color: "transparent"
+                border.color: Qt.rgba(Theme.accentColor.r, Theme.accentColor.g, Theme.accentColor.b, 0.4)
+                border.width: 3 / zoomLevel
+                z: 2
             }
 
             // Изображения (z=10 и выше)
@@ -290,6 +311,10 @@ Item {
                 cursorShape = Qt.ClosedHandCursor
             } else {
                 // Клик по пустому месту — начинаем рамочное выделение
+                // Деактивируем режимы инструментов
+                resizeMode = false
+                cropMode = false
+
                 isSelecting = true
                 selectionRect.x = mouse.x
                 selectionRect.y = mouse.y
@@ -319,6 +344,15 @@ Item {
                 var deltaY = currentScene.y - dragStartScene.y
                 var newX = dragItemStartX + deltaX
                 var newY = dragItemStartY + deltaY
+
+                // Clamping к границам рабочей области
+                var itemW = controller.getItemWidth(dragIndex)
+                var itemH = controller.getItemHeight(dragIndex)
+                if (itemW <= 0) itemW = 100
+                if (itemH <= 0) itemH = 100
+                newX = Math.max(0, Math.min(sceneSize - itemW, newX))
+                newY = Math.max(0, Math.min(sceneSize - itemH, newY))
+
                 controller.model.updatePosition(dragIndex, newX, newY)
                 cursorShape = Qt.ClosedHandCursor
             } else if (isSelecting) {

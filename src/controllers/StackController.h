@@ -3,6 +3,7 @@
 #include <QUndoCommand>
 #include <QPointF>
 #include <QRectF>
+#include <QSizeF>
 #include <QString>
 #include <QUrl>
 
@@ -101,4 +102,25 @@ private:
     ImageItemModel *m_model;
     int m_index;
     qreal m_angleDelta;
+};
+
+/**
+ * @brief CropImageCommand - команда обрезки изображения.
+ * Сохраняет позицию, размер и crop rect для undo/redo.
+ */
+class CropImageCommand : public QUndoCommand {
+public:
+    CropImageCommand(ImageItemModel *model, int index,
+                     const QPointF &oldPos, const QSizeF &oldSize, const QRectF &oldCrop,
+                     const QPointF &newPos, const QSizeF &newSize, const QRectF &newCrop,
+                     QUndoCommand *parent = nullptr);
+    void undo() override;
+    void redo() override;
+
+private:
+    ImageItemModel *m_model;
+    int m_index;
+    QPointF m_oldPos, m_newPos;
+    QSizeF m_oldSize, m_newSize;
+    QRectF m_oldCrop, m_newCrop;
 };

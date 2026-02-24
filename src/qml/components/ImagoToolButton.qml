@@ -12,6 +12,7 @@ AbstractButton {
     property string iconSource
     property string tooltip
     property string shortcutText
+    property bool active: false
     
     implicitWidth: 38
     implicitHeight: 38
@@ -23,8 +24,11 @@ AbstractButton {
     
     background: Rectangle {
         radius: 6
-        color: root.pressed ? Theme.accentPressedColor : 
+        color: root.active ? Qt.rgba(Theme.accentColor.r, Theme.accentColor.g, Theme.accentColor.b, 0.35) :
+               root.pressed ? Theme.accentPressedColor : 
                root.hovered ? Theme.accentHoverColor : "transparent"
+        border.color: root.active ? Theme.accentColor : "transparent"
+        border.width: root.active ? 1.5 : 0
     }
     
     contentItem: Item {

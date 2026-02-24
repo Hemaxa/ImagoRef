@@ -171,3 +171,32 @@ void RotateImageCommand::redo()
     ImageData item = m_model->getItem(m_index);
     m_model->updateRotation(m_index, item.rotation + m_angleDelta);
 }
+
+// ============ CropImageCommand ============
+
+CropImageCommand::CropImageCommand(ImageItemModel *model, int index,
+                                   const QPointF &oldPos, const QSizeF &oldSize, const QRectF &oldCrop,
+                                   const QPointF &newPos, const QSizeF &newSize, const QRectF &newCrop,
+                                   QUndoCommand *parent)
+    : QUndoCommand("Обрезка изображения", parent)
+    , m_model(model)
+    , m_index(index)
+    , m_oldPos(oldPos), m_newPos(newPos)
+    , m_oldSize(oldSize), m_newSize(newSize)
+    , m_oldCrop(oldCrop), m_newCrop(newCrop)
+{
+}
+
+void CropImageCommand::undo()
+{
+    m_model->updatePosition(m_index, m_oldPos.x(), m_oldPos.y());
+    m_model->updateSize(m_index, m_oldSize.width(), m_oldSize.height());
+    m_model->updateCrop(m_index, m_oldCrop.x(), m_oldCrop.y(), m_oldCrop.width(), m_oldCrop.height());
+}
+
+void CropImageCommand::redo()
+{
+    m_model->updatePosition(m_index, m_newPos.x(), m_newPos.y());
+    m_model->updateSize(m_index, m_newSize.width(), m_newSize.height());
+    m_model->updateCrop(m_index, m_newCrop.x(), m_newCrop.y(), m_newCrop.width(), m_newCrop.height());
+}

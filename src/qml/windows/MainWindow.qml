@@ -46,6 +46,15 @@ Item {
         onZoomOutClicked: canvasView.zoomOut()
         onResizeModeClicked: canvasView.toggleResizeMode()
         onCropModeClicked: canvasView.toggleCropMode()
+        onPasteClicked: {
+            var center = Qt.point(canvasView.width / 2, canvasView.height / 2)
+            var scenePos = canvasView.mapToScene(center)
+            controller.pasteFromClipboard(scenePos.x, scenePos.y)
+        }
+        
+        // Привязка состояния активных инструментов
+        resizeModeActive: canvasView.resizeMode
+        cropModeActive: canvasView.cropMode
         
         // Состояние видимости
         state: "visible"
@@ -160,8 +169,9 @@ Item {
     Shortcut {
         sequence: "Escape"
         onActivated: {
-            controller.clearSelection()
             canvasView.exitResizeMode()
+            canvasView.exitCropMode()
+            controller.clearSelection()
         }
     }
     
