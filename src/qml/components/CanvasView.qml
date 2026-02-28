@@ -288,7 +288,10 @@ Item {
 
             if (hitIdx >= 0) {
                 // Клик по изображению
-                if (mouse.modifiers & Qt.ControlModifier) {
+                if (resizeMode || cropMode) {
+                    // В режиме инструмента — всегда переключаем выделение на кликнутый элемент
+                    controller.selectItem(hitIdx, false)
+                } else if (mouse.modifiers & Qt.ControlModifier) {
                     // Ctrl — убрать из выделения
                     controller.deselectItem(hitIdx)
                 } else if (mouse.modifiers & Qt.ShiftModifier) {
@@ -301,14 +304,16 @@ Item {
                     }
                 }
 
-                // Начинаем drag выделенного элемента
-                isDragging = true
-                dragIndex = hitIdx
-                dragStartScene = scenePos
-                dragItemStartX = controller.getItemX(hitIdx)
-                dragItemStartY = controller.getItemY(hitIdx)
-                controller.beginMove(hitIdx)
-                cursorShape = Qt.ClosedHandCursor
+                // Drag только если инструменты не активны
+                if (!resizeMode && !cropMode) {
+                    isDragging = true
+                    dragIndex = hitIdx
+                    dragStartScene = scenePos
+                    dragItemStartX = controller.getItemX(hitIdx)
+                    dragItemStartY = controller.getItemY(hitIdx)
+                    controller.beginMove(hitIdx)
+                    cursorShape = Qt.ClosedHandCursor
+                }
             } else {
                 // Клик по пустому месту — начинаем рамочное выделение
                 // Деактивируем режимы инструментов

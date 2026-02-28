@@ -289,6 +289,13 @@ Item {
     }
     
     onVisibleChanged: {
-        if (visible) forceActiveFocus()
+        if (visible) {
+            // Сброс области обрезки при новом показе
+            cropX = target.width * 0.1
+            cropY = target.height * 0.1
+            cropW = target.width * 0.8
+            cropH = target.height * 0.8
+            forceActiveFocus()
+        }
     }
 }

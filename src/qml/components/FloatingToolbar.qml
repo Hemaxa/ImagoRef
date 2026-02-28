@@ -82,20 +82,20 @@ Rectangle {
         ImagoToolButton {
             iconSource: "qrc:/icons/icons/grid.svg"
             tooltip: "Привязать к сетке"
-            shortcutText: "Ctrl+G"
+            shortcutText: "G"
             onClicked: controller.snapToGrid()
         }
         ImagoToolButton {
             iconSource: "qrc:/icons/icons/resize.svg"
             tooltip: "Изменить размер"
-            shortcutText: "Ctrl+E"
+            shortcutText: "S"
             active: root.resizeModeActive
             onClicked: root.resizeModeClicked()
         }
         ImagoToolButton {
             iconSource: "qrc:/icons/icons/crop.svg"
             tooltip: "Обрезать"
-            shortcutText: "Ctrl+Shift+X"
+            shortcutText: "C"
             active: root.cropModeActive
             onClicked: root.cropModeClicked()
             enabled: controller.hasSelection
@@ -103,13 +103,13 @@ Rectangle {
         ImagoToolButton {
             iconSource: "qrc:/icons/icons/rotate-left.svg"
             tooltip: "Вращать против часовой"
-            shortcutText: "Ctrl+Shift+R"
+            shortcutText: "Shift+R"
             onClicked: controller.rotateSelected(-90)
         }
         ImagoToolButton {
             iconSource: "qrc:/icons/icons/rotate-right.svg"
             tooltip: "Вращать по часовой"
-            shortcutText: "Ctrl+R"
+            shortcutText: "R"
             onClicked: controller.rotateSelected(90)
         }
         

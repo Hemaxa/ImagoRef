@@ -4,22 +4,51 @@ import QtQuick.Layouts
 
 /**
  * SettingsWindow.qml - диалог настроек приложения.
+ * Оформлен в стиле основного приложения (тёмный фон, акцентные элементы).
  */
 Dialog {
     id: root
     
-    title: "Настройки"
-    width: 750
-    height: 450
+    title: ""
+    width: 700
+    height: 420
     modal: true
     
-    standardButtons: Dialog.Ok | Dialog.Cancel
+    standardButtons: Dialog.NoButton
     
     background: Rectangle {
         color: Theme.backgroundColor
-        border.color: Theme.borderColor
-        border.width: 1
-        radius: 8
+        border.color: Theme.accentColor
+        border.width: 2
+        radius: 12
+    }
+    
+    // Пользовательский заголовок
+    header: Item {
+        height: 48
+        
+        Rectangle {
+            anchors.fill: parent
+            color: Qt.rgba(Theme.accentColor.r, Theme.accentColor.g, Theme.accentColor.b, 0.15)
+            radius: 12
+            
+            // Скругление только сверху
+            Rectangle {
+                anchors.bottom: parent.bottom
+                anchors.left: parent.left
+                anchors.right: parent.right
+                height: 12
+                color: parent.color
+            }
+        }
+        
+        Text {
+            anchors.centerIn: parent
+            text: "Настройки"
+            font.pixelSize: 16
+            font.bold: true
+            color: Theme.accentColor
+        }
     }
     
     onAccepted: {
@@ -37,7 +66,7 @@ Dialog {
         // Навигационный список
         ListView {
             id: navigationList
-            Layout.preferredWidth: 180
+            Layout.preferredWidth: 160
             Layout.fillHeight: true
             currentIndex: 0
             
@@ -48,18 +77,23 @@ Dialog {
             
             delegate: ItemDelegate {
                 width: navigationList.width
-                height: 44
+                height: 42
                 
                 background: Rectangle {
-                    color: navigationList.currentIndex === index ? Theme.accentColor : "transparent"
-                    radius: 10
+                    color: navigationList.currentIndex === index 
+                           ? Qt.rgba(Theme.accentColor.r, Theme.accentColor.g, Theme.accentColor.b, 0.25)
+                           : (hovered ? Qt.rgba(Theme.accentColor.r, Theme.accentColor.g, Theme.accentColor.b, 0.1) : "transparent")
+                    radius: 8
+                    border.color: navigationList.currentIndex === index ? Theme.accentColor : "transparent"
+                    border.width: 1
                 }
                 
                 contentItem: Text {
                     text: model.name
-                    color: navigationList.currentIndex === index ? Theme.backgroundColor : Theme.textColor
+                    color: navigationList.currentIndex === index ? Theme.accentColor : Theme.textColor
+                    font.bold: navigationList.currentIndex === index
                     verticalAlignment: Text.AlignVCenter
-                    leftPadding: 10
+                    leftPadding: 12
                 }
                 
                 onClicked: navigationList.currentIndex = index
@@ -70,9 +104,16 @@ Dialog {
                 color: "transparent"
                 border.color: Theme.borderColor
                 border.width: 1
-                radius: 12
+                radius: 8
                 z: -1
             }
+        }
+        
+        // Разделитель
+        Rectangle {
+            Layout.fillHeight: true
+            Layout.preferredWidth: 1
+            color: Theme.borderColor
         }
         
         // Страницы настроек
@@ -85,16 +126,17 @@ Dialog {
             Item {
                 ColumnLayout {
                     anchors.fill: parent
-                    anchors.margins: 20
-                    spacing: 20
+                    anchors.margins: 15
+                    spacing: 18
                     
                     // Шаг сетки
                     RowLayout {
-                        spacing: 30
+                        spacing: 0
                         
                         Label {
-                            text: "Шаг сетки:"
+                            text: "Шаг сетки"
                             color: Theme.textColor
+                            Layout.preferredWidth: 160
                         }
                         
                         SpinBox {
@@ -103,6 +145,7 @@ Dialog {
                             to: 200
                             value: Settings.gridSize
                             editable: true
+                            Layout.preferredWidth: 180
                             
                             textFromValue: function(value) {
                                 return value + " px"
@@ -111,21 +154,40 @@ Dialog {
                             valueFromText: function(text) {
                                 return parseInt(text.replace(" px", ""))
                             }
+                            
+                            background: Rectangle {
+                                color: Theme.controlBackground
+                                border.color: Theme.borderColor
+                                border.width: 1
+                                radius: 6
+                            }
+                            
+                            contentItem: TextInput {
+                                text: gridSizeSpinBox.textFromValue(gridSizeSpinBox.value, gridSizeSpinBox.locale)
+                                font.pixelSize: 13
+                                color: Theme.textColor
+                                horizontalAlignment: Text.AlignHCenter
+                                verticalAlignment: Text.AlignVCenter
+                                readOnly: !gridSizeSpinBox.editable
+                                validator: gridSizeSpinBox.validator
+                                inputMethodHints: Qt.ImhFormattedNumbersOnly
+                            }
                         }
                     }
                     
                     // Тема интерфейса
                     RowLayout {
-                        spacing: 30
+                        spacing: 0
                         
                         Label {
-                            text: "Тема интерфейса:"
+                            text: "Тема интерфейса"
                             color: Theme.textColor
+                            Layout.preferredWidth: 160
                         }
                         
                         ComboBox {
                             id: themeComboBox
-                            Layout.preferredWidth: 200
+                            Layout.preferredWidth: 180
                             
                             model: ListModel {
                                 ListElement { text: "Imago"; value: "imago" }
@@ -142,6 +204,21 @@ Dialog {
                             textRole: "text"
                             valueRole: "value"
                             
+                            background: Rectangle {
+                                color: Theme.controlBackground
+                                border.color: Theme.borderColor
+                                border.width: 1
+                                radius: 6
+                            }
+                            
+                            contentItem: Text {
+                                text: themeComboBox.displayText
+                                font.pixelSize: 13
+                                color: Theme.textColor
+                                verticalAlignment: Text.AlignVCenter
+                                leftPadding: 10
+                            }
+                            
                             Component.onCompleted: {
                                 currentIndex = indexOfValue(Settings.themeName)
                             }
@@ -150,16 +227,17 @@ Dialog {
                     
                     // Паттерн рабочей области
                     RowLayout {
-                        spacing: 30
+                        spacing: 0
                         
                         Label {
-                            text: "Паттерн холста:"
+                            text: "Паттерн холста"
                             color: Theme.textColor
+                            Layout.preferredWidth: 160
                         }
                         
                         ComboBox {
                             id: patternComboBox
-                            Layout.preferredWidth: 200
+                            Layout.preferredWidth: 180
                             
                             model: ListModel {
                                 ListElement { text: "Точки"; value: "dots" }
@@ -169,6 +247,21 @@ Dialog {
                             
                             textRole: "text"
                             valueRole: "value"
+                            
+                            background: Rectangle {
+                                color: Theme.controlBackground
+                                border.color: Theme.borderColor
+                                border.width: 1
+                                radius: 6
+                            }
+                            
+                            contentItem: Text {
+                                text: patternComboBox.displayText
+                                font.pixelSize: 13
+                                color: Theme.textColor
+                                verticalAlignment: Text.AlignVCenter
+                                leftPadding: 10
+                            }
                             
                             Component.onCompleted: {
                                 currentIndex = indexOfValue(Settings.canvasPattern)
@@ -186,95 +279,131 @@ Dialog {
                 
                 ColumnLayout {
                     width: parent.width
-                    spacing: 15
+                    spacing: 10
                     
                     // Навигация и холст
                     Label {
                         text: "Навигация и холст"
                         font.bold: true
-                        font.pixelSize: 15
-                        color: Theme.textColor
-                        
-                        Rectangle {
-                            anchors.bottom: parent.bottom
-                            width: parent.width
-                            height: 1
-                            color: Theme.accentColor
-                        }
+                        font.pixelSize: 14
+                        color: Theme.accentColor
+                        bottomPadding: 2
                     }
                     
-                    HotkeyRow { description: "Перемещение холста:"; keys: "Зажать среднюю кнопку мыши" }
-                    HotkeyRow { description: "Масштабирование:"; keys: "Ctrl/Cmd + Колесико мыши" }
-                    HotkeyRow { description: "Приблизить:"; keys: "Ctrl/Cmd + Плюс (+)" }
-                    HotkeyRow { description: "Отдалить:"; keys: "Ctrl/Cmd + Минус (-)" }
-                    HotkeyRow { description: "Привязать все к сетке:"; keys: "Ctrl + G" }
+                    HotkeyRow { description: "Перемещение холста:"; keys: "Зажать ⌥ / среднюю кнопку мыши" }
+                    HotkeyRow { description: "Масштабирование:"; keys: "⌘/Ctrl + Колесико мыши" }
+                    HotkeyRow { description: "Приблизить:"; keys: "⌘/Ctrl + +" }
+                    HotkeyRow { description: "Отдалить:"; keys: "⌘/Ctrl + -" }
+                    HotkeyRow { description: "Привязать к сетке:"; keys: "G" }
                     
-                    Item { height: 10 }
+                    Item { height: 8 }
                     
                     // Управление элементами
                     Label {
                         text: "Управление элементами"
                         font.bold: true
-                        font.pixelSize: 15
-                        color: Theme.textColor
-                        
-                        Rectangle {
-                            anchors.bottom: parent.bottom
-                            width: parent.width
-                            height: 1
-                            color: Theme.accentColor
-                        }
+                        font.pixelSize: 14
+                        color: Theme.accentColor
+                        bottomPadding: 2
                     }
                     
-                    HotkeyRow { description: "Вставить из буфера:"; keys: "Ctrl/Cmd + V" }
-                    HotkeyRow { description: "Удалить выделенное:"; keys: "Delete/Backspace" }
-                    HotkeyRow { description: "Отменить действие:"; keys: "Ctrl/Cmd + Z" }
-                    HotkeyRow { description: "Повторить действие:"; keys: "Ctrl/Cmd + Shift + Z" }
+                    HotkeyRow { description: "Выделить все:"; keys: "⌘/Ctrl + A" }
+                    HotkeyRow { description: "Вставить из буфера:"; keys: "⌘/Ctrl + V" }
+                    HotkeyRow { description: "Удалить выделенное:"; keys: "Delete / Backspace" }
+                    HotkeyRow { description: "Отменить действие:"; keys: "⌘/Ctrl + Z" }
+                    HotkeyRow { description: "Повторить действие:"; keys: "⌘/Ctrl + Shift + Z" }
                     
-                    Item { height: 10 }
+                    Item { height: 8 }
                     
                     // Трансформации
                     Label {
                         text: "Трансформации"
                         font.bold: true
-                        font.pixelSize: 15
-                        color: Theme.textColor
-                        
-                        Rectangle {
-                            anchors.bottom: parent.bottom
-                            width: parent.width
-                            height: 1
-                            color: Theme.accentColor
-                        }
+                        font.pixelSize: 14
+                        color: Theme.accentColor
+                        bottomPadding: 2
                     }
                     
-                    HotkeyRow { description: "Режим изменения размера:"; keys: "Ctrl + E" }
-                    HotkeyRow { description: "Вращать по часовой:"; keys: "Ctrl + R" }
-                    HotkeyRow { description: "Вращать против часовой:"; keys: "Ctrl + Shift + R" }
+                    HotkeyRow { description: "Изменить размер:"; keys: "S" }
+                    HotkeyRow { description: "Обрезать:"; keys: "C" }
+                    HotkeyRow { description: "Вращать по часовой:"; keys: "R" }
+                    HotkeyRow { description: "Вращать против часовой:"; keys: "Shift + R" }
                     HotkeyRow { description: "Сохранять пропорции:"; keys: "Зажать Shift" }
                     
-                    Item { height: 10 }
+                    Item { height: 8 }
                     
                     // Интерфейс
                     Label {
                         text: "Интерфейс"
                         font.bold: true
-                        font.pixelSize: 15
-                        color: Theme.textColor
-                        
-                        Rectangle {
-                            anchors.bottom: parent.bottom
-                            width: parent.width
-                            height: 1
-                            color: Theme.accentColor
-                        }
+                        font.pixelSize: 14
+                        color: Theme.accentColor
+                        bottomPadding: 2
                     }
                     
                     HotkeyRow { description: "Скрыть/показать панель:"; keys: "Tab" }
-                    HotkeyRow { description: "Открыть настройки:"; keys: "Ctrl/Cmd + ," }
+                    HotkeyRow { description: "Открыть настройки:"; keys: "⌘/Ctrl + ," }
+                    HotkeyRow { description: "Сбросить инструменты:"; keys: "Escape" }
                     
                     Item { Layout.fillHeight: true }
                 }
+            }
+        }
+    }
+    
+    // Кнопки OK / Отмена
+    footer: Item {
+        height: 52
+        
+        RowLayout {
+            anchors.right: parent.right
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.rightMargin: 15
+            spacing: 10
+            
+            // Отмена
+            AbstractButton {
+                Layout.preferredWidth: 90
+                Layout.preferredHeight: 32
+                
+                background: Rectangle {
+                    color: hovered ? Qt.rgba(Theme.textColor.r, Theme.textColor.g, Theme.textColor.b, 0.1) : "transparent"
+                    border.color: Theme.borderColor
+                    border.width: 1
+                    radius: 6
+                }
+                
+                contentItem: Text {
+                    text: "Отмена"
+                    color: Theme.textColor
+                    font.pixelSize: 13
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                }
+                
+                onClicked: root.reject()
+            }
+            
+            // OK
+            AbstractButton {
+                Layout.preferredWidth: 90
+                Layout.preferredHeight: 32
+                
+                background: Rectangle {
+                    color: hovered ? Theme.accentPressedColor : Theme.accentColor
+                    radius: 6
+                }
+                
+                contentItem: Text {
+                    text: "Применить"
+                    color: Theme.backgroundColor
+                    font.pixelSize: 13
+                    font.bold: true
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                }
+                
+                onClicked: root.accept()
             }
         }
     }
@@ -284,15 +413,18 @@ Dialog {
         property string description
         property string keys
         
-        spacing: 20
+        spacing: 0
         
         Label {
             text: description
-            color: Theme.textColor
+            color: Qt.rgba(Theme.textColor.r, Theme.textColor.g, Theme.textColor.b, 0.7)
+            font.pixelSize: 12
+            Layout.preferredWidth: 200
         }
         
         Label {
             text: keys
+            font.pixelSize: 12
             font.bold: true
             color: Theme.textColor
         }

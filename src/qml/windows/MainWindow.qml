@@ -92,7 +92,7 @@ Item {
         onActivated: controller.deleteSelected()
     }
     
-    // Paste - вставить из буфера
+    // Paste - вставить из буфера (Ctrl/Cmd+V)
     Shortcut {
         sequence: StandardKey.Paste
         onActivated: {
@@ -102,13 +102,13 @@ Item {
         }
     }
     
-    // Open
+    // Open (Ctrl/Cmd+O)
     Shortcut {
         sequence: StandardKey.Open
         onActivated: fileOpenDialog.open()
     }
     
-    // Save
+    // Save (Ctrl/Cmd+S)
     Shortcut {
         sequence: StandardKey.Save
         onActivated: {
@@ -120,30 +120,31 @@ Item {
         }
     }
     
-    // Save As
+    // Save As (Ctrl/Cmd+Shift+S)
     Shortcut {
         sequence: StandardKey.SaveAs
         onActivated: fileSaveDialog.open()
     }
     
-    // Snap to grid
+    // Snap to grid — G
     Shortcut {
-        sequence: "Ctrl+G"
+        sequence: "G"
         onActivated: controller.snapToGrid()
     }
     
-    // Rotate
+    // Rotate clockwise — R
     Shortcut {
-        sequence: "Ctrl+R"
+        sequence: "R"
         onActivated: controller.rotateSelected(90)
     }
     
+    // Rotate counter-clockwise — Shift+R
     Shortcut {
-        sequence: "Ctrl+Shift+R"
+        sequence: "Shift+R"
         onActivated: controller.rotateSelected(-90)
     }
     
-    // Undo/Redo
+    // Undo/Redo (Ctrl/Cmd+Z, Ctrl/Cmd+Shift+Z)
     Shortcut {
         sequence: StandardKey.Undo
         onActivated: controller.undo()
@@ -154,18 +155,18 @@ Item {
         onActivated: controller.redo()
     }
     
-    // Zoom
+    // Zoom (Ctrl/Cmd +/-)
     Shortcut {
-        sequences: ["Ctrl+=", "Ctrl++"]
+        sequences: ["Ctrl+=", "Ctrl++", "Meta+=", "Meta++"]
         onActivated: canvasView.zoomIn()
     }
     
     Shortcut {
-        sequences: ["Ctrl+-"]
+        sequences: ["Ctrl+-", "Meta+-"]
         onActivated: canvasView.zoomOut()
     }
     
-    // Escape - сбросить выделение и режим ресайза
+    // Escape - сбросить инструменты и выделение
     Shortcut {
         sequence: "Escape"
         onActivated: {
@@ -175,13 +176,19 @@ Item {
         }
     }
     
-    // Resize mode
+    // Resize mode — S
     Shortcut {
-        sequence: "Ctrl+E"
+        sequence: "S"
         onActivated: canvasView.toggleResizeMode()
     }
     
-    // Select all
+    // Crop mode — C
+    Shortcut {
+        sequence: "C"
+        onActivated: canvasView.toggleCropMode()
+    }
+    
+    // Select all (Ctrl/Cmd+A)
     Shortcut {
         sequence: StandardKey.SelectAll
         onActivated: controller.selectAll()
