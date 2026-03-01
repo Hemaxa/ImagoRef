@@ -27,7 +27,7 @@ Rectangle {
     property bool cropModeActive: false
     
     width: 58
-    height: toolbarLayout.height + 16
+    height: toolbarLayout.height + 6
     color: Theme.panelColor
     border.color: Theme.borderColor
     border.width: 3
@@ -37,8 +37,8 @@ Rectangle {
         id: toolbarLayout
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
-        anchors.topMargin: 8
-        spacing: 5
+        anchors.topMargin: 3
+        spacing: 3
         
         // Файловые операции
         ImagoToolButton {

@@ -3,8 +3,9 @@ import QtQuick.Controls
 import ImagoRef
 
 /**
- * ToolButton.qml - анимированная кнопка для панели инструментов.
- * Поддерживает SVG иконки и анимацию масштаба.
+ * ImagoToolButton.qml - кнопка панели инструментов.
+ * Иконка отображается на всю ширину кнопки.
+ * Новые SVG-иконки содержат встроенный цветной фон.
  */
 AbstractButton {
     id: root
@@ -14,32 +15,51 @@ AbstractButton {
     property string shortcutText
     property bool active: false
     
-    implicitWidth: 38
-    implicitHeight: 38
+    implicitWidth: 52
+    implicitHeight: 52
     
     opacity: enabled ? 1.0 : 0.4
     
-    // Масштаб иконки для анимации
+    // Масштаб для анимации
     property real iconScale: 1.0
     
-    background: Rectangle {
-        radius: 6
-        color: root.active ? Qt.rgba(Theme.accentColor.r, Theme.accentColor.g, Theme.accentColor.b, 0.35) :
-               root.pressed ? Theme.accentPressedColor : 
-               root.hovered ? Theme.accentHoverColor : "transparent"
-        border.color: root.active ? Theme.accentColor : "transparent"
-        border.width: root.active ? 1.5 : 0
-    }
+    background: Item {}
     
     contentItem: Item {
-        Image {
-            id: iconImage
-            anchors.centerIn: parent
-            width: 22 * root.iconScale
-            height: 22 * root.iconScale
-            source: root.iconSource
-            sourceSize: Qt.size(22, 22)
-            smooth: true
+        // Контейнер для закругления
+        Rectangle {
+            id: clipRect
+            anchors.fill: parent
+            radius: 6
+            clip: true
+            color: "transparent"
+            
+            Image {
+                id: iconImage
+                anchors.centerIn: parent
+                width: parent.width * root.iconScale
+                height: parent.height * root.iconScale
+                source: root.iconSource
+                sourceSize: Qt.size(100, 100)
+                smooth: true
+                fillMode: Image.PreserveAspectFit
+            }
+        }
+        
+        // Обводка для active состояния
+        Rectangle {
+            anchors.fill: parent
+            radius: 6
+            color: "transparent"
+            border.color: root.active ? Theme.accentColor : "transparent"
+            border.width: root.active ? 2 : 0
+        }
+        
+        // Затемнение при нажатии
+        Rectangle {
+            anchors.fill: parent
+            radius: 6
+            color: root.pressed ? Qt.rgba(0, 0, 0, 0.25) : "transparent"
         }
     }
     
@@ -50,7 +70,7 @@ AbstractButton {
             when: root.hovered && !root.pressed
             PropertyChanges {
                 target: root
-                iconScale: 1.15
+                iconScale: 1.08
             }
         }
     ]
