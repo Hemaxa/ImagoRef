@@ -52,13 +52,44 @@ Item {
                         : undefined
     }
 
-    // Подпись над изображением
+    // Подпись над изображением — всегда горизонтальна, над визуальным верхом картинки
     Rectangle {
         id: labelBackground
         visible: root.modelLabel !== ""
-        anchors.bottom: parent.top
-        anchors.left: parent.left
-        anchors.bottomMargin: 4 / root.zoomLevel
+        
+        // Компенсируем поворот — текст всегда горизонтален
+        rotation: -root.rotation
+        transformOrigin: Item.TopLeft
+        
+        // Вычисляем позицию визуального верхнего левого угла bounding box в локальных координатах
+        property real _rad: root.rotation * Math.PI / 180.0
+        property real _cos: Math.cos(_rad)
+        property real _sin: Math.sin(_rad)
+        // 4 угла элемента в координатах сцены (относительно центра)
+        property real _cx: root.itemWidth / 2
+        property real _cy: root.itemHeight / 2
+        // Смещения углов от центра, повёрнутые
+        property var _corners: [
+            { sx: -_cx * _cos + _cy * _sin, sy: -_cx * _sin - _cy * _cos }, // top-left
+            { sx:  _cx * _cos + _cy * _sin, sy:  _cx * _sin - _cy * _cos }, // top-right
+            { sx:  _cx * _cos - _cy * _sin, sy:  _cx * _sin + _cy * _cos }, // bottom-right
+            { sx: -_cx * _cos - _cy * _sin, sy: -_cx * _sin + _cy * _cos }  // bottom-left
+        ]
+        // Bounding box min в coordinatах сцены (от центра)
+        property real _bbMinX: Math.min(_corners[0].sx, _corners[1].sx, _corners[2].sx, _corners[3].sx)
+        property real _bbMinY: Math.min(_corners[0].sy, _corners[1].sy, _corners[2].sy, _corners[3].sy)
+        // Позиция в сцене (top-left bounding box) — пересчитываем обратно в локальные координаты
+        // localPos = rotate(-θ, sceneOffset) + center
+        property real _labelSceneX: _cx + _bbMinX
+        property real _labelSceneY: _cy + _bbMinY - height - 4 / root.zoomLevel
+        // Обратный поворот из сцены в локальные координаты
+        property real _offX: _labelSceneX - _cx
+        property real _offY: _labelSceneY - _cy
+        property real _localX: _offX * _cos + _offY * _sin + _cx
+        property real _localY: -_offX * _sin + _offY * _cos + _cy
+        
+        x: _localX
+        y: _localY
         width: labelText.implicitWidth + 12 / root.zoomLevel
         height: labelText.implicitHeight + 6 / root.zoomLevel
         color: Qt.rgba(0, 0, 0, 0.65)

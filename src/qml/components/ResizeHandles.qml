@@ -90,62 +90,68 @@ Item {
                 onPositionChanged: function(mouse) {
                     if (!pressed) return
                     
-                    // Map to Scene (target.parent) because target moves/resizes
                     var pos = mapToItem(target.parent, mouse.x, mouse.y)
-                    
-                    // Delta in Scene coordinates
-                    var dx = pos.x - lastPos.x
-                    var dy = pos.y - lastPos.y
+                    var sceneDx = pos.x - lastPos.x
+                    var sceneDy = pos.y - lastPos.y
                     lastPos = pos
                     
-                    // Читаем текущие значения из модели (не из target, чтобы не ломать bindings)
-                    var newX = controller.getItemX(itemIndex)
-                    var newY = controller.getItemY(itemIndex)
-                    var newW = controller.getItemWidth(itemIndex)
-                    var newH = controller.getItemHeight(itemIndex)
+                    // Поворот: переводим дельту из сцены в локальные координаты
+                    var rad = target.rotation * Math.PI / 180.0
+                    var cosR = Math.cos(rad)
+                    var sinR = Math.sin(rad)
+                    var localDx =  sceneDx * cosR + sceneDy * sinR
+                    var localDy = -sceneDx * sinR + sceneDy * cosR
                     
-                    // Пропорциональное изменение при Shift
-                    var keepAspect = mouse.modifiers & Qt.ShiftModifier
-                    var aspectRatio = startSize.width / startSize.height
+                    var x = controller.getItemX(itemIndex)
+                    var y = controller.getItemY(itemIndex)
+                    var w = controller.getItemWidth(itemIndex)
+                    var h = controller.getItemHeight(itemIndex)
+                    var cx = x + w / 2
+                    var cy = y + h / 2
                     
+                    // Якорная точка (противоположный угол/сторона) в локальных координатах от центра
+                    var anchorOffX = 0, anchorOffY = 0
                     switch (handleType) {
-                        case 0: // TopLeft
-                            newX += dx; newY += dy
-                            newW -= dx; newH -= dy
-                            break
-                        case 1: // Top
-                            newY += dy; newH -= dy
-                            break
-                        case 2: // TopRight
-                            newY += dy
-                            newW += dx; newH -= dy
-                            break
-                        case 3: // Right
-                            newW += dx
-                            break
-                        case 4: // BottomRight
-                            newW += dx; newH += dy
-                            break
-                        case 5: // Bottom
-                            newH += dy
-                            break
-                        case 6: // BottomLeft
-                            newX += dx
-                            newW -= dx; newH += dy
-                            break
-                        case 7: // Left
-                            newX += dx; newW -= dx
-                            break
+                        case 0: anchorOffX =  w/2; anchorOffY =  h/2; break // TopLeft → BottomRight
+                        case 1: anchorOffX =  0;   anchorOffY =  h/2; break // Top → Bottom center
+                        case 2: anchorOffX = -w/2; anchorOffY =  h/2; break // TopRight → BottomLeft
+                        case 3: anchorOffX = -w/2; anchorOffY =  0;   break // Right → Left center
+                        case 4: anchorOffX = -w/2; anchorOffY = -h/2; break // BottomRight → TopLeft
+                        case 5: anchorOffX =  0;   anchorOffY = -h/2; break // Bottom → Top center
+                        case 6: anchorOffX =  w/2; anchorOffY = -h/2; break // BottomLeft → TopRight
+                        case 7: anchorOffX =  w/2; anchorOffY =  0;   break // Left → Right center
                     }
                     
-                    // Пропорциональность
+                    // Позиция якоря в координатах сцены
+                    var anchorSceneX = cx + anchorOffX * cosR - anchorOffY * sinR
+                    var anchorSceneY = cy + anchorOffX * sinR + anchorOffY * cosR
+                    
+                    // Изменение размера в локальных координатах
+                    var dw = 0, dh = 0
+                    switch (handleType) {
+                        case 0: dw = -localDx; dh = -localDy; break
+                        case 1: dh = -localDy; break
+                        case 2: dw =  localDx; dh = -localDy; break
+                        case 3: dw =  localDx; break
+                        case 4: dw =  localDx; dh =  localDy; break
+                        case 5: dh =  localDy; break
+                        case 6: dw = -localDx; dh =  localDy; break
+                        case 7: dw = -localDx; break
+                    }
+                    
+                    var newW = w + dw
+                    var newH = h + dh
+                    
+                    // Пропорциональность (Shift)
+                    var keepAspect = mouse.modifiers & Qt.ShiftModifier
+                    var aspectRatio = startSize.width / startSize.height
                     if (keepAspect) {
                         if (handleType === 1 || handleType === 5) {
                             newW = newH * aspectRatio
                         } else if (handleType === 3 || handleType === 7) {
                             newH = newW / aspectRatio
                         } else {
-                            if (Math.abs(dx) > Math.abs(dy)) {
+                            if (Math.abs(localDx) > Math.abs(localDy)) {
                                 newH = newW / aspectRatio
                             } else {
                                 newW = newH * aspectRatio
@@ -153,11 +159,29 @@ Item {
                         }
                     }
                     
-                    // Минимальный размер — обновляем через модель, чтобы не ломать bindings
-                    if (newW >= 20 && newH >= 20) {
-                        controller.model.updatePosition(itemIndex, newX, newY)
-                        controller.model.updateSize(itemIndex, newW, newH)
+                    if (newW < 20 || newH < 20) return
+                    
+                    // Новое смещение якоря от нового центра
+                    var newAnchorOffX = 0, newAnchorOffY = 0
+                    switch (handleType) {
+                        case 0: newAnchorOffX =  newW/2; newAnchorOffY =  newH/2; break
+                        case 1: newAnchorOffX =  0;      newAnchorOffY =  newH/2; break
+                        case 2: newAnchorOffX = -newW/2; newAnchorOffY =  newH/2; break
+                        case 3: newAnchorOffX = -newW/2; newAnchorOffY =  0;      break
+                        case 4: newAnchorOffX = -newW/2; newAnchorOffY = -newH/2; break
+                        case 5: newAnchorOffX =  0;      newAnchorOffY = -newH/2; break
+                        case 6: newAnchorOffX =  newW/2; newAnchorOffY = -newH/2; break
+                        case 7: newAnchorOffX =  newW/2; newAnchorOffY =  0;      break
                     }
+                    
+                    // Новый центр: якорь должен остаться на месте
+                    var newCx = anchorSceneX - newAnchorOffX * cosR + newAnchorOffY * sinR
+                    var newCy = anchorSceneY - newAnchorOffX * sinR - newAnchorOffY * cosR
+                    var newX = newCx - newW / 2
+                    var newY = newCy - newH / 2
+                    
+                    controller.model.updatePosition(itemIndex, newX, newY)
+                    controller.model.updateSize(itemIndex, newW, newH)
                 }
                 
                 onReleased: {
