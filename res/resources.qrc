@@ -31,6 +31,8 @@
         <file>icons/undo.svg</file>
         <file>icons/rotate_left.svg</file>
         <file>icons/rotate_right.svg</file>
+        <file>icons/label.svg</file>
+        <file>icons/arrange.svg</file>
     </qresource>
     <qresource prefix="/graphics">
         <file>graphics/text-logo.png</file>

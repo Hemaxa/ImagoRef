@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <style>
+      .bg1 { fill: #ffd6a5; }
+      .bg2 { fill: #ffb366; }
+      .icon { fill: #333; }
+    </style>
+  </defs>
+  <g id="Background">
+    <rect class="bg1" width="100" height="100"/>
+    <path class="bg2" d="M100,0v100H40c10-20-5-50,15-60C75,30,90,15,100,0Z"/>
+  </g>
+  <g id="Icon">
+    <!-- Grid/arrange icon: 4 rectangles arranged in a grid -->
+    <rect class="icon" x="18" y="18" width="26" height="26" rx="4"/>
+    <rect class="icon" x="56" y="18" width="26" height="26" rx="4"/>
+    <rect class="icon" x="18" y="56" width="26" height="26" rx="4"/>
+    <rect class="icon" x="56" y="56" width="26" height="26" rx="4"/>
+  </g>
+</svg>

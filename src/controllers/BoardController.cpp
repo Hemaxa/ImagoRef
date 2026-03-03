@@ -121,6 +121,7 @@ bool BoardController::openBoard(const QUrl &fileUrl)
                 data.height = itemObj["height"].toDouble();
                 data.rotation = itemObj["rotation"].toDouble();
                 data.zValue = itemObj["zValue"].toDouble();
+                data.label = itemObj["label"].toString();
                 m_model->addImage(data);
             }
         }
@@ -160,6 +161,7 @@ bool BoardController::saveBoardAs(const QUrl &fileUrl)
         itemObj["height"] = item.height;
         itemObj["rotation"] = item.rotation;
         itemObj["zValue"] = item.zValue;
+        itemObj["label"] = item.label;
 
         // Сохраняем изображение как base64
         QByteArray byteArray;
@@ -494,6 +496,122 @@ void BoardController::cropImage(int index, qreal cropX, qreal cropY, qreal cropW
         QPointF(newX, newY), QSizeF(cropWidth, cropHeight),
         QRectF(newSourceCropX, newSourceCropY, newSourceCropW, newSourceCropH)
     ));
+}
+
+void BoardController::setLabelForSelected(const QString &label)
+{
+    QVariantList indices = m_model->selectedIndices();
+    if (indices.isEmpty()) return;
+
+    m_undoStack->beginMacro("Подписать изображения");
+
+    for (const QVariant &v : indices) {
+        int idx = v.toInt();
+        ImageData item = m_model->getItem(idx);
+        if (item.label != label) {
+            m_undoStack->push(new SetLabelCommand(m_model, idx, item.label, label));
+        }
+    }
+
+    m_undoStack->endMacro();
+}
+
+void BoardController::arrangeAll()
+{
+    int count = m_model->count();
+    if (count == 0) return;
+
+    int spacing = SettingsManager::instance().arrangeSpacing();
+
+    // Собираем все элементы с учётом повёрнутых bounding box
+    struct ItemInfo {
+        int index;
+        qreal itemWidth;   // Оригинальная ширина элемента
+        qreal itemHeight;  // Оригинальная высота элемента
+        qreal bbWidth;     // Ширина bounding box с учётом поворота
+        qreal bbHeight;    // Высота bounding box с учётом поворота
+    };
+    
+    QVector<ItemInfo> items;
+    items.reserve(count);
+    qreal totalArea = 0;
+    
+    for (int i = 0; i < count; ++i) {
+        ImageData data = m_model->getItem(i);
+        
+        // Вычисляем bounding box повёрнутого элемента
+        qreal rad = std::fabs(data.rotation) * M_PI / 180.0;
+        qreal cosA = std::fabs(std::cos(rad));
+        qreal sinA = std::fabs(std::sin(rad));
+        qreal bbW = data.width * cosA + data.height * sinA;
+        qreal bbH = data.width * sinA + data.height * cosA;
+        
+        items.append({i, data.width, data.height, bbW, bbH});
+        totalArea += (bbW + spacing) * (bbH + spacing);
+    }
+
+    // Сортируем по высоте bounding box (убывание) для shelf-packing
+    std::sort(items.begin(), items.end(), [](const ItemInfo &a, const ItemInfo &b) {
+        return a.bbHeight > b.bbHeight;
+    });
+
+    // Вычисляем оптимальную ширину ряда из общей площади — стремимся к квадратному расположению
+    qreal maxRowWidth = std::sqrt(totalArea) * 1.3;
+    if (maxRowWidth < 800) maxRowWidth = 800;
+
+    // Начальная позиция (центрируем вокруг центра сцены)
+    qreal startX = 10000.0 - maxRowWidth / 2.0;
+    
+    // Предвычисляем общую высоту для центрирования по Y
+    qreal totalHeight = 0;
+    {
+        qreal cx = 0, rh = 0;
+        for (const auto &item : items) {
+            if (cx + item.bbWidth > maxRowWidth && cx > 0) {
+                totalHeight += rh + spacing;
+                cx = 0;
+                rh = 0;
+            }
+            cx += item.bbWidth + spacing;
+            rh = std::max(rh, item.bbHeight);
+        }
+        totalHeight += rh;
+    }
+    qreal startY = 10000.0 - totalHeight / 2.0;
+
+    // Shelf-packing с bounding box размерами
+    QVector<int> sortedIndices;
+    QVector<QPointF> oldPositions;
+    QVector<QPointF> newPositions;
+
+    qreal currentX = startX;
+    qreal currentY = startY;
+    qreal rowHeight = 0;
+
+    for (const auto &item : items) {
+        if (currentX - startX + item.bbWidth > maxRowWidth && currentX > startX) {
+            currentX = startX;
+            currentY += rowHeight + spacing;
+            rowHeight = 0;
+        }
+
+        // Позиция bounding box top-left = (currentX, currentY)
+        // Центр bounding box = (currentX + bbW/2, currentY + bbH/2)
+        // Центр элемента совпадает с центром bounding box (поворот вокруг центра)
+        // Позиция элемента (x, y) = центр - (itemWidth/2, itemHeight/2)
+        qreal newX = currentX + item.bbWidth / 2.0 - item.itemWidth / 2.0;
+        qreal newY = currentY + item.bbHeight / 2.0 - item.itemHeight / 2.0;
+
+        ImageData data = m_model->getItem(item.index);
+        sortedIndices.append(item.index);
+        oldPositions.append(QPointF(data.x, data.y));
+        newPositions.append(QPointF(newX, newY));
+
+        currentX += item.bbWidth + spacing;
+        rowHeight = std::max(rowHeight, item.bbHeight);
+    }
+
+    m_undoStack->push(new ArrangeCommand(m_model, sortedIndices, oldPositions, newPositions));
 }
 
 // ============ Undo/Redo ============

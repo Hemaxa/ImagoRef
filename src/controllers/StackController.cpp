@@ -200,3 +200,55 @@ void CropImageCommand::redo()
     m_model->updateSize(m_index, m_newSize.width(), m_newSize.height());
     m_model->updateCrop(m_index, m_newCrop.x(), m_newCrop.y(), m_newCrop.width(), m_newCrop.height());
 }
+
+// ============ SetLabelCommand ============
+
+SetLabelCommand::SetLabelCommand(ImageItemModel *model, int index,
+                                 const QString &oldLabel, const QString &newLabel,
+                                 QUndoCommand *parent)
+    : QUndoCommand("Изменение подписи", parent)
+    , m_model(model)
+    , m_index(index)
+    , m_oldLabel(oldLabel)
+    , m_newLabel(newLabel)
+{
+}
+
+void SetLabelCommand::undo()
+{
+    m_model->updateLabel(m_index, m_oldLabel);
+}
+
+void SetLabelCommand::redo()
+{
+    m_model->updateLabel(m_index, m_newLabel);
+}
+
+// ============ ArrangeCommand ============
+
+ArrangeCommand::ArrangeCommand(ImageItemModel *model,
+                               const QVector<int> &indices,
+                               const QVector<QPointF> &oldPositions,
+                               const QVector<QPointF> &newPositions,
+                               QUndoCommand *parent)
+    : QUndoCommand("Расположить изображения", parent)
+    , m_model(model)
+    , m_indices(indices)
+    , m_oldPositions(oldPositions)
+    , m_newPositions(newPositions)
+{
+}
+
+void ArrangeCommand::undo()
+{
+    for (int i = 0; i < m_indices.count(); ++i) {
+        m_model->updatePosition(m_indices[i], m_oldPositions[i].x(), m_oldPositions[i].y());
+    }
+}
+
+void ArrangeCommand::redo()
+{
+    for (int i = 0; i < m_indices.count(); ++i) {
+        m_model->updatePosition(m_indices[i], m_newPositions[i].x(), m_newPositions[i].y());
+    }
+}

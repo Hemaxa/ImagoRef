@@ -18,6 +18,7 @@ Rectangle {
     signal zoomOutClicked()
     signal resizeModeClicked()
     signal cropModeClicked()
+    signal labelClicked()
     signal pasteClicked()
     
     // Состояние активных инструментов
@@ -83,6 +84,23 @@ Rectangle {
             active: root.cropModeActive
             enabled: controller.hasSelection
             onClicked: root.cropModeClicked()
+        }
+        
+        // Подписать
+        ImagoToolButton {
+            iconSource: "qrc:/icons/icons/label.svg"
+            tooltip: "Подписать"
+            shortcutText: "L"
+            enabled: controller.hasSelection
+            onClicked: root.labelClicked()
+        }
+        
+        // Расположить
+        ImagoToolButton {
+            iconSource: "qrc:/icons/icons/arrange.svg"
+            tooltip: "Расположить"
+            shortcutText: "A"
+            onClicked: controller.arrangeAll()
         }
         
         // Вращать против часовой

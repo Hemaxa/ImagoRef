@@ -124,3 +124,40 @@ private:
     QSizeF m_oldSize, m_newSize;
     QRectF m_oldCrop, m_newCrop;
 };
+
+/**
+ * @brief SetLabelCommand - команда установки подписи изображения.
+ */
+class SetLabelCommand : public QUndoCommand {
+public:
+    SetLabelCommand(ImageItemModel *model, int index,
+                    const QString &oldLabel, const QString &newLabel,
+                    QUndoCommand *parent = nullptr);
+    void undo() override;
+    void redo() override;
+
+private:
+    ImageItemModel *m_model;
+    int m_index;
+    QString m_oldLabel, m_newLabel;
+};
+
+/**
+ * @brief ArrangeCommand - команда автоматического расположения изображений.
+ * Сохраняет старые и новые позиции для undo/redo.
+ */
+class ArrangeCommand : public QUndoCommand {
+public:
+    ArrangeCommand(ImageItemModel *model,
+                   const QVector<int> &indices,
+                   const QVector<QPointF> &oldPositions,
+                   const QVector<QPointF> &newPositions,
+                   QUndoCommand *parent = nullptr);
+    void undo() override;
+    void redo() override;
+
+private:
+    ImageItemModel *m_model;
+    QVector<int> m_indices;
+    QVector<QPointF> m_oldPositions, m_newPositions;
+};

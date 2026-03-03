@@ -75,6 +75,8 @@ public:
     Q_INVOKABLE void snapToGrid();
     Q_INVOKABLE void rotateSelected(qreal angleDelta);
     Q_INVOKABLE void cropImage(int index, qreal cropX, qreal cropY, qreal cropWidth, qreal cropHeight);
+    Q_INVOKABLE void setLabelForSelected(const QString &label);
+    Q_INVOKABLE void arrangeAll();
 
     // Undo/Redo
     Q_INVOKABLE void undo();

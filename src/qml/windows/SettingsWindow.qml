@@ -55,6 +55,8 @@ Dialog {
         Settings.gridSize = gridSizeSpinBox.value
         Settings.themeName = themeComboBox.currentValue
         Settings.canvasPattern = patternComboBox.currentValue
+        Settings.labelFontSize = labelFontSizeSpinBox.value
+        Settings.arrangeSpacing = arrangeSpacingSpinBox.value
         Theme.applyTheme(themeComboBox.currentValue)
     }
     
@@ -265,6 +267,98 @@ Dialog {
                             
                             Component.onCompleted: {
                                 currentIndex = indexOfValue(Settings.canvasPattern)
+                            }
+                        }
+                    }
+                    
+                    // Размер шрифта подписи
+                    RowLayout {
+                        spacing: 0
+                        
+                        Label {
+                            text: "Размер шрифта подписи"
+                            color: Theme.textColor
+                            Layout.preferredWidth: 160
+                        }
+                        
+                        SpinBox {
+                            id: labelFontSizeSpinBox
+                            from: 8
+                            to: 72
+                            value: Settings.labelFontSize
+                            editable: true
+                            Layout.preferredWidth: 180
+                            
+                            textFromValue: function(value) {
+                                return value + " px"
+                            }
+                            
+                            valueFromText: function(text) {
+                                return parseInt(text.replace(" px", ""))
+                            }
+                            
+                            background: Rectangle {
+                                color: Theme.controlBackground
+                                border.color: Theme.borderColor
+                                border.width: 1
+                                radius: 6
+                            }
+                            
+                            contentItem: TextInput {
+                                text: labelFontSizeSpinBox.textFromValue(labelFontSizeSpinBox.value, labelFontSizeSpinBox.locale)
+                                font.pixelSize: 13
+                                color: Theme.textColor
+                                horizontalAlignment: Text.AlignHCenter
+                                verticalAlignment: Text.AlignVCenter
+                                readOnly: !labelFontSizeSpinBox.editable
+                                validator: labelFontSizeSpinBox.validator
+                                inputMethodHints: Qt.ImhFormattedNumbersOnly
+                            }
+                        }
+                    }
+                    
+                    // Отступ при расположении
+                    RowLayout {
+                        spacing: 0
+                        
+                        Label {
+                            text: "Отступ при расположении"
+                            color: Theme.textColor
+                            Layout.preferredWidth: 160
+                        }
+                        
+                        SpinBox {
+                            id: arrangeSpacingSpinBox
+                            from: 0
+                            to: 200
+                            value: Settings.arrangeSpacing
+                            editable: true
+                            Layout.preferredWidth: 180
+                            
+                            textFromValue: function(value) {
+                                return value + " px"
+                            }
+                            
+                            valueFromText: function(text) {
+                                return parseInt(text.replace(" px", ""))
+                            }
+                            
+                            background: Rectangle {
+                                color: Theme.controlBackground
+                                border.color: Theme.borderColor
+                                border.width: 1
+                                radius: 6
+                            }
+                            
+                            contentItem: TextInput {
+                                text: arrangeSpacingSpinBox.textFromValue(arrangeSpacingSpinBox.value, arrangeSpacingSpinBox.locale)
+                                font.pixelSize: 13
+                                color: Theme.textColor
+                                horizontalAlignment: Text.AlignHCenter
+                                verticalAlignment: Text.AlignVCenter
+                                readOnly: !arrangeSpacingSpinBox.editable
+                                validator: arrangeSpacingSpinBox.validator
+                                inputMethodHints: Qt.ImhFormattedNumbersOnly
                             }
                         }
                     }

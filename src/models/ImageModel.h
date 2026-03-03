@@ -19,6 +19,7 @@ struct ImageData {
     qreal rotation = 0; //угол поворота изображения
     qreal zValue = 0; //уровень изображения по высоте
     bool selected = false; //флаг выбора изображения
+    QString label; //подпись изображения
     
     //параметры обрезки (в координатах исходного изображения)
     qreal cropX = 0;
@@ -45,6 +46,7 @@ public:
         RotationRole,              // Угол поворота (градусы)
         ZValueRole,                // Z-index (слой)
         SelectedRole,              // Статус выделения (bool)
+        LabelRole,                 // Подпись изображения (строка)
         CropXRole,                 // Обрезка X (исходные координаты)
         CropYRole,                 // Обрезка Y (исходные координаты)
         CropWidthRole,             // Обрезка Width (исходные координаты)
@@ -83,6 +85,9 @@ public:
     
     // Обновление обрезки (non-destructive)
     Q_INVOKABLE void updateCrop(int index, qreal x, qreal y, qreal width, qreal height);
+    
+    // Обновление подписи
+    Q_INVOKABLE void updateLabel(int index, const QString &label);
     
     // Обновление пиксмапа (для обрезки)
     void updatePixmap(int index, const QPixmap &pixmap);

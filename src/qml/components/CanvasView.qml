@@ -201,19 +201,17 @@ Item {
 
                 delegate: ImageItem {
                     id: imgDelegate
-                    z: 10 + index
-
-                    // Роли модели (переименовали selected -> modelSelected во избежание конфликтов)
-                    // Note: 'index' is not a role, so we use context property 'index'
-                    // Properties 'itemId', 'source', 'modelCrop*' are defined in ImageItem.qml
-                    // we DO NOT need to redeclare them here, Repeater will set them on the base component.
                     
+                    required property int index
+                    z: 10 + imgDelegate.index
+
+                    // Роли модели
                     required property real modelX
                     required property real modelY
                     required property real modelWidth
                     required property real modelHeight
                     required property real modelRotation
-                    required property bool modelSelected // Роль из модели (теперь modelSelected)
+                    required property bool modelSelected
 
                     // Применяем свойства
                     x: imgDelegate.modelX
@@ -222,7 +220,7 @@ Item {
                     itemHeight: imgDelegate.modelHeight
                     rotation: imgDelegate.modelRotation
                     
-                    itemIndex: index // Bind context property 'index' to itemIndex
+                    itemIndex: imgDelegate.index
                     
                     // Привязываем свойство компонента ImageItem.selected к роли модели
                     selected: imgDelegate.modelSelected

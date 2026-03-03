@@ -19,6 +19,7 @@ Item {
     required property real modelCropY
     required property real modelCropWidth
     required property real modelCropHeight
+    required property string modelLabel
     
     property int itemIndex: index
     property url imageSource: source
@@ -49,6 +50,27 @@ Item {
         sourceClipRect: (root.modelCropWidth > 0 && root.modelCropHeight > 0) 
                         ? Qt.rect(root.modelCropX, root.modelCropY, root.modelCropWidth, root.modelCropHeight) 
                         : undefined
+    }
+
+    // Подпись над изображением
+    Rectangle {
+        id: labelBackground
+        visible: root.modelLabel !== ""
+        anchors.bottom: parent.top
+        anchors.left: parent.left
+        anchors.bottomMargin: 4 / root.zoomLevel
+        width: labelText.implicitWidth + 12 / root.zoomLevel
+        height: labelText.implicitHeight + 6 / root.zoomLevel
+        color: Qt.rgba(0, 0, 0, 0.65)
+        radius: 4 / root.zoomLevel
+
+        Text {
+            id: labelText
+            anchors.centerIn: parent
+            text: root.modelLabel
+            font.pixelSize: Settings.labelFontSize / root.zoomLevel
+            color: "white"
+        }
     }
 
     // Рамка при наведении (полупрозрачная белая)

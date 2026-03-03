@@ -17,6 +17,8 @@ class SettingsManager : public QObject {
     Q_PROPERTY(QString themeName READ themeName WRITE setThemeName NOTIFY themeNameChanged)
     Q_PROPERTY(int gridSize READ gridSize WRITE setGridSize NOTIFY gridSizeChanged)
     Q_PROPERTY(QString canvasPattern READ canvasPattern WRITE setCanvasPattern NOTIFY canvasPatternChanged)
+    Q_PROPERTY(int labelFontSize READ labelFontSize WRITE setLabelFontSize NOTIFY labelFontSizeChanged)
+    Q_PROPERTY(int arrangeSpacing READ arrangeSpacing WRITE setArrangeSpacing NOTIFY arrangeSpacingChanged)
 
 public:
     static SettingsManager* create(QQmlEngine *qmlEngine, QJSEngine *jsEngine);
@@ -34,10 +36,18 @@ public:
     QString canvasPattern() const;
     void setCanvasPattern(const QString& pattern);
 
+    int labelFontSize() const;
+    void setLabelFontSize(int size);
+
+    int arrangeSpacing() const;
+    void setArrangeSpacing(int spacing);
+
 signals:
     void themeNameChanged();
     void gridSizeChanged();
     void canvasPatternChanged();
+    void labelFontSizeChanged();
+    void arrangeSpacingChanged();
 
 private:
     explicit SettingsManager(QObject* parent = nullptr);
@@ -48,4 +58,6 @@ private:
     QString m_themeName;
     int m_gridSize;
     QString m_canvasPattern;
+    int m_labelFontSize;
+    int m_arrangeSpacing;
 };

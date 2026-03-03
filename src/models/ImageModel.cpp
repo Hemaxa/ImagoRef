@@ -30,6 +30,7 @@ QVariant ImageItemModel::data(const QModelIndex &index, int role) const
     case RotationRole: return item.rotation;
     case ZValueRole: return item.zValue;
     case SelectedRole: return item.selected;
+    case LabelRole: return item.label;
     case CropXRole: return item.cropX;
     case CropYRole: return item.cropY;
     case CropWidthRole: return item.cropWidth;
@@ -68,6 +69,9 @@ bool ImageItemModel::setData(const QModelIndex &index, const QVariant &value, in
     case SelectedRole:
         if (item.selected != value.toBool()) { item.selected = value.toBool(); changed = true; }
         break;
+    case LabelRole:
+        if (item.label != value.toString()) { item.label = value.toString(); changed = true; }
+        break;
     case CropXRole:
         if (item.cropX != value.toReal()) { item.cropX = value.toReal(); changed = true; }
         break;
@@ -102,6 +106,7 @@ QHash<int, QByteArray> ImageItemModel::roleNames() const
         {RotationRole, "modelRotation"},
         {ZValueRole, "zValue"},
         {SelectedRole, "modelSelected"},
+        {LabelRole, "modelLabel"},
         {CropXRole, "modelCropX"},
         {CropYRole, "modelCropY"},
         {CropWidthRole, "modelCropWidth"},
@@ -265,6 +270,18 @@ void ImageItemModel::updateCrop(int index, qreal x, qreal y, qreal width, qreal 
     
     QModelIndex modelIndex = createIndex(index, 0);
     emit dataChanged(modelIndex, modelIndex, {CropXRole, CropYRole, CropWidthRole, CropHeightRole});
+}
+
+void ImageItemModel::updateLabel(int index, const QString &label)
+{
+    if (index < 0 || index >= m_items.count())
+        return;
+
+    if (m_items[index].label != label) {
+        m_items[index].label = label;
+        QModelIndex modelIndex = createIndex(index, 0);
+        emit dataChanged(modelIndex, modelIndex, {LabelRole});
+    }
 }
 
 QVariantList ImageItemModel::selectedIndices() const
