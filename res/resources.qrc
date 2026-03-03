@@ -13,14 +13,14 @@
     <qresource prefix="/icons">
         <file>icons/crop.svg</file>
         <file>icons/delete.svg</file>
-        <file>icons/grid.svg</file>
+        <file>icons/grid_snap.svg</file>
         <file>icons/open.svg</file>
         <file>icons/paste.svg</file>
-        <file>icons/resize.svg</file>
+        <file>icons/scale.svg</file>
         <file>icons/save.svg</file>
         <file>icons/settings.svg</file>
-        <file>icons/zoom-in.svg</file>
-        <file>icons/zoom-out.svg</file>
+        <file>icons/zoom_in.svg</file>
+        <file>icons/zoom_out.svg</file>
         <file>icons/arrow-down-dark.svg</file>
         <file>icons/arrow-down-light.svg</file>
         <file>icons/arrow-up-dark.svg</file>
@@ -29,8 +29,8 @@
         <file>icons/checkmark-light.svg</file>
         <file>icons/redo.svg</file>
         <file>icons/undo.svg</file>
-        <file>icons/rotate-left.svg</file>
-        <file>icons/rotate-right.svg</file>
+        <file>icons/rotate_left.svg</file>
+        <file>icons/rotate_right.svg</file>
     </qresource>
     <qresource prefix="/graphics">
         <file>graphics/text-logo.png</file>
