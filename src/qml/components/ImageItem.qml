@@ -27,6 +27,7 @@ Item {
     property bool selected: false
     property bool resizeMode: false
     property bool cropMode: false
+    signal exitCropMode()
     property bool enableDrag: true
     property real zoomLevel: 1.0
 
@@ -103,10 +104,11 @@ Item {
 
         onCropApplied: function(cropX, cropY, cropWidth, cropHeight) {
             controller.cropImage(itemIndex, cropX, cropY, cropWidth, cropHeight)
+            root.exitCropMode()
         }
 
         onCropCancelled: {
-            root.cropMode = false
+            root.exitCropMode()
         }
     }
 

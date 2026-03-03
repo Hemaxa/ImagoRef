@@ -234,6 +234,8 @@ Item {
 
                     // Перемещение только через drag, отключаем в режимах инструментов
                     enableDrag: !root.resizeMode && !root.cropMode
+
+                    onExitCropMode: root.cropMode = false
                 }
             }
         }
