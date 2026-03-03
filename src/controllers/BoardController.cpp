@@ -460,13 +460,31 @@ void BoardController::cropImage(int index, qreal cropX, qreal cropY, qreal cropW
     qreal newSourceCropW = cropWidth * scaleX;
     qreal newSourceCropH = cropHeight * scaleY;
     
-    // 3. Calculate new position
-    qreal rad = item.rotation * M_PI / 180.0;
-    qreal dx = cropX * std::cos(rad) - cropY * std::sin(rad);
-    qreal dy = cropX * std::sin(rad) + cropY * std::cos(rad);
+    // 3. Calculate new position (учитывая transformOrigin = Item.Center в QML)
+    // Центр crop-прямоугольника в локальных координатах элемента
+    qreal cropCenterLocalX = cropX + cropWidth / 2.0;
+    qreal cropCenterLocalY = cropY + cropHeight / 2.0;
     
-    qreal newX = item.x + dx;
-    qreal newY = item.y + dy;
+    // Центр элемента до обрезки (transformOrigin)
+    qreal oldCenterX = item.width / 2.0;
+    qreal oldCenterY = item.height / 2.0;
+    
+    // Смещение центра crop относительно центра элемента
+    qreal relX = cropCenterLocalX - oldCenterX;
+    qreal relY = cropCenterLocalY - oldCenterY;
+    
+    // Применяем поворот к смещению
+    qreal rad = item.rotation * M_PI / 180.0;
+    qreal rotatedRelX = relX * std::cos(rad) - relY * std::sin(rad);
+    qreal rotatedRelY = relX * std::sin(rad) + relY * std::cos(rad);
+    
+    // Центр crop-прямоугольника в координатах сцены
+    qreal sceneCropCenterX = (item.x + oldCenterX) + rotatedRelX;
+    qreal sceneCropCenterY = (item.y + oldCenterY) + rotatedRelY;
+    
+    // Новая позиция (x, y) = top-left нового элемента, пересчитанная из центра
+    qreal newX = sceneCropCenterX - cropWidth / 2.0;
+    qreal newY = sceneCropCenterY - cropHeight / 2.0;
     
     // Push undo command
     m_undoStack->push(new CropImageCommand(

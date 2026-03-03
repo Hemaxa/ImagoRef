@@ -1,4 +1,4 @@
-//main.cpp - точка входа для приложения, инициализирует QML движок и регистрирует C++ типы
+//main.cpp - точка входа для приложения, инициализирует QML движок, регистрирует C++ типы, запускает бесконечный цикл событий
 
 #include <QGuiApplication> //основной класс для GUI-приложений без виджетов
 #include <QQmlApplicationEngine> //движок, который загружает и управляет QML
@@ -15,6 +15,7 @@ int main(int argc, char *argv[])
     QGuiApplication app(argc, argv);
     
     //установка стиля Quick Controls (для корректной кастомизации интерфейса)
+    //позваляет отказаться от системных стилей для элементов интерфейса
     QQuickStyle::setStyle("Basic");
 
     //загрузка пользовательских настроек
@@ -25,13 +26,14 @@ int main(int argc, char *argv[])
     QQmlApplicationEngine engine;
 
     //регистрация контекстных свойств (синглтоны)
+    //через setContextProperty можно напрямую обратиться к полю класса (например Settings.gridSize)
     engine.rootContext()->setContextProperty("Settings", &SettingsManager::instance());
     engine.rootContext()->setContextProperty("Theme", &ThemeManager::instance());
 
     //загрузка главного QML файла из модуля Qt6
     const QUrl url(QStringLiteral("qrc:/ImagoRef/src/qml/Main.qml"));
     
-    //URL для загрузки главного QML файла
+    //URL для загрузки главного QML файла (позволит корректно завершить работу приложения при неудачном обращении к Main.qml)
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreationFailed, &app, []() { QCoreApplication::exit(-1); }, Qt::QueuedConnection);
     engine.load(url);
     
@@ -40,5 +42,6 @@ int main(int argc, char *argv[])
         return -1;
     }
 
+    //запуск бесконечного цикла обработки событий пока программа не закрыта
     return app.exec();
 }

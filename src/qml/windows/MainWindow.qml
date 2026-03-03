@@ -1,7 +1,6 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import QtQuick.Dialogs
 import ImagoRef
 import "../components"
 
@@ -31,17 +30,8 @@ Item {
         x: 15
         y: 15
         
-        // Подключаем все сигналы
+        // Подключаем сигналы
         onSettingsClicked: root.settingsRequested()
-        onOpenClicked: fileOpenDialog.open()
-        onSaveClicked: {
-            if (controller.currentFilePath !== "") {
-                controller.saveBoard()
-            } else {
-                fileSaveDialog.open()
-            }
-        }
-        onSaveAsClicked: fileSaveDialog.open()
         onZoomInClicked: canvasView.zoomIn()
         onZoomOutClicked: canvasView.zoomOut()
         onResizeModeClicked: canvasView.toggleResizeMode()
@@ -100,30 +90,6 @@ Item {
             var scenePos = canvasView.mapToScene(center)
             controller.pasteFromClipboard(scenePos.x, scenePos.y)
         }
-    }
-    
-    // Open (Ctrl/Cmd+O)
-    Shortcut {
-        sequence: StandardKey.Open
-        onActivated: fileOpenDialog.open()
-    }
-    
-    // Save (Ctrl/Cmd+S)
-    Shortcut {
-        sequence: StandardKey.Save
-        onActivated: {
-            if (controller.currentFilePath !== "") {
-                controller.saveBoard()
-            } else {
-                fileSaveDialog.open()
-            }
-        }
-    }
-    
-    // Save As (Ctrl/Cmd+Shift+S)
-    Shortcut {
-        sequence: StandardKey.SaveAs
-        onActivated: fileSaveDialog.open()
     }
     
     // Snap to grid — G
@@ -192,22 +158,5 @@ Item {
     Shortcut {
         sequence: StandardKey.SelectAll
         onActivated: controller.selectAll()
-    }
-    
-    // Диалог сохранения
-    FileDialog {
-        id: fileSaveDialog
-        title: "Сохранить доску"
-        fileMode: FileDialog.SaveFile
-        nameFilters: ["ImagoRef доска (*.iref)", "Все файлы (*)"]
-        onAccepted: controller.saveBoardAs(selectedFile)
-    }
-    
-    // Диалог открытия
-    FileDialog {
-        id: fileOpenDialog
-        title: "Открыть доску"
-        nameFilters: ["ImagoRef доска (*.iref)", "Все файлы (*)"]
-        onAccepted: controller.openBoard(selectedFile)
     }
 }

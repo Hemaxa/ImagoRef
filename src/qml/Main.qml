@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Window
+import QtQuick.Dialogs
 import ImagoRef
 import "windows"
 import "components"
@@ -17,6 +18,46 @@ ApplicationWindow {
     // Контроллер доски
     BoardController {
         id: boardController
+    }
+    
+    // Системная панель меню (нативная macOS)
+    menuBar: MenuBar {
+        Menu {
+            title: "Файл"
+            
+            Action {
+                text: "Открыть..."
+                shortcut: StandardKey.Open
+                onTriggered: {
+                    if (mainLoader.active) {
+                        fileOpenDialog.open()
+                    }
+                }
+            }
+            MenuSeparator {}
+            Action {
+                text: "Сохранить"
+                shortcut: StandardKey.Save
+                onTriggered: {
+                    if (mainLoader.active) {
+                        if (boardController.currentFilePath !== "") {
+                            boardController.saveBoard()
+                        } else {
+                            fileSaveDialog.open()
+                        }
+                    }
+                }
+            }
+            Action {
+                text: "Сохранить как..."
+                shortcut: StandardKey.SaveAs
+                onTriggered: {
+                    if (mainLoader.active) {
+                        fileSaveDialog.open()
+                    }
+                }
+            }
+        }
     }
     
     // Загрузчик главного окна
@@ -56,42 +97,27 @@ ApplicationWindow {
             }
         }
     }
-
-
+    
+    // Диалог сохранения
+    FileDialog {
+        id: fileSaveDialog
+        title: "Сохранить доску"
+        fileMode: FileDialog.SaveFile
+        nameFilters: ["ImagoRef доска (*.iref)", "Все файлы (*)"]
+        onAccepted: boardController.saveBoardAs(selectedFile)
+    }
+    
+    // Диалог открытия
+    FileDialog {
+        id: fileOpenDialog
+        title: "Открыть доску"
+        nameFilters: ["ImagoRef доска (*.iref)", "Все файлы (*)"]
+        onAccepted: boardController.openBoard(selectedFile)
+    }
     
     // Показать окно приветствия при запуске
     Component.onCompleted: {
         welcomeDialog.open()
-    }
-    
-    // Глобальные горячие клавиши
-    Shortcut {
-        sequence: StandardKey.Open
-        onActivated: {
-            if (mainLoader.active) {
-                fileOpenDialog.open()
-            }
-        }
-    }
-    
-    Shortcut {
-        sequence: StandardKey.Save
-        onActivated: {
-            if (mainLoader.active && boardController.currentFilePath !== "") {
-                boardController.saveBoard()
-            } else if (mainLoader.active) {
-                fileSaveDialog.open()
-            }
-        }
-    }
-    
-    Shortcut {
-        sequence: StandardKey.SaveAs
-        onActivated: {
-            if (mainLoader.active) {
-                fileSaveDialog.open()
-            }
-        }
     }
     
     Shortcut {

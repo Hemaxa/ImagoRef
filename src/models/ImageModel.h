@@ -2,25 +2,25 @@
 
 #pragma once
 
-#include <QAbstractListModel> //списки в Qt
+#include <QAbstractListModel> //умные списки в Qt, через которые QML автоматически перерисует элемент при изменении свойств
 #include <QPixmap> //изображения в Qt
 #include <QUrl> //класс для работы с путями
 #include <QtQml/qqml.h>
 
-//ImageData - структура данных для хранения информации об изображении
+//ImageData - структура данных для хранения информации об одном изображении
 struct ImageData {
-    QString id; //уникальный идентификатор
+    QString id; //уникальный идентификатор изображения
     QUrl source; //путь к изображению
-    QPixmap pixmap; //оригинальный пиксмап
-    qreal x = 0; //координата x
-    qreal y = 0; //координата y
-    qreal width = 0; //ширина
-    qreal height = 0; //высота
-    qreal rotation = 0; //угол
-    qreal zValue = 0; //уровень
-    bool selected = false; //флаг выбора
+    QPixmap pixmap; //оригинальное изображение (QPixmap)
+    qreal x = 0; //координата x изображения
+    qreal y = 0; //координата y изображения
+    qreal width = 0; //ширина изображения
+    qreal height = 0; //высота изображения
+    qreal rotation = 0; //угол поворота изображения
+    qreal zValue = 0; //уровень изображения по высоте
+    bool selected = false; //флаг выбора изображения
     
-    // Параметры обрезки (в координатах исходного изображения)
+    //параметры обрезки (в координатах исходного изображения)
     qreal cropX = 0;
     qreal cropY = 0;
     qreal cropWidth = 0;  // 0 означает "нет обрезки" (полная ширина)
