@@ -27,8 +27,8 @@ Rectangle {
     
     width: 58
     height: toolbarLayout.height + 6
-    color: Theme.panelColor
-    border.color: Theme.borderColor
+    color: ThemeManager.panelColor
+    border.color: ThemeManager.borderColor
     border.width: 3
     radius: 12
     clip: true  // Обрезаем содержимое по скруглённым краям
@@ -53,8 +53,8 @@ Rectangle {
             iconSource: "qrc:/icons/icons/delete.svg"
             tooltip: "Удалить"
             shortcutText: "Delete"
-            enabled: controller.hasSelection
-            onClicked: controller.deleteSelected()
+            enabled: controller.selectionController.hasSelection
+            onClicked: controller.toolController.deleteSelected()
         }
         
         // Привязать к сетке
@@ -62,8 +62,8 @@ Rectangle {
             iconSource: "qrc:/icons/icons/grid_snap.svg"
             tooltip: "Привязать к сетке"
             shortcutText: "G"
-            enabled: controller.hasSelection
-            onClicked: controller.snapToGrid()
+            enabled: controller.selectionController.hasSelection
+            onClicked: controller.toolController.snapToGrid()
         }
         
         // Изменить размер
@@ -72,7 +72,7 @@ Rectangle {
             tooltip: "Изменить размер"
             shortcutText: "S"
             active: root.resizeModeActive
-            enabled: controller.hasSelection
+            enabled: controller.selectionController.hasSelection
             onClicked: root.resizeModeClicked()
         }
         
@@ -82,7 +82,7 @@ Rectangle {
             tooltip: "Обрезать"
             shortcutText: "C"
             active: root.cropModeActive
-            enabled: controller.hasSelection
+            enabled: controller.selectionController.hasSelection
             onClicked: root.cropModeClicked()
         }
         
@@ -91,7 +91,7 @@ Rectangle {
             iconSource: "qrc:/icons/icons/label.svg"
             tooltip: "Подписать"
             shortcutText: "L"
-            enabled: controller.hasSelection
+            enabled: controller.selectionController.hasSelection
             onClicked: root.labelClicked()
         }
         
@@ -100,7 +100,7 @@ Rectangle {
             iconSource: "qrc:/icons/icons/arrange.svg"
             tooltip: "Расположить"
             shortcutText: "A"
-            onClicked: controller.arrangeAll()
+            onClicked: controller.toolController.arrangeAll()
         }
         
         // Вращать против часовой
@@ -108,8 +108,8 @@ Rectangle {
             iconSource: "qrc:/icons/icons/rotate_left.svg"
             tooltip: "Вращать против часовой"
             shortcutText: "Shift+R"
-            enabled: controller.hasSelection
-            onClicked: controller.rotateSelected(-90)
+            enabled: controller.selectionController.hasSelection
+            onClicked: controller.toolController.rotateSelected(-90)
         }
         
         // Вращать по часовой
@@ -117,8 +117,8 @@ Rectangle {
             iconSource: "qrc:/icons/icons/rotate_right.svg"
             tooltip: "Вращать по часовой"
             shortcutText: "R"
-            enabled: controller.hasSelection
-            onClicked: controller.rotateSelected(90)
+            enabled: controller.selectionController.hasSelection
+            onClicked: controller.toolController.rotateSelected(90)
         }
         
         // Приблизить

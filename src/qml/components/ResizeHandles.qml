@@ -1,10 +1,8 @@
+//ResizeHandles.qml - маркеры изменения размера для ImageItem, 8 маркеров по углам и сторонам.
+
 import QtQuick
 import ImagoRef
 
-/**
- * ResizeHandles.qml - маркеры изменения размера для ImageItem.
- * 8 маркеров по углам и сторонам.
- */
 Item {
     id: root
     
@@ -82,8 +80,8 @@ Item {
                 
                 onPressed: function(mouse) {
                     lastPos = mapToItem(target.parent, mouse.x, mouse.y)
-                    root.startPos = Qt.point(controller.getItemX(itemIndex), controller.getItemY(itemIndex))
-                    root.startSize = Qt.size(controller.getItemWidth(itemIndex), controller.getItemHeight(itemIndex))
+                    root.startPos = Qt.point(controller.selectionController.getItemX(itemIndex), controller.selectionController.getItemY(itemIndex))
+                    root.startSize = Qt.size(controller.selectionController.getItemWidth(itemIndex), controller.selectionController.getItemHeight(itemIndex))
                     controller.beginResize(itemIndex)
                 }
                 
@@ -102,10 +100,10 @@ Item {
                     var localDx =  sceneDx * cosR + sceneDy * sinR
                     var localDy = -sceneDx * sinR + sceneDy * cosR
                     
-                    var x = controller.getItemX(itemIndex)
-                    var y = controller.getItemY(itemIndex)
-                    var w = controller.getItemWidth(itemIndex)
-                    var h = controller.getItemHeight(itemIndex)
+                    var x = controller.selectionController.getItemX(itemIndex)
+                    var y = controller.selectionController.getItemY(itemIndex)
+                    var w = controller.selectionController.getItemWidth(itemIndex)
+                    var h = controller.selectionController.getItemHeight(itemIndex)
                     var cx = x + w / 2
                     var cy = y + h / 2
                     
@@ -186,10 +184,10 @@ Item {
                 
                 onReleased: {
                     // Читаем финальные значения из модели
-                    var finalX = controller.getItemX(itemIndex)
-                    var finalY = controller.getItemY(itemIndex)
-                    var finalW = controller.getItemWidth(itemIndex)
-                    var finalH = controller.getItemHeight(itemIndex)
+                    var finalX = controller.selectionController.getItemX(itemIndex)
+                    var finalY = controller.selectionController.getItemY(itemIndex)
+                    var finalW = controller.selectionController.getItemWidth(itemIndex)
+                    var finalH = controller.selectionController.getItemHeight(itemIndex)
                     
                     if (finalX !== startPos.x || finalY !== startPos.y ||
                         finalW !== startSize.width || finalH !== startSize.height) {

@@ -28,6 +28,14 @@ target_sources(ImagoRef PRIVATE
     ${SRC_DIR}/controllers/BoardController.cpp
     ${SRC_DIR}/controllers/StackController.h
     ${SRC_DIR}/controllers/StackController.cpp
+    ${SRC_DIR}/controllers/FileController.h
+    ${SRC_DIR}/controllers/FileController.cpp
+    ${SRC_DIR}/controllers/SelectionController.h
+    ${SRC_DIR}/controllers/SelectionController.cpp
+    ${SRC_DIR}/controllers/ClipboardController.h
+    ${SRC_DIR}/controllers/ClipboardController.cpp
+    ${SRC_DIR}/controllers/ToolController.h
+    ${SRC_DIR}/controllers/ToolController.cpp
 
     ${SRC_DIR}/managers/SettingsManager.h
     ${SRC_DIR}/managers/SettingsManager.cpp

@@ -1,36 +1,36 @@
+//MainWindow.qml - главное окно приложения с холстом и панелью инструментов
+
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import ImagoRef
+
 import "../components"
 
-/**
- * MainWindow.qml - главное окно приложения с холстом и панелью инструментов.
- */
 Item {
     id: root
     
+    //получаем контроллер доски из Main.qml
     required property BoardController controller
     signal settingsRequested()
     
-    // Холст
+    //создает экземпляр холста
     CanvasView {
         id: canvasView
         anchors.fill: parent
-        controller: root.controller
+        controller: root.controller //передаем контроллер дальше в холст
         z: 0
     }
     
-    // Плавающая панель инструментов
+    //создает экземпляр панели инструментов
     FloatingToolbar {
         id: toolbar
         controller: root.controller
         z: 100
-        
         x: 15
         y: 15
         
-        // Подключаем сигналы
+        //подключаем сигналы нажатия кнопок на панели и активации режимов редактирования
         onSettingsClicked: root.settingsRequested()
         onZoomInClicked: canvasView.zoomIn()
         onZoomOutClicked: canvasView.zoomOut()
@@ -40,14 +40,13 @@ Item {
         onPasteClicked: {
             var center = Qt.point(canvasView.width / 2, canvasView.height / 2)
             var scenePos = canvasView.mapToScene(center)
-            controller.pasteFromClipboard(scenePos.x, scenePos.y)
+            controller.clipboardController.pasteFromClipboard(scenePos.x, scenePos.y)
         }
-        
-        // Привязка состояния активных инструментов
+
         resizeModeActive: canvasView.resizeMode
         cropModeActive: canvasView.cropMode
         
-        // Состояние видимости
+        //состояния видимости панели для анимации
         state: "visible"
         states: [
             State {
@@ -69,115 +68,117 @@ Item {
         }
     }
     
-    // Горячие клавиши
-    
-    // Tab - показать/скрыть панель
+    //горячие клавиши
+    //показать или скрыть панель
     Shortcut {
         sequence: "Tab"
         onActivated: toolbar.state = (toolbar.state === "visible") ? "hidden" : "visible"
     }
     
-    // Delete - удалить выделенные
+    //удалить выделенные
     Shortcut {
         sequences: ["Delete", "Backspace"]
-        onActivated: controller.deleteSelected()
+        onActivated: controller.toolController.deleteSelected()
     }
     
-    // Paste - вставить из буфера (Ctrl/Cmd+V)
+    //вставить из буфера
     Shortcut {
         sequence: StandardKey.Paste
         onActivated: {
+            //вычисляется центр экрана для вставки ровно по центру
             var center = Qt.point(canvasView.width / 2, canvasView.height / 2)
             var scenePos = canvasView.mapToScene(center)
-            controller.pasteFromClipboard(scenePos.x, scenePos.y)
+            controller.clipboardController.pasteFromClipboard(scenePos.x, scenePos.y)
         }
     }
     
-    // Snap to grid — G
+    //привязка к сетке
     Shortcut {
         sequence: "G"
-        onActivated: controller.snapToGrid()
+        onActivated: controller.toolController.snapToGrid()
     }
     
-    // Rotate clockwise — R
+    //поворот по часовой стрелке
     Shortcut {
         sequence: "R"
-        onActivated: controller.rotateSelected(90)
+        onActivated: controller.toolController.rotateSelected(90)
     }
     
-    // Rotate counter-clockwise — Shift+R
+    //поворот против часовой стрелки
     Shortcut {
         sequence: "Shift+R"
-        onActivated: controller.rotateSelected(-90)
+        onActivated: controller.toolController.rotateSelected(-90)
     }
     
-    // Undo/Redo (Ctrl/Cmd+Z, Ctrl/Cmd+Shift+Z)
+    //действие отмены
     Shortcut {
         sequence: StandardKey.Undo
         onActivated: controller.undo()
     }
     
+    //действия возврата
     Shortcut {
         sequence: StandardKey.Redo
         onActivated: controller.redo()
     }
     
-    // Zoom (Ctrl/Cmd +/-)
+    //приблизить
     Shortcut {
         sequences: ["Ctrl+=", "Ctrl++", "Meta+=", "Meta++"]
         onActivated: canvasView.zoomIn()
     }
     
+    //отдалить
     Shortcut {
         sequences: ["Ctrl+-", "Meta+-"]
         onActivated: canvasView.zoomOut()
     }
     
-    // Escape - сбросить инструменты и выделение
+    //сбросить инструменты и выделение
     Shortcut {
         sequence: "Escape"
         onActivated: {
             canvasView.exitResizeMode()
             canvasView.exitCropMode()
-            controller.clearSelection()
+            controller.selectionController.clearSelection()
         }
     }
     
-    // Resize mode — S
+    //режим изменения размера
     Shortcut {
         sequence: "S"
         onActivated: canvasView.toggleResizeMode()
     }
     
-    // Crop mode — C
+    //режим обрезки
     Shortcut {
         sequence: "C"
         onActivated: canvasView.toggleCropMode()
     }
     
-    // Select all (Ctrl/Cmd+A)
+    //выбрать все
     Shortcut {
         sequence: StandardKey.SelectAll
-        onActivated: controller.selectAll()
+        onActivated: controller.selectionController.selectAll()
     }
     
-    // Label — L
+    //надпись
     Shortcut {
         sequence: "L"
         onActivated: {
-            if (controller.hasSelection) {
+            if (controller.selectionController.hasSelection) {
                 labelDialog.openDialog()
             }
         }
     }
     
-    // Arrange — A
+    //расположить
     Shortcut {
         sequence: "A"
-        onActivated: controller.arrangeAll()
+        onActivated: controller.toolController.arrangeAll()
     }
     
-    // Диалог ввода подписи
+    //диалог ввода подписи
     Dialog {
         id: labelDialog
         title: ""
@@ -194,8 +195,8 @@ Item {
         }
         
         background: Rectangle {
-            color: Theme.backgroundColor
-            border.color: Theme.accentColor
+            color: ThemeManager.backgroundColor
+            border.color: ThemeManager.accentColor
             border.width: 2
             radius: 12
         }
@@ -205,7 +206,7 @@ Item {
             
             Rectangle {
                 anchors.fill: parent
-                color: Qt.rgba(Theme.accentColor.r, Theme.accentColor.g, Theme.accentColor.b, 0.15)
+                color: Qt.rgba(ThemeManager.accentColor.r, ThemeManager.accentColor.g, ThemeManager.accentColor.b, 0.15)
                 radius: 12
                 Rectangle {
                     anchors.bottom: parent.bottom
@@ -221,7 +222,7 @@ Item {
                 text: "Подпись"
                 font.pixelSize: 14
                 font.bold: true
-                color: Theme.accentColor
+                color: ThemeManager.accentColor
             }
         }
         
@@ -236,21 +237,21 @@ Item {
                     width: parent.width
                     placeholderText: "Введите подпись..."
                     font.pixelSize: 14
-                    color: Theme.textColor
+                    color: ThemeManager.textColor
                     
                     background: Rectangle {
-                        color: Theme.controlBackground
-                        border.color: labelInput.activeFocus ? Theme.accentColor : Theme.borderColor
+                        color: ThemeManager.controlBackground
+                        border.color: labelInput.activeFocus ? ThemeManager.accentColor : ThemeManager.borderColor
                         border.width: 1
                         radius: 6
                     }
                     
                     Keys.onReturnPressed: {
-                        controller.setLabelForSelected(labelInput.text)
+                        controller.toolController.setLabelForSelected(labelInput.text)
                         labelDialog.close()
                     }
                     Keys.onEnterPressed: {
-                        controller.setLabelForSelected(labelInput.text)
+                        controller.toolController.setLabelForSelected(labelInput.text)
                         labelDialog.close()
                     }
                 }
@@ -265,21 +266,21 @@ Item {
                         
                         background: Rectangle {
                             color: "transparent"
-                            border.color: Theme.borderColor
+                            border.color: ThemeManager.borderColor
                             border.width: 1
                             radius: 6
                         }
                         
                         contentItem: Text {
                             text: "Очистить"
-                            color: Theme.textColor
+                            color: ThemeManager.textColor
                             font.pixelSize: 13
                             horizontalAlignment: Text.AlignHCenter
                             verticalAlignment: Text.AlignVCenter
                         }
                         
                         onClicked: {
-                            controller.setLabelForSelected("")
+                            controller.toolController.setLabelForSelected("")
                             labelDialog.close()
                         }
                     }
@@ -289,13 +290,13 @@ Item {
                         height: 32
                         
                         background: Rectangle {
-                            color: Theme.accentColor
+                            color: ThemeManager.accentColor
                             radius: 6
                         }
                         
                         contentItem: Text {
                             text: "Применить"
-                            color: Theme.backgroundColor
+                            color: ThemeManager.backgroundColor
                             font.pixelSize: 13
                             font.bold: true
                             horizontalAlignment: Text.AlignHCenter
@@ -303,7 +304,7 @@ Item {
                         }
                         
                         onClicked: {
-                            controller.setLabelForSelected(labelInput.text)
+                            controller.toolController.setLabelForSelected(labelInput.text)
                             labelDialog.close()
                         }
                     }

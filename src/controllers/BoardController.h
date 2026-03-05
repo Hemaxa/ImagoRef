@@ -6,106 +6,74 @@
 #include <QtQml/qqml.h>
 
 #include "ImageModel.h"
+#include "FileController.h"
+#include "SelectionController.h"
+#include "ClipboardController.h"
+#include "ToolController.h"
 
 /**
- * @brief BoardController - главный контроллер приложения для QML.
- * Управляет холстом, файловыми операциями и инструментами.
+ * @brief BoardController — фасад-контроллер приложения для QML.
+ * Координирует подконтроллеры и хранит общие ресурсы (модель, undo-стек).
  */
 class BoardController : public QObject {
     Q_OBJECT
     QML_ELEMENT
 
     Q_PROPERTY(ImageItemModel* model READ model CONSTANT)
-    // Текущий путь к файлу доски
-    Q_PROPERTY(QString currentFilePath READ currentFilePath NOTIFY filePathChanged)
-    // Заголовок окна (зависит от имени файла)
-    Q_PROPERTY(QString windowTitle READ windowTitle NOTIFY filePathChanged)
+    
+    // Подконтроллеры
+    Q_PROPERTY(FileController* fileController READ fileController CONSTANT)
+    Q_PROPERTY(SelectionController* selectionController READ selectionController CONSTANT)
+    Q_PROPERTY(ClipboardController* clipboardController READ clipboardController CONSTANT)
+    Q_PROPERTY(ToolController* toolController READ toolController CONSTANT)
+
     // Состояния для кнопок Undo/Redo
     Q_PROPERTY(bool canUndo READ canUndo NOTIFY undoStateChanged)
     Q_PROPERTY(bool canRedo READ canRedo NOTIFY redoStateChanged)
     // Размер сетки (в пикселях)
     Q_PROPERTY(int gridSize READ gridSize WRITE setGridSize NOTIFY gridSizeChanged)
-    // Есть ли выделенные элементы (для активации кнопок инструментов)
-    Q_PROPERTY(bool hasSelection READ hasSelection NOTIFY selectionChanged)
 
 public:
     explicit BoardController(QObject *parent = nullptr);
     ~BoardController();
 
     ImageItemModel* model() const;
-    QString currentFilePath() const;
-    QString windowTitle() const;
+    FileController* fileController() const;
+    SelectionController* selectionController() const;
+    ClipboardController* clipboardController() const;
+    ToolController* toolController() const;
+
     bool canUndo() const;
     bool canRedo() const;
     int gridSize() const;
     void setGridSize(int size);
-    bool hasSelection() const;
-
-    // Файловые операции
-    Q_INVOKABLE bool openBoard(const QUrl &fileUrl);
-    Q_INVOKABLE bool saveBoard();
-    Q_INVOKABLE bool saveBoardAs(const QUrl &fileUrl);
-    Q_INVOKABLE void newBoard();
-
-    // Операции с изображениями
-    Q_INVOKABLE void addImage(const QUrl &imageUrl, qreal x, qreal y);
-    Q_INVOKABLE void addImageFromPixmap(const QByteArray &imageData, qreal x, qreal y);
-    Q_INVOKABLE void pasteFromClipboard(qreal x, qreal y);
-    
-    // Выделение
-    Q_INVOKABLE void selectItem(int index, bool addToSelection = false);
-    Q_INVOKABLE void deselectItem(int index);
-    Q_INVOKABLE void toggleSelection(int index);
-    Q_INVOKABLE void selectAll();
-    Q_INVOKABLE void clearSelection();
-    Q_INVOKABLE void selectInRect(qreal x, qreal y, qreal width, qreal height, bool addToSelection = false);
-
-    // Hit-test: определяет индекс верхнего элемента под точкой (или -1)
-    Q_INVOKABLE int hitTest(qreal x, qreal y) const;
-
-    // QML-доступ к свойствам элемента (так как ImageData не Q_GADGET)
-    Q_INVOKABLE qreal getItemX(int index) const;
-    Q_INVOKABLE qreal getItemY(int index) const;
-    Q_INVOKABLE qreal getItemWidth(int index) const;
-    Q_INVOKABLE qreal getItemHeight(int index) const;
-    Q_INVOKABLE bool isItemSelected(int index) const;
-
-    // Инструменты
-    Q_INVOKABLE void deleteSelected();
-    Q_INVOKABLE void snapToGrid();
-    Q_INVOKABLE void rotateSelected(qreal angleDelta);
-    Q_INVOKABLE void cropImage(int index, qreal cropX, qreal cropY, qreal cropWidth, qreal cropHeight);
-    Q_INVOKABLE void setLabelForSelected(const QString &label);
-    Q_INVOKABLE void arrangeAll();
 
     // Undo/Redo
     Q_INVOKABLE void undo();
     Q_INVOKABLE void redo();
 
-    // Методы для отслеживания начала и конца перемещения/изменения размера.
-    // Необходимы для создания одной команды Undo после завершения интерактивного действия в QML.
+    // Отслеживание перемещения/ресайза для Undo
     Q_INVOKABLE void beginMove(int index);
     Q_INVOKABLE void endMove(int index, qreal newX, qreal newY);
     Q_INVOKABLE void beginResize(int index);
     Q_INVOKABLE void endResize(int index, qreal newX, qreal newY, qreal newWidth, qreal newHeight);
 
 signals:
-    void filePathChanged();
     void undoStateChanged();
     void redoStateChanged();
     void gridSizeChanged();
-    void selectionChanged();
-    void boardLoaded();
-    void boardSaved();
 
 private:
-    void updateWindowTitle();
     void connectUndoSignals();
 
     ImageItemModel *m_model;
     QUndoStack *m_undoStack;
-    QString m_currentFilePath;
     int m_gridSize;
+
+    FileController *m_fileController;
+    SelectionController *m_selectionController;
+    ClipboardController *m_clipboardController;
+    ToolController *m_toolController;
 
     // Для отслеживания начальных позиций при перемещении/ресайзе
     QPointF m_moveStartPos;

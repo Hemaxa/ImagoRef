@@ -99,7 +99,7 @@ Item {
             id: labelText
             anchors.centerIn: parent
             text: root.modelLabel
-            font.pixelSize: Settings.labelFontSize / root.zoomLevel
+            font.pixelSize: SettingsManager.labelFontSize / root.zoomLevel
             color: "white"
         }
     }
@@ -120,7 +120,7 @@ Item {
         anchors.fill: parent
         anchors.margins: -2 / zoomLevel
         color: "transparent"
-        border.color: Theme.accentColor
+        border.color: ThemeManager.accentColor
         border.width: root.selected ? Math.max(3 / zoomLevel, 2) : 0
         visible: root.selected
         radius: 2 / zoomLevel
@@ -156,7 +156,7 @@ Item {
         itemIndex: root.itemIndex
 
         onCropApplied: function(cropX, cropY, cropWidth, cropHeight) {
-            controller.cropImage(itemIndex, cropX, cropY, cropWidth, cropHeight)
+            controller.toolController.cropImage(itemIndex, cropX, cropY, cropWidth, cropHeight)
             root.exitCropMode()
         }
 

@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import ImagoRef
 
 /**
  * SettingsWindow.qml - диалог настроек приложения.
@@ -17,8 +18,8 @@ Dialog {
     standardButtons: Dialog.NoButton
     
     background: Rectangle {
-        color: Theme.backgroundColor
-        border.color: Theme.accentColor
+        color: ThemeManager.backgroundColor
+        border.color: ThemeManager.accentColor
         border.width: 2
         radius: 12
     }
@@ -29,7 +30,7 @@ Dialog {
         
         Rectangle {
             anchors.fill: parent
-            color: Qt.rgba(Theme.accentColor.r, Theme.accentColor.g, Theme.accentColor.b, 0.15)
+            color: Qt.rgba(ThemeManager.accentColor.r, ThemeManager.accentColor.g, ThemeManager.accentColor.b, 0.15)
             radius: 12
             
             // Скругление только сверху
@@ -47,17 +48,17 @@ Dialog {
             text: "Настройки"
             font.pixelSize: 16
             font.bold: true
-            color: Theme.accentColor
+            color: ThemeManager.accentColor
         }
     }
     
     onAccepted: {
-        Settings.gridSize = gridSizeSpinBox.value
-        Settings.themeName = themeComboBox.currentValue
-        Settings.canvasPattern = patternComboBox.currentValue
-        Settings.labelFontSize = labelFontSizeSpinBox.value
-        Settings.arrangeSpacing = arrangeSpacingSpinBox.value
-        Theme.applyTheme(themeComboBox.currentValue)
+        SettingsManager.gridSize = gridSizeSpinBox.value
+        SettingsManager.themeName = themeComboBox.currentValue
+        SettingsManager.canvasPattern = patternComboBox.currentValue
+        SettingsManager.labelFontSize = labelFontSizeSpinBox.value
+        SettingsManager.arrangeSpacing = arrangeSpacingSpinBox.value
+        ThemeManager.applyTheme(themeComboBox.currentValue)
     }
     
     RowLayout {
@@ -83,16 +84,16 @@ Dialog {
                 
                 background: Rectangle {
                     color: navigationList.currentIndex === index 
-                           ? Qt.rgba(Theme.accentColor.r, Theme.accentColor.g, Theme.accentColor.b, 0.25)
-                           : (hovered ? Qt.rgba(Theme.accentColor.r, Theme.accentColor.g, Theme.accentColor.b, 0.1) : "transparent")
+                           ? Qt.rgba(ThemeManager.accentColor.r, ThemeManager.accentColor.g, ThemeManager.accentColor.b, 0.25)
+                           : (hovered ? Qt.rgba(ThemeManager.accentColor.r, ThemeManager.accentColor.g, ThemeManager.accentColor.b, 0.1) : "transparent")
                     radius: 8
-                    border.color: navigationList.currentIndex === index ? Theme.accentColor : "transparent"
+                    border.color: navigationList.currentIndex === index ? ThemeManager.accentColor : "transparent"
                     border.width: 1
                 }
                 
                 contentItem: Text {
                     text: model.name
-                    color: navigationList.currentIndex === index ? Theme.accentColor : Theme.textColor
+                    color: navigationList.currentIndex === index ? ThemeManager.accentColor : ThemeManager.textColor
                     font.bold: navigationList.currentIndex === index
                     verticalAlignment: Text.AlignVCenter
                     leftPadding: 12
@@ -104,7 +105,7 @@ Dialog {
             Rectangle {
                 anchors.fill: parent
                 color: "transparent"
-                border.color: Theme.borderColor
+                border.color: ThemeManager.borderColor
                 border.width: 1
                 radius: 8
                 z: -1
@@ -115,7 +116,7 @@ Dialog {
         Rectangle {
             Layout.fillHeight: true
             Layout.preferredWidth: 1
-            color: Theme.borderColor
+            color: ThemeManager.borderColor
         }
         
         // Страницы настроек
@@ -137,7 +138,7 @@ Dialog {
                         
                         Label {
                             text: "Шаг сетки"
-                            color: Theme.textColor
+                            color: ThemeManager.textColor
                             Layout.preferredWidth: 160
                         }
                         
@@ -145,7 +146,7 @@ Dialog {
                             id: gridSizeSpinBox
                             from: 20
                             to: 200
-                            value: Settings.gridSize
+                            value: SettingsManager.gridSize
                             editable: true
                             Layout.preferredWidth: 180
                             
@@ -158,8 +159,8 @@ Dialog {
                             }
                             
                             background: Rectangle {
-                                color: Theme.controlBackground
-                                border.color: Theme.borderColor
+                                color: ThemeManager.controlBackground
+                                border.color: ThemeManager.borderColor
                                 border.width: 1
                                 radius: 6
                             }
@@ -167,7 +168,7 @@ Dialog {
                             contentItem: TextInput {
                                 text: gridSizeSpinBox.textFromValue(gridSizeSpinBox.value, gridSizeSpinBox.locale)
                                 font.pixelSize: 13
-                                color: Theme.textColor
+                                color: ThemeManager.textColor
                                 horizontalAlignment: Text.AlignHCenter
                                 verticalAlignment: Text.AlignVCenter
                                 readOnly: !gridSizeSpinBox.editable
@@ -183,7 +184,7 @@ Dialog {
                         
                         Label {
                             text: "Тема интерфейса"
-                            color: Theme.textColor
+                            color: ThemeManager.textColor
                             Layout.preferredWidth: 160
                         }
                         
@@ -207,8 +208,8 @@ Dialog {
                             valueRole: "value"
                             
                             background: Rectangle {
-                                color: Theme.controlBackground
-                                border.color: Theme.borderColor
+                                color: ThemeManager.controlBackground
+                                border.color: ThemeManager.borderColor
                                 border.width: 1
                                 radius: 6
                             }
@@ -216,13 +217,13 @@ Dialog {
                             contentItem: Text {
                                 text: themeComboBox.displayText
                                 font.pixelSize: 13
-                                color: Theme.textColor
+                                color: ThemeManager.textColor
                                 verticalAlignment: Text.AlignVCenter
                                 leftPadding: 10
                             }
                             
                             Component.onCompleted: {
-                                currentIndex = indexOfValue(Settings.themeName)
+                                currentIndex = indexOfValue(SettingsManager.themeName)
                             }
                         }
                     }
@@ -233,7 +234,7 @@ Dialog {
                         
                         Label {
                             text: "Паттерн холста"
-                            color: Theme.textColor
+                            color: ThemeManager.textColor
                             Layout.preferredWidth: 160
                         }
                         
@@ -251,8 +252,8 @@ Dialog {
                             valueRole: "value"
                             
                             background: Rectangle {
-                                color: Theme.controlBackground
-                                border.color: Theme.borderColor
+                                color: ThemeManager.controlBackground
+                                border.color: ThemeManager.borderColor
                                 border.width: 1
                                 radius: 6
                             }
@@ -260,13 +261,13 @@ Dialog {
                             contentItem: Text {
                                 text: patternComboBox.displayText
                                 font.pixelSize: 13
-                                color: Theme.textColor
+                                color: ThemeManager.textColor
                                 verticalAlignment: Text.AlignVCenter
                                 leftPadding: 10
                             }
                             
                             Component.onCompleted: {
-                                currentIndex = indexOfValue(Settings.canvasPattern)
+                                currentIndex = indexOfValue(SettingsManager.canvasPattern)
                             }
                         }
                     }
@@ -277,7 +278,7 @@ Dialog {
                         
                         Label {
                             text: "Размер шрифта подписи"
-                            color: Theme.textColor
+                            color: ThemeManager.textColor
                             Layout.preferredWidth: 160
                         }
                         
@@ -285,7 +286,7 @@ Dialog {
                             id: labelFontSizeSpinBox
                             from: 8
                             to: 72
-                            value: Settings.labelFontSize
+                            value: SettingsManager.labelFontSize
                             editable: true
                             Layout.preferredWidth: 180
                             
@@ -298,8 +299,8 @@ Dialog {
                             }
                             
                             background: Rectangle {
-                                color: Theme.controlBackground
-                                border.color: Theme.borderColor
+                                color: ThemeManager.controlBackground
+                                border.color: ThemeManager.borderColor
                                 border.width: 1
                                 radius: 6
                             }
@@ -307,7 +308,7 @@ Dialog {
                             contentItem: TextInput {
                                 text: labelFontSizeSpinBox.textFromValue(labelFontSizeSpinBox.value, labelFontSizeSpinBox.locale)
                                 font.pixelSize: 13
-                                color: Theme.textColor
+                                color: ThemeManager.textColor
                                 horizontalAlignment: Text.AlignHCenter
                                 verticalAlignment: Text.AlignVCenter
                                 readOnly: !labelFontSizeSpinBox.editable
@@ -323,7 +324,7 @@ Dialog {
                         
                         Label {
                             text: "Отступ при расположении"
-                            color: Theme.textColor
+                            color: ThemeManager.textColor
                             Layout.preferredWidth: 160
                         }
                         
@@ -331,7 +332,7 @@ Dialog {
                             id: arrangeSpacingSpinBox
                             from: 0
                             to: 200
-                            value: Settings.arrangeSpacing
+                            value: SettingsManager.arrangeSpacing
                             editable: true
                             Layout.preferredWidth: 180
                             
@@ -344,8 +345,8 @@ Dialog {
                             }
                             
                             background: Rectangle {
-                                color: Theme.controlBackground
-                                border.color: Theme.borderColor
+                                color: ThemeManager.controlBackground
+                                border.color: ThemeManager.borderColor
                                 border.width: 1
                                 radius: 6
                             }
@@ -353,7 +354,7 @@ Dialog {
                             contentItem: TextInput {
                                 text: arrangeSpacingSpinBox.textFromValue(arrangeSpacingSpinBox.value, arrangeSpacingSpinBox.locale)
                                 font.pixelSize: 13
-                                color: Theme.textColor
+                                color: ThemeManager.textColor
                                 horizontalAlignment: Text.AlignHCenter
                                 verticalAlignment: Text.AlignVCenter
                                 readOnly: !arrangeSpacingSpinBox.editable
@@ -380,7 +381,7 @@ Dialog {
                         text: "Навигация и холст"
                         font.bold: true
                         font.pixelSize: 14
-                        color: Theme.accentColor
+                        color: ThemeManager.accentColor
                         bottomPadding: 2
                     }
                     
@@ -397,7 +398,7 @@ Dialog {
                         text: "Управление элементами"
                         font.bold: true
                         font.pixelSize: 14
-                        color: Theme.accentColor
+                        color: ThemeManager.accentColor
                         bottomPadding: 2
                     }
                     
@@ -414,7 +415,7 @@ Dialog {
                         text: "Трансформации"
                         font.bold: true
                         font.pixelSize: 14
-                        color: Theme.accentColor
+                        color: ThemeManager.accentColor
                         bottomPadding: 2
                     }
                     
@@ -431,7 +432,7 @@ Dialog {
                         text: "Интерфейс"
                         font.bold: true
                         font.pixelSize: 14
-                        color: Theme.accentColor
+                        color: ThemeManager.accentColor
                         bottomPadding: 2
                     }
                     
@@ -457,19 +458,20 @@ Dialog {
             
             // Отмена
             AbstractButton {
+                id: cancelBtn
                 Layout.preferredWidth: 90
                 Layout.preferredHeight: 32
                 
                 background: Rectangle {
-                    color: hovered ? Qt.rgba(Theme.textColor.r, Theme.textColor.g, Theme.textColor.b, 0.1) : "transparent"
-                    border.color: Theme.borderColor
+                    color: cancelBtn.hovered ? Qt.rgba(ThemeManager.textColor.r, ThemeManager.textColor.g, ThemeManager.textColor.b, 0.1) : "transparent"
+                    border.color: ThemeManager.borderColor
                     border.width: 1
                     radius: 6
                 }
                 
                 contentItem: Text {
                     text: "Отмена"
-                    color: Theme.textColor
+                    color: ThemeManager.textColor
                     font.pixelSize: 13
                     horizontalAlignment: Text.AlignHCenter
                     verticalAlignment: Text.AlignVCenter
@@ -480,17 +482,18 @@ Dialog {
             
             // OK
             AbstractButton {
+                id: applyBtn
                 Layout.preferredWidth: 90
                 Layout.preferredHeight: 32
                 
                 background: Rectangle {
-                    color: hovered ? Theme.accentPressedColor : Theme.accentColor
+                    color: applyBtn.hovered ? ThemeManager.accentPressedColor : ThemeManager.accentColor
                     radius: 6
                 }
                 
                 contentItem: Text {
                     text: "Применить"
-                    color: Theme.backgroundColor
+                    color: ThemeManager.backgroundColor
                     font.pixelSize: 13
                     font.bold: true
                     horizontalAlignment: Text.AlignHCenter
@@ -511,7 +514,7 @@ Dialog {
         
         Label {
             text: description
-            color: Qt.rgba(Theme.textColor.r, Theme.textColor.g, Theme.textColor.b, 0.7)
+            color: Qt.rgba(ThemeManager.textColor.r, ThemeManager.textColor.g, ThemeManager.textColor.b, 0.7)
             font.pixelSize: 12
             Layout.preferredWidth: 200
         }
@@ -520,7 +523,7 @@ Dialog {
             text: keys
             font.pixelSize: 12
             font.bold: true
-            color: Theme.textColor
+            color: ThemeManager.textColor
         }
     }
 }

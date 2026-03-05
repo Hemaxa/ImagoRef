@@ -1,10 +1,13 @@
 #include "SettingsManager.h"
+#include <QJSEngine>
 
 SettingsManager* SettingsManager::create(QQmlEngine *qmlEngine, QJSEngine *jsEngine)
 {
     Q_UNUSED(qmlEngine)
     Q_UNUSED(jsEngine)
-    return &instance();
+    auto *inst = &instance();
+    QJSEngine::setObjectOwnership(inst, QJSEngine::CppOwnership);
+    return inst;
 }
 
 SettingsManager& SettingsManager::instance()

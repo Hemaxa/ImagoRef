@@ -1,26 +1,29 @@
-import QtQuick
-import QtQuick.Controls
-import QtQuick.Window
-import QtQuick.Dialogs
-import ImagoRef
-import "windows"
-import "components"
+//Main.qml - точка входа для QML части приложения, управляет показом WelcomeWindow, MainWindow и SettingsWindow
 
-// Main.qml - главная точка входа QML приложения. Управляет показом WelcomeWindow, MainWindow и SettingsWindow.
+import QtQuick
+import QtQuick.Controls //добавляет базовые элементы UI
+import QtQuick.Window //работа с окнами и экраном
+import QtQuick.Dialogs //работа с нативными диалогами операционной системы
+import ImagoRef //добавление виртуального модуля приложения
+
+import "windows" //подключает все .qml файлы из папки windows
+import "components" //подключает все .qml файлы из папки components
+
+//корневое окно приложения
 ApplicationWindow {
-    id: root
-    visible: true
-    width: 900
-    height: 700
-    title: boardController.windowTitle
-    color: Theme.backgroundColor
+    id: root //идентификатор (root является корневым элементом только для этого файла)
+    visible: true //режим видимости
+    width: 900 //ширина
+    height: 700 //высота
+    title: boardController.fileController.windowTitle //заголовок окна берется из контроллера файлов посредством контроллера доски 
+    color: ThemeManager.backgroundColor //цвет фона берется из менеджера тем
     
-    // Контроллер доски
+    //создает экземпляр контроллера доски
     BoardController {
         id: boardController
     }
     
-    // Системная панель меню (нативная macOS)
+    //создает системную панель меню
     menuBar: MenuBar {
         Menu {
             title: "Файл"
@@ -34,15 +37,18 @@ ApplicationWindow {
                     }
                 }
             }
-            MenuSeparator {}
+
+            MenuSeparator {} //разделитель
+
             Action {
                 text: "Сохранить"
                 shortcut: StandardKey.Save
                 onTriggered: {
                     if (mainLoader.active) {
-                        if (boardController.currentFilePath !== "") {
-                            boardController.saveBoard()
-                        } else {
+                        if (boardController.fileController.currentFilePath !== "") {
+                            boardController.fileController.saveBoard()
+                        }
+                        else {
                             fileSaveDialog.open()
                         }
                     }
@@ -60,7 +66,7 @@ ApplicationWindow {
         }
     }
     
-    // Загрузчик главного окна
+    //загрузчик главного окна
     Loader {
         id: mainLoader
         active: false
@@ -71,26 +77,28 @@ ApplicationWindow {
         }
     }
     
-    // Диалог настроек
+    //создает экземпляр диалога настроек
     SettingsWindow {
         id: settingsDialog
         anchors.centerIn: parent
     }
     
-    // Диалог приветствия
+    //создает экземпляр диалога приветствия
     WelcomeWindow {
         id: welcomeDialog
         anchors.centerIn: parent
         
+        //создание новой доски
         onNewBoardRequested: {
             root.showMaximized()
-            boardController.newBoard()
+            boardController.fileController.newBoard()
             mainLoader.active = true
             welcomeDialog.close()
         }
         
+        //открытие существующей доски
         onOpenBoardRequested: function(fileUrl) {
-            if (boardController.openBoard(fileUrl)) {
+            if (boardController.fileController.openBoard(fileUrl)) {
                 root.showMaximized()
                 mainLoader.active = true
                 welcomeDialog.close()
@@ -98,28 +106,31 @@ ApplicationWindow {
         }
     }
     
-    // Диалог сохранения
+    //создание системных диалогов
+    //диалог сохранения файла
     FileDialog {
         id: fileSaveDialog
         title: "Сохранить доску"
         fileMode: FileDialog.SaveFile
         nameFilters: ["ImagoRef доска (*.iref)", "Все файлы (*)"]
-        onAccepted: boardController.saveBoardAs(selectedFile)
+        onAccepted: boardController.fileController.saveBoardAs(selectedFile)
     }
     
-    // Диалог открытия
+    //диалог открытия файла
     FileDialog {
         id: fileOpenDialog
         title: "Открыть доску"
         nameFilters: ["ImagoRef доска (*.iref)", "Все файлы (*)"]
-        onAccepted: boardController.openBoard(selectedFile)
+        onAccepted: boardController.fileController.openBoard(selectedFile)
     }
     
-    // Показать окно приветствия при запуске
+    //показать окно приветствия при запуске после исполнения всего файла
     Component.onCompleted: {
         welcomeDialog.open()
     }
     
+    //горячие клавиши
+    //открытие окна настроек
     Shortcut {
         sequence: "Ctrl+,"
         onActivated: settingsDialog.open()

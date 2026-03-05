@@ -1,8 +1,7 @@
-//main.cpp - точка входа для приложения, инициализирует QML движок, регистрирует C++ типы, запускает бесконечный цикл событий
+//main.cpp - точка входа для всего приложения, инициализирует QML движок, регистрирует C++ типы, запускает бесконечный цикл событий
 
 #include <QGuiApplication> //основной класс для GUI-приложений без виджетов
 #include <QQmlApplicationEngine> //движок, который загружает и управляет QML
-#include <QQmlContext> //позволяет передавать данные из C++ в QML
 #include <QQuickStyle> //стили для QML
 #include <QIcon> //иконки для QML
 
@@ -24,11 +23,6 @@ int main(int argc, char *argv[])
 
     //создание QML движка
     QQmlApplicationEngine engine;
-
-    //регистрация контекстных свойств (синглтоны)
-    //через setContextProperty можно напрямую обратиться к полю класса (например Settings.gridSize)
-    engine.rootContext()->setContextProperty("Settings", &SettingsManager::instance());
-    engine.rootContext()->setContextProperty("Theme", &ThemeManager::instance());
 
     //загрузка главного QML файла из модуля Qt6
     const QUrl url(QStringLiteral("qrc:/ImagoRef/src/qml/Main.qml"));

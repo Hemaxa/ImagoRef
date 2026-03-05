@@ -51,7 +51,7 @@ AbstractButton {
             anchors.fill: parent
             radius: 6
             color: "transparent"
-            border.color: root.active ? Theme.accentColor : "transparent"
+            border.color: root.active ? ThemeManager.accentColor : "transparent"
             border.width: root.active ? 2 : 0
         }
         
