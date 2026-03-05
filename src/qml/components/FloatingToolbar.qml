@@ -1,18 +1,16 @@
+//FloatingToolbar.qml - плавающая панель инструментов
+
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import ImagoRef
 
-/**
- * FloatingToolbar.qml - плавающая панель инструментов.
- * Тёмно-серая панель со скруглёнными краями, иконки на всю ширину.
- */
 Rectangle {
     id: root
     
     required property BoardController controller
     
-    // Сигналы для действий
+    //cигналы для действий
     signal settingsClicked()
     signal zoomInClicked()
     signal zoomOutClicked()
@@ -21,16 +19,16 @@ Rectangle {
     signal labelClicked()
     signal pasteClicked()
     
-    // Состояние активных инструментов
+    //cостояние активных инструментов
     property bool resizeModeActive: false
     property bool cropModeActive: false
     
-    width: 58
+    width: 60
     height: toolbarLayout.height + 6
     color: ThemeManager.panelColor
     border.color: ThemeManager.borderColor
     border.width: 3
-    radius: 12
+    radius: 3
     clip: true  // Обрезаем содержимое по скруглённым краям
     
     ColumnLayout {
@@ -41,7 +39,7 @@ Rectangle {
         spacing: 3
         
         // Вставить
-        ImagoToolButton {
+        ToolbarButton {
             iconSource: "qrc:/icons/icons/paste.svg"
             tooltip: "Вставить"
             shortcutText: "Ctrl+V"
@@ -49,7 +47,7 @@ Rectangle {
         }
         
         // Удалить
-        ImagoToolButton {
+        ToolbarButton {
             iconSource: "qrc:/icons/icons/delete.svg"
             tooltip: "Удалить"
             shortcutText: "Delete"
@@ -58,7 +56,7 @@ Rectangle {
         }
         
         // Привязать к сетке
-        ImagoToolButton {
+        ToolbarButton {
             iconSource: "qrc:/icons/icons/grid_snap.svg"
             tooltip: "Привязать к сетке"
             shortcutText: "G"
@@ -67,7 +65,7 @@ Rectangle {
         }
         
         // Изменить размер
-        ImagoToolButton {
+        ToolbarButton {
             iconSource: "qrc:/icons/icons/scale.svg"
             tooltip: "Изменить размер"
             shortcutText: "S"
@@ -77,7 +75,7 @@ Rectangle {
         }
         
         // Обрезать
-        ImagoToolButton {
+        ToolbarButton {
             iconSource: "qrc:/icons/icons/crop.svg"
             tooltip: "Обрезать"
             shortcutText: "C"
@@ -87,7 +85,7 @@ Rectangle {
         }
         
         // Подписать
-        ImagoToolButton {
+        ToolbarButton {
             iconSource: "qrc:/icons/icons/label.svg"
             tooltip: "Подписать"
             shortcutText: "L"
@@ -96,7 +94,7 @@ Rectangle {
         }
         
         // Расположить
-        ImagoToolButton {
+        ToolbarButton {
             iconSource: "qrc:/icons/icons/arrange.svg"
             tooltip: "Расположить"
             shortcutText: "A"
@@ -104,7 +102,7 @@ Rectangle {
         }
         
         // Вращать против часовой
-        ImagoToolButton {
+        ToolbarButton {
             iconSource: "qrc:/icons/icons/rotate_left.svg"
             tooltip: "Вращать против часовой"
             shortcutText: "Shift+R"
@@ -113,7 +111,7 @@ Rectangle {
         }
         
         // Вращать по часовой
-        ImagoToolButton {
+        ToolbarButton {
             iconSource: "qrc:/icons/icons/rotate_right.svg"
             tooltip: "Вращать по часовой"
             shortcutText: "R"
@@ -122,7 +120,7 @@ Rectangle {
         }
         
         // Приблизить
-        ImagoToolButton {
+        ToolbarButton {
             iconSource: "qrc:/icons/icons/zoom_in.svg"
             tooltip: "Приблизить"
             shortcutText: "Ctrl++"
@@ -130,7 +128,7 @@ Rectangle {
         }
         
         // Отдалить
-        ImagoToolButton {
+        ToolbarButton {
             iconSource: "qrc:/icons/icons/zoom_out.svg"
             tooltip: "Отдалить"
             shortcutText: "Ctrl+-"
@@ -138,7 +136,7 @@ Rectangle {
         }
         
         // Отменить
-        ImagoToolButton {
+        ToolbarButton {
             iconSource: "qrc:/icons/icons/undo.svg"
             tooltip: "Отменить"
             shortcutText: "Ctrl+Z"
@@ -147,7 +145,7 @@ Rectangle {
         }
         
         // Повторить
-        ImagoToolButton {
+        ToolbarButton {
             iconSource: "qrc:/icons/icons/redo.svg"
             tooltip: "Повторить"
             shortcutText: "Ctrl+Shift+Z"
@@ -156,7 +154,7 @@ Rectangle {
         }
         
         // Настройки
-        ImagoToolButton {
+        ToolbarButton {
             iconSource: "qrc:/icons/icons/settings.svg"
             tooltip: "Настройки"
             shortcutText: "Ctrl+,"

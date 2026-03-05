@@ -1,4 +1,4 @@
-//ResizeHandles.qml - маркеры изменения размера для ImageItem, 8 маркеров по углам и сторонам.
+//ResizeOverlay.qml - маркеры изменения размера для ImageItem, 8 маркеров по углам и сторонам.
 
 import QtQuick
 import ImagoRef

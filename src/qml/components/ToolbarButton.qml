@@ -3,7 +3,7 @@ import QtQuick.Controls
 import ImagoRef
 
 /**
- * ImagoToolButton.qml - кнопка панели инструментов.
+ * ToolbarButton.qml - кнопка панели инструментов.
  * Иконка отображается на всю ширину кнопки.
  * Новые SVG-иконки содержат встроенный цветной фон.
  */
@@ -15,8 +15,8 @@ AbstractButton {
     property string shortcutText
     property bool active: false
     
-    implicitWidth: 52
-    implicitHeight: 52
+    implicitWidth: 54
+    implicitHeight: 54
     
     opacity: enabled ? 1.0 : 0.4
     

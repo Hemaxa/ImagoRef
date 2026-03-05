@@ -33,8 +33,8 @@ ThemeManager::ThemeManager(QObject *parent) : QObject(parent)
     m_themeColors["accentPressedColor"] = QColor("#D35400");
     m_themeColors["iconColor"] = QColor("#E67E22");
     m_themeColors["gridColor"] = QColor("#3c3c3c");
-    m_themeColors["borderColor"] = QColor("#333333");
-    m_themeColors["panelColor"] = QColor(31, 31, 31, 230);
+    m_themeColors["borderColor"] = QColor("#3c3c3c");
+    m_themeColors["panelColor"] = QColor("#3c3c3c");
     m_themeColors["controlBackground"] = QColor("#1f1f1f");
 }
 

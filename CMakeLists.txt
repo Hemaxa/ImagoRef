@@ -59,8 +59,8 @@ qt_add_qml_module(ImagoRef
         src/qml/components/CanvasView.qml
         src/qml/components/ImageItem.qml
         src/qml/components/FloatingToolbar.qml
-        src/qml/components/ImagoToolButton.qml
-        src/qml/components/ResizeHandles.qml
+        src/qml/components/ToolbarButton.qml
+        src/qml/components/ResizeOverlay.qml
         src/qml/components/CropOverlay.qml
     RESOURCES
         res/resources.qrc

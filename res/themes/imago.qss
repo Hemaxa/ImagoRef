@@ -11,7 +11,7 @@
 @iconColor: #E67E22;
 @gridColor: #3c3c3c;
 @borderColor: #585b70;
-@panelColor: rgba(30, 30, 46, 230);
+@panelColor: #585b70;
 @controlBackground: #313244;
 
 /* =================================================================== */
