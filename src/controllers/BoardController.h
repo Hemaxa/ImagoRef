@@ -18,20 +18,20 @@ class BoardController : public QObject {
     QML_ELEMENT //макрос, который позволяет использовать этот класс напрямую в QML
 
     //свойство Q_PROPERTY делает переменные C++ доступными в QML как обычные свойства
-    Q_PROPERTY(ImageItemModel* model READ model CONSTANT) //модель данных
+    Q_PROPERTY(ImageItemModel* model READ getModel CONSTANT) //модель данных
     
     //остальные контроллеры
-    Q_PROPERTY(FileController* fileController READ fileController CONSTANT)
-    Q_PROPERTY(SelectionController* selectionController READ selectionController CONSTANT)
-    Q_PROPERTY(ClipboardController* clipboardController READ clipboardController CONSTANT)
-    Q_PROPERTY(ToolController* toolController READ toolController CONSTANT)
+    Q_PROPERTY(FileController* fileController READ getFileController CONSTANT)
+    Q_PROPERTY(SelectionController* selectionController READ getSelectionController CONSTANT)
+    Q_PROPERTY(ClipboardController* clipboardController READ getClipboardController CONSTANT)
+    Q_PROPERTY(ToolController* toolController READ getToolController CONSTANT)
 
     //состояния для кнопок Undo/Redo
-    Q_PROPERTY(bool canUndo READ canUndo NOTIFY undoStateChanged)
-    Q_PROPERTY(bool canRedo READ canRedo NOTIFY redoStateChanged)
+    Q_PROPERTY(bool canUndo READ getCanUndo NOTIFY undoStateChanged)
+    Q_PROPERTY(bool canRedo READ getCanRedo NOTIFY redoStateChanged)
     
     //размер сетки
-    Q_PROPERTY(int gridSize READ gridSize WRITE setGridSize NOTIFY gridSizeChanged)
+    Q_PROPERTY(int gridSize READ getGridSize WRITE setGridSize NOTIFY gridSizeChanged)
 
 public:
     //конструктор принимает родительский QObject для автоматического управления памятью
@@ -39,15 +39,15 @@ public:
     ~BoardController();
 
     //геттеры для свойств
-    ImageItemModel* model() const;
-    FileController* fileController() const;
-    SelectionController* selectionController() const;
-    ClipboardController* clipboardController() const;
-    ToolController* toolController() const;
+    ImageItemModel* getModel() const;
+    FileController* getFileController() const;
+    SelectionController* getSelectionController() const;
+    ClipboardController* getClipboardController() const;
+    ToolController* getToolController() const;
 
-    bool canUndo() const;
-    bool canRedo() const;
-    int gridSize() const;
+    bool getCanUndo() const;
+    bool getCanRedo() const;
+    int getGridSize() const;
 
     //сеттеры для свойств
     void setGridSize(int size);
@@ -71,7 +71,7 @@ signals:
 
 private:
     //вспомогательный метод для настройки сигналов
-    void connectUndoSignals();
+    void connectSignals();
 
     //внутренние переменные класса
     ImageItemModel *m_model;

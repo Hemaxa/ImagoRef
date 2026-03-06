@@ -13,13 +13,13 @@ class SelectionController : public QObject {
     QML_UNCREATABLE("SelectionController is only available via BoardController.selectionController")
 
     //свойство активного/неактивного выбора картинки
-    Q_PROPERTY(bool hasSelection READ hasSelection NOTIFY selectionChanged)
+    Q_PROPERTY(bool hasSelection READ getHasSelection NOTIFY selectionChanged)
 
 public:
     explicit SelectionController(ImageItemModel *model, QObject *parent = nullptr);
 
     //метод, который проверяет, есть ли хоть одна выделенная картинка
-    bool hasSelection() const;
+    bool getHasSelection() const;
 
     //выделение
     Q_INVOKABLE void selectItem(int index, bool addToSelection = false);
@@ -37,7 +37,7 @@ public:
     Q_INVOKABLE qreal getItemY(int index) const;
     Q_INVOKABLE qreal getItemWidth(int index) const;
     Q_INVOKABLE qreal getItemHeight(int index) const;
-    Q_INVOKABLE bool isItemSelected(int index) const;
+    Q_INVOKABLE bool getIsItemSelected(int index) const;
 
 signals:
     //сигнал, который отправляется при любом изменении списка выделенных элементов

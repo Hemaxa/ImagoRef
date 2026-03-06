@@ -87,7 +87,7 @@ Item {
     function limitSelectionToOne() {
         var found = false
         for (var i = 0; i < controller.model.count; i++) {
-            if (controller.selectionController.isItemSelected(i)) {
+            if (controller.selectionController.getIsItemSelected(i)) {
                 if (found) {
                     controller.selectionController.deselectItem(i)
                 }
@@ -312,7 +312,7 @@ Item {
                 }
                 else {
                     //обычный клик — единственное выделение (если не уже выделен)
-                    if (!controller.selectionController.isItemSelected(hitIdx)) {
+                    if (!controller.selectionController.getIsItemSelected(hitIdx)) {
                         controller.selectionController.selectItem(hitIdx, false)
                     }
                 }

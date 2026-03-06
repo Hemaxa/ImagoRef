@@ -16,17 +16,17 @@ class ThemeManager : public QObject {
     QML_ELEMENT
     QML_SINGLETON
 
-    Q_PROPERTY(QString currentTheme READ currentTheme NOTIFY themeChanged)
-    Q_PROPERTY(QColor backgroundColor READ backgroundColor NOTIFY themeChanged)
-    Q_PROPERTY(QColor textColor READ textColor NOTIFY themeChanged)
-    Q_PROPERTY(QColor accentColor READ accentColor NOTIFY themeChanged)
-    Q_PROPERTY(QColor accentHoverColor READ accentHoverColor NOTIFY themeChanged)
-    Q_PROPERTY(QColor accentPressedColor READ accentPressedColor NOTIFY themeChanged)
-    Q_PROPERTY(QColor iconColor READ iconColor NOTIFY themeChanged)
-    Q_PROPERTY(QColor gridColor READ gridColor NOTIFY themeChanged)
-    Q_PROPERTY(QColor borderColor READ borderColor NOTIFY themeChanged)
-    Q_PROPERTY(QColor panelColor READ panelColor NOTIFY themeChanged)
-    Q_PROPERTY(QColor controlBackground READ controlBackground NOTIFY themeChanged)
+    Q_PROPERTY(QString currentTheme READ getCurrentTheme NOTIFY themeChanged)
+    Q_PROPERTY(QColor backgroundColor READ getBackgroundColor NOTIFY themeChanged)
+    Q_PROPERTY(QColor textColor READ getTextColor NOTIFY themeChanged)
+    Q_PROPERTY(QColor accentColor READ getAccentColor NOTIFY themeChanged)
+    Q_PROPERTY(QColor accentHoverColor READ getAccentHoverColor NOTIFY themeChanged)
+    Q_PROPERTY(QColor accentPressedColor READ getAccentPressedColor NOTIFY themeChanged)
+    Q_PROPERTY(QColor iconColor READ getIconColor NOTIFY themeChanged)
+    Q_PROPERTY(QColor gridColor READ getGridColor NOTIFY themeChanged)
+    Q_PROPERTY(QColor borderColor READ getBorderColor NOTIFY themeChanged)
+    Q_PROPERTY(QColor panelColor READ getPanelColor NOTIFY themeChanged)
+    Q_PROPERTY(QColor controlBackground READ getControlBackground NOTIFY themeChanged)
 
 public:
     static ThemeManager* create(QQmlEngine *qmlEngine, QJSEngine *jsEngine);
@@ -35,17 +35,17 @@ public:
     Q_INVOKABLE void applyTheme(const QString& themeName);
     Q_INVOKABLE QPixmap colorizeSvg(const QString& path, const QColor& color, const QSize& size);
 
-    QString currentTheme() const;
-    QColor backgroundColor() const;
-    QColor textColor() const;
-    QColor accentColor() const;
-    QColor accentHoverColor() const;
-    QColor accentPressedColor() const;
-    QColor iconColor() const;
-    QColor gridColor() const;
-    QColor borderColor() const;
-    QColor panelColor() const;
-    QColor controlBackground() const;
+    QString getCurrentTheme() const;
+    QColor getBackgroundColor() const;
+    QColor getTextColor() const;
+    QColor getAccentColor() const;
+    QColor getAccentHoverColor() const;
+    QColor getAccentPressedColor() const;
+    QColor getIconColor() const;
+    QColor getGridColor() const;
+    QColor getBorderColor() const;
+    QColor getPanelColor() const;
+    QColor getControlBackground() const;
 
 signals:
     void themeChanged();

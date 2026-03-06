@@ -88,6 +88,7 @@ if(APPLE)
         Qt6::QuickControls2
         Qt6::Qml
         Qt6::Gui
+        Qt6::GuiPrivate
         Qt6::Svg
 
         OpenGL::GL
@@ -166,6 +167,7 @@ if(WIN32)
         Qt6::QuickControls2
         Qt6::Qml
         Qt6::Gui
+        Qt6::GuiPrivate
         Qt6::Svg
     )
 
@@ -228,6 +230,7 @@ if(UNIX AND NOT APPLE)
         Qt6::QuickControls2
         Qt6::Qml
         Qt6::Gui
+        Qt6::GuiPrivate
         Qt6::Svg
     )
 

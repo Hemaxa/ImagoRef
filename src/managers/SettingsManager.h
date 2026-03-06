@@ -14,11 +14,11 @@ class SettingsManager : public QObject {
     QML_ELEMENT
     QML_SINGLETON
 
-    Q_PROPERTY(QString themeName READ themeName WRITE setThemeName NOTIFY themeNameChanged)
-    Q_PROPERTY(int gridSize READ gridSize WRITE setGridSize NOTIFY gridSizeChanged)
-    Q_PROPERTY(QString canvasPattern READ canvasPattern WRITE setCanvasPattern NOTIFY canvasPatternChanged)
-    Q_PROPERTY(int labelFontSize READ labelFontSize WRITE setLabelFontSize NOTIFY labelFontSizeChanged)
-    Q_PROPERTY(int arrangeSpacing READ arrangeSpacing WRITE setArrangeSpacing NOTIFY arrangeSpacingChanged)
+    Q_PROPERTY(QString themeName READ getThemeName WRITE setThemeName NOTIFY themeNameChanged)
+    Q_PROPERTY(int gridSize READ getGridSize WRITE setGridSize NOTIFY gridSizeChanged)
+    Q_PROPERTY(QString canvasPattern READ getCanvasPattern WRITE setCanvasPattern NOTIFY canvasPatternChanged)
+    Q_PROPERTY(int labelFontSize READ getLabelFontSize WRITE setLabelFontSize NOTIFY labelFontSizeChanged)
+    Q_PROPERTY(int arrangeSpacing READ getArrangeSpacing WRITE setArrangeSpacing NOTIFY arrangeSpacingChanged)
 
 public:
     static SettingsManager* create(QQmlEngine *qmlEngine, QJSEngine *jsEngine);
@@ -27,19 +27,19 @@ public:
     void loadSettings();
     void saveSettings();
 
-    QString themeName() const;
+    QString getThemeName() const;
     void setThemeName(const QString& name);
 
-    int gridSize() const;
+    int getGridSize() const;
     void setGridSize(int size);
 
-    QString canvasPattern() const;
+    QString getCanvasPattern() const;
     void setCanvasPattern(const QString& pattern);
 
-    int labelFontSize() const;
+    int getLabelFontSize() const;
     void setLabelFontSize(int size);
 
-    int arrangeSpacing() const;
+    int getArrangeSpacing() const;
     void setArrangeSpacing(int spacing);
 
 signals:

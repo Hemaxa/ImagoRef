@@ -14,16 +14,16 @@ class FileController : public QObject {
     QML_UNCREATABLE("FileController is only available via BoardController.fileController")
 
     //свойство проверки наличия файловго пути (новыя доска или открытый файл)
-    Q_PROPERTY(QString currentFilePath READ currentFilePath NOTIFY filePathChanged)
+    Q_PROPERTY(QString currentFilePath READ getCurrentFilePath NOTIFY filePathChanged)
     //свойство генерации заголовка окна в зависимости от файла
-    Q_PROPERTY(QString windowTitle READ windowTitle NOTIFY filePathChanged)
+    Q_PROPERTY(QString windowTitle READ getWindowTitle NOTIFY filePathChanged)
 
 public:
     explicit FileController(ImageItemModel *model, QUndoStack *undoStack, QObject *parent = nullptr);
 
     //геттеры
-    QString currentFilePath() const;
-    QString windowTitle() const;
+    QString getCurrentFilePath() const;
+    QString getWindowTitle() const;
 
     //методы файловых операций
     Q_INVOKABLE void newBoard();

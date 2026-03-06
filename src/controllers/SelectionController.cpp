@@ -2,12 +2,14 @@
 #include "ImageModel.h"
 
 #include <QRectF>
+#include <QTransform>
+#include <QPolygonF>
 
 SelectionController::SelectionController(ImageItemModel *model, QObject *parent) : QObject(parent), m_model(model) {}
 
-bool SelectionController::hasSelection() const
+bool SelectionController::getHasSelection() const
 {
-    return !m_model->selectedIndices().isEmpty();
+    return !m_model->getSelectedIndices().isEmpty();
 }
 
 void SelectionController::selectItem(int index, bool addToSelection)
@@ -35,7 +37,7 @@ void SelectionController::toggleSelection(int index)
 
 void SelectionController::selectAll()
 {
-    for (int i = 0; i < m_model->count(); ++i) {
+    for (int i = 0; i < m_model->getCount(); ++i) {
         m_model->setSelected(i, true);
     }
     emit selectionChanged();
@@ -57,12 +59,21 @@ void SelectionController::selectInRect(qreal x, qreal y, qreal width, qreal heig
         m_model->clearSelection();
     }
     
+    QPolygonF selectionPolygon(selectionRect);
+    
     //проходим по всем картинкам и проверяем, пересекается ли их прямоугольник с прямоугольником рамки
-    for (int i = 0; i < m_model->count(); ++i) {
+    for (int i = 0; i < m_model->getCount(); ++i) {
         ImageData item = m_model->getItem(i);
         QRectF itemRect(item.x, item.y, item.width, item.height);
         
-        if (selectionRect.intersects(itemRect)) {
+        QTransform transform;
+        transform.translate(item.x + item.width / 2.0, item.y + item.height / 2.0);
+        transform.rotate(item.rotation);
+        transform.translate(-(item.x + item.width / 2.0), -(item.y + item.height / 2.0));
+        
+        QPolygonF itemPolygonF = transform.map(itemRect);
+        
+        if (!selectionPolygon.intersected(itemPolygonF).isEmpty() || selectionPolygon.containsPoint(itemPolygonF.boundingRect().center(), Qt::OddEvenFill)) {
             m_model->setSelected(i, true);
         }
     }
@@ -72,10 +83,17 @@ void SelectionController::selectInRect(qreal x, qreal y, qreal width, qreal heig
 
 int SelectionController::hitTest(qreal x, qreal y) const
 {
-    for (int i = m_model->count() - 1; i >= 0; --i) {
+    for (int i = m_model->getCount() - 1; i >= 0; --i) {
         ImageData item = m_model->getItem(i);
         QRectF rect(item.x, item.y, item.width, item.height);
-        if (rect.contains(x, y)) {
+        
+        QTransform transform;
+        transform.translate(item.x + item.width / 2.0, item.y + item.height / 2.0);
+        transform.rotate(item.rotation);
+        transform.translate(-(item.x + item.width / 2.0), -(item.y + item.height / 2.0));
+        
+        QPolygonF polygon = transform.map(rect);
+        if (polygon.containsPoint(QPointF(x, y), Qt::OddEvenFill)) {
             return i;
         }
     }
@@ -84,35 +102,35 @@ int SelectionController::hitTest(qreal x, qreal y) const
 
 qreal SelectionController::getItemX(int index) const
 {
-    if (index >= 0 && index < m_model->count())
+    if (index >= 0 && index < m_model->getCount())
         return m_model->getItem(index).x;
     return 0;
 }
 
 qreal SelectionController::getItemY(int index) const
 {
-    if (index >= 0 && index < m_model->count())
+    if (index >= 0 && index < m_model->getCount())
         return m_model->getItem(index).y;
     return 0;
 }
 
 qreal SelectionController::getItemWidth(int index) const
 {
-    if (index >= 0 && index < m_model->count())
+    if (index >= 0 && index < m_model->getCount())
         return m_model->getItem(index).width;
     return 0;
 }
 
 qreal SelectionController::getItemHeight(int index) const
 {
-    if (index >= 0 && index < m_model->count())
+    if (index >= 0 && index < m_model->getCount())
         return m_model->getItem(index).height;
     return 0;
 }
 
-bool SelectionController::isItemSelected(int index) const
+bool SelectionController::getIsItemSelected(int index) const
 {
-    if (index >= 0 && index < m_model->count())
+    if (index >= 0 && index < m_model->getCount())
         return m_model->getItem(index).selected;
     return false;
 }

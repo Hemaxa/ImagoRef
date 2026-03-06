@@ -13,7 +13,7 @@ ToolController::ToolController(ImageItemModel *model, QUndoStack *undoStack, QOb
 {
 }
 
-bool ToolController::isPinned() const
+bool ToolController::getIsPinned() const
 {
     return m_isPinned;
 }
@@ -26,7 +26,7 @@ void ToolController::togglePin()
 
 void ToolController::deleteSelected()
 {
-    QVariantList indices = m_model->selectedIndices();
+    QVariantList indices = m_model->getSelectedIndices();
     if (indices.isEmpty()) return;
 
     QList<int> intIndices;
@@ -40,10 +40,10 @@ void ToolController::deleteSelected()
 
 void ToolController::snapToGrid()
 {
-    int gridSize = SettingsManager::instance().gridSize();
+    int gridSize = SettingsManager::instance().getGridSize();
     if (gridSize <= 0) return;
 
-    QVariantList indices = m_model->selectedIndices();
+    QVariantList indices = m_model->getSelectedIndices();
     if (indices.isEmpty()) return;
 
     m_undoStack->beginMacro("Привязка к сетке");
@@ -68,7 +68,7 @@ void ToolController::snapToGrid()
 
 void ToolController::rotateSelected(qreal angleDelta)
 {
-    QVariantList indices = m_model->selectedIndices();
+    QVariantList indices = m_model->getSelectedIndices();
     if (indices.isEmpty()) return;
 
     m_undoStack->beginMacro(angleDelta > 0 ? "Вращение по часовой" : "Вращение против часовой");
@@ -83,7 +83,7 @@ void ToolController::rotateSelected(qreal angleDelta)
 
 void ToolController::cropImage(int index, qreal cropX, qreal cropY, qreal cropWidth, qreal cropHeight)
 {
-    if (index < 0 || index >= m_model->count()) return;
+    if (index < 0 || index >= m_model->getCount()) return;
     
     ImageData item = m_model->getItem(index);
     if (item.pixmap.isNull()) return;
@@ -132,7 +132,7 @@ void ToolController::cropImage(int index, qreal cropX, qreal cropY, qreal cropWi
 
 void ToolController::setLabelForSelected(const QString &label)
 {
-    QVariantList indices = m_model->selectedIndices();
+    QVariantList indices = m_model->getSelectedIndices();
     if (indices.isEmpty()) return;
 
     m_undoStack->beginMacro("Подписать изображения");
@@ -150,10 +150,10 @@ void ToolController::setLabelForSelected(const QString &label)
 
 void ToolController::arrangeAll()
 {
-    int count = m_model->count();
+    int count = m_model->getCount();
     if (count == 0) return;
 
-    int spacing = SettingsManager::instance().arrangeSpacing();
+    int spacing = SettingsManager::instance().getArrangeSpacing();
 
     struct ItemInfo {
         int index;

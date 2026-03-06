@@ -41,7 +41,7 @@ void SettingsManager::saveSettings()
     m_settings.setValue("arrange/spacing", m_arrangeSpacing);
 }
 
-QString SettingsManager::themeName() const
+QString SettingsManager::getThemeName() const
 {
     return m_themeName;
 }
@@ -55,7 +55,7 @@ void SettingsManager::setThemeName(const QString& name)
     }
 }
 
-int SettingsManager::gridSize() const
+int SettingsManager::getGridSize() const
 {
     return m_gridSize;
 }
@@ -69,7 +69,7 @@ void SettingsManager::setGridSize(int size)
     }
 }
 
-QString SettingsManager::canvasPattern() const
+QString SettingsManager::getCanvasPattern() const
 {
     return m_canvasPattern;
 }
@@ -83,7 +83,7 @@ void SettingsManager::setCanvasPattern(const QString& pattern)
     }
 }
 
-int SettingsManager::labelFontSize() const
+int SettingsManager::getLabelFontSize() const
 {
     return m_labelFontSize;
 }
@@ -97,7 +97,7 @@ void SettingsManager::setLabelFontSize(int size)
     }
 }
 
-int SettingsManager::arrangeSpacing() const
+int SettingsManager::getArrangeSpacing() const
 {
     return m_arrangeSpacing;
 }

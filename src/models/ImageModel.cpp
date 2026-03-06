@@ -121,7 +121,7 @@ Qt::ItemFlags ImageItemModel::flags(const QModelIndex &index) const
     return Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 }
 
-int ImageItemModel::count() const
+int ImageItemModel::getCount() const
 {
     return m_items.count();
 }
@@ -284,7 +284,7 @@ void ImageItemModel::updateLabel(int index, const QString &label)
     }
 }
 
-QVariantList ImageItemModel::selectedIndices() const
+QVariantList ImageItemModel::getSelectedIndices() const
 {
     QVariantList result;
     for (int i = 0; i < m_items.count(); ++i) {

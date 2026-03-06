@@ -14,12 +14,12 @@ class ImageItemModel;
 class ToolController : public QObject {
     Q_OBJECT
     QML_UNCREATABLE("ToolController is only available via BoardController.toolController")
-    Q_PROPERTY(bool isPinned READ isPinned NOTIFY isPinnedChanged)
+    Q_PROPERTY(bool isPinned READ getIsPinned NOTIFY isPinnedChanged)
 
 public:
     explicit ToolController(ImageItemModel *model, QUndoStack *undoStack, QObject *parent = nullptr);
 
-    bool isPinned() const;
+    bool getIsPinned() const;
 
     Q_INVOKABLE void deleteSelected();
     Q_INVOKABLE void snapToGrid();

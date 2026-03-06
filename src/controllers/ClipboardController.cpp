@@ -38,7 +38,7 @@ void ClipboardController::addImage(const QUrl &imageUrl, qreal x, qreal y)
     
     m_undoStack->push(new AddImageCommand(
         m_model, 
-        m_model->getItem(m_model->count() - 1).id,
+        m_model->getItem(m_model->getCount() - 1).id,
         imageUrl, x, y, data.width, data.height
     ));
 }
@@ -63,7 +63,7 @@ void ClipboardController::addImageFromPixmap(const QByteArray &imageData, qreal 
     
     m_undoStack->push(new AddImageCommand(
         m_model,
-        m_model->getItem(m_model->count() - 1).id,
+        m_model->getItem(m_model->getCount() - 1).id,
         QUrl(), x, y, data.width, data.height
     ));
 }

@@ -130,14 +130,14 @@ QPixmap ThemeManager::colorizeSvg(const QString& path, const QColor& color, cons
     return pixmap;
 }
 
-QString ThemeManager::currentTheme() const { return m_currentTheme; }
-QColor ThemeManager::backgroundColor() const { return m_themeColors.value("backgroundColor"); }
-QColor ThemeManager::textColor() const { return m_themeColors.value("textColor"); }
-QColor ThemeManager::accentColor() const { return m_themeColors.value("accentColor"); }
-QColor ThemeManager::accentHoverColor() const { return m_themeColors.value("accentHoverColor"); }
-QColor ThemeManager::accentPressedColor() const { return m_themeColors.value("accentPressedColor"); }
-QColor ThemeManager::iconColor() const { return m_themeColors.value("iconColor"); }
-QColor ThemeManager::gridColor() const { return m_themeColors.value("gridColor"); }
-QColor ThemeManager::borderColor() const { return m_themeColors.value("borderColor"); }
-QColor ThemeManager::panelColor() const { return m_themeColors.value("panelColor"); }
-QColor ThemeManager::controlBackground() const { return m_themeColors.value("controlBackground"); }
+QString ThemeManager::getCurrentTheme() const { return m_currentTheme; }
+QColor ThemeManager::getBackgroundColor() const { return m_themeColors.value("backgroundColor"); }
+QColor ThemeManager::getTextColor() const { return m_themeColors.value("textColor"); }
+QColor ThemeManager::getAccentColor() const { return m_themeColors.value("accentColor"); }
+QColor ThemeManager::getAccentHoverColor() const { return m_themeColors.value("accentHoverColor"); }
+QColor ThemeManager::getAccentPressedColor() const { return m_themeColors.value("accentPressedColor"); }
+QColor ThemeManager::getIconColor() const { return m_themeColors.value("iconColor"); }
+QColor ThemeManager::getGridColor() const { return m_themeColors.value("gridColor"); }
+QColor ThemeManager::getBorderColor() const { return m_themeColors.value("borderColor"); }
+QColor ThemeManager::getPanelColor() const { return m_themeColors.value("panelColor"); }
+QColor ThemeManager::getControlBackground() const { return m_themeColors.value("controlBackground"); }

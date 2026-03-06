@@ -33,7 +33,7 @@ class ImageItemModel : public QAbstractListModel {
     QML_ELEMENT //позволяет создавать класс из QML
 
     //свойства, доступные в QML
-    Q_PROPERTY(int count READ count NOTIFY countChanged)
+    Q_PROPERTY(int count READ getCount NOTIFY countChanged)
 
 public:
     enum Roles {
@@ -63,7 +63,7 @@ public:
     Qt::ItemFlags flags(const QModelIndex &index) const override;
 
     // Публичные методы для управления
-    int count() const;
+    int getCount() const;
     void addImage(const ImageData &data);
     void removeImage(int index);
     void removeById(const QString &id);
@@ -81,7 +81,7 @@ public:
     Q_INVOKABLE void updateRotation(int index, qreal rotation);
     Q_INVOKABLE void setSelected(int index, bool selected);
     Q_INVOKABLE void clearSelection();
-    Q_INVOKABLE QVariantList selectedIndices() const;
+    Q_INVOKABLE QVariantList getSelectedIndices() const;
     
     // Обновление обрезки (non-destructive)
     Q_INVOKABLE void updateCrop(int index, qreal x, qreal y, qreal width, qreal height);
