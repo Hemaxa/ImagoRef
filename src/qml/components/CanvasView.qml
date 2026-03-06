@@ -22,6 +22,10 @@ Item {
     //паттерн сетки ("dots", "cross", "none")
     property string canvasPattern: SettingsManager.canvasPattern
 
+    // Свойство для режима закрепления
+    property bool isPinned: controller.toolController.isPinned
+    property bool isPinnedAndInactive: isPinned && !Qt.application.active
+
     //размер сцены
     readonly property real sceneSize: 30000 //30000x30000
 
@@ -98,7 +102,7 @@ Item {
     Rectangle {
         id: background
         anchors.fill: parent
-        color: ThemeManager.backgroundColor
+        color: root.isPinnedAndInactive ? "transparent" : ThemeManager.backgroundColor
     }
 
     //прокручиваемая область
@@ -136,7 +140,7 @@ Item {
                 anchors.margins: root.canvasPattern === "dots" || root.canvasPattern === "cross" ? -patternCanvas.gSize / 2 : 0
                 z: 0
                 fillMode: Image.Tile
-                visible: root.canvasPattern !== "none"
+                visible: root.canvasPattern !== "none" && !root.isPinnedAndInactive
                 source: patternCanvas.ready ? patternCanvas.toDataURL() : ""
                 smooth: false
             }
@@ -198,6 +202,7 @@ Item {
                 border.color: Qt.rgba(ThemeManager.accentColor.r, ThemeManager.accentColor.g, ThemeManager.accentColor.b, 0.4)
                 border.width: 3 / zoomLevel
                 z: 2
+                visible: !root.isPinnedAndInactive
             }
 
             //изображения (z=10 и выше)

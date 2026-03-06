@@ -1,3 +1,5 @@
+//BoardController — фасад-контроллер приложения для QML. Координирует подконтроллеры и хранит общие ресурсы (модель, undo-стек)
+
 #pragma once
 
 #include <QObject>
@@ -11,32 +13,32 @@
 #include "ClipboardController.h"
 #include "ToolController.h"
 
-/**
- * @brief BoardController — фасад-контроллер приложения для QML.
- * Координирует подконтроллеры и хранит общие ресурсы (модель, undo-стек).
- */
 class BoardController : public QObject {
-    Q_OBJECT
-    QML_ELEMENT
+    Q_OBJECT //обязательный макрос для любого класса Qt, который использует сигналы, слоты или свойства (Q_PROPERTY)
+    QML_ELEMENT //макрос, который позволяет использовать этот класс напрямую в QML
 
-    Q_PROPERTY(ImageItemModel* model READ model CONSTANT)
+    //свойство Q_PROPERTY делает переменные C++ доступными в QML как обычные свойства
+    Q_PROPERTY(ImageItemModel* model READ model CONSTANT) //модель данных
     
-    // Подконтроллеры
+    //остальные контроллеры
     Q_PROPERTY(FileController* fileController READ fileController CONSTANT)
     Q_PROPERTY(SelectionController* selectionController READ selectionController CONSTANT)
     Q_PROPERTY(ClipboardController* clipboardController READ clipboardController CONSTANT)
     Q_PROPERTY(ToolController* toolController READ toolController CONSTANT)
 
-    // Состояния для кнопок Undo/Redo
+    //состояния для кнопок Undo/Redo
     Q_PROPERTY(bool canUndo READ canUndo NOTIFY undoStateChanged)
     Q_PROPERTY(bool canRedo READ canRedo NOTIFY redoStateChanged)
-    // Размер сетки (в пикселях)
+    
+    //размер сетки
     Q_PROPERTY(int gridSize READ gridSize WRITE setGridSize NOTIFY gridSizeChanged)
 
 public:
+    //конструктор принимает родительский QObject для автоматического управления памятью
     explicit BoardController(QObject *parent = nullptr);
     ~BoardController();
 
+    //геттеры для свойств
     ImageItemModel* model() const;
     FileController* fileController() const;
     SelectionController* selectionController() const;
@@ -46,36 +48,43 @@ public:
     bool canUndo() const;
     bool canRedo() const;
     int gridSize() const;
+
+    //сеттеры для свойств
     void setGridSize(int size);
 
-    // Undo/Redo
+    //свойство Q_INVOKABLE позволяет вызывать эти C++ методы прямо из JavaScript/QML кода
+    //Undo/Redo
     Q_INVOKABLE void undo();
     Q_INVOKABLE void redo();
 
-    // Отслеживание перемещения/ресайза для Undo
+    //отслеживание перемещения/ресайза для Undo
     Q_INVOKABLE void beginMove(int index);
     Q_INVOKABLE void endMove(int index, qreal newX, qreal newY);
     Q_INVOKABLE void beginResize(int index);
     Q_INVOKABLE void endResize(int index, qreal newX, qreal newY, qreal newWidth, qreal newHeight);
 
 signals:
+    //сигналы, которые оповещают QML об изменениях (связаны с макросами NOTIFY в Q_PROPERTY)
     void undoStateChanged();
     void redoStateChanged();
     void gridSizeChanged();
 
 private:
+    //вспомогательный метод для настройки сигналов
     void connectUndoSignals();
 
+    //внутренние переменные класса
     ImageItemModel *m_model;
     QUndoStack *m_undoStack;
     int m_gridSize;
 
+    //указатели на остальные контроллеры
     FileController *m_fileController;
     SelectionController *m_selectionController;
     ClipboardController *m_clipboardController;
     ToolController *m_toolController;
 
-    // Для отслеживания начальных позиций при перемещении/ресайзе
+    //переменные для хранения начального состояния объекта, когда пользователь только начинает его редактировать (изменения размера, перемещение)
     QPointF m_moveStartPos;
     QRectF m_resizeStartRect;
     QPointF m_resizeStartPos;

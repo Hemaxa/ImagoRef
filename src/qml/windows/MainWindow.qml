@@ -14,6 +14,11 @@ Item {
     required property BoardController controller
     signal settingsRequested()
     
+    // Свойство для режима закрепления
+    property bool isPinned: controller.toolController.isPinned
+    property bool isPinnedAndInactive: isPinned && !Qt.application.active
+
+    
     //создает экземпляр холста
     CanvasView {
         id: canvasView
@@ -26,6 +31,7 @@ Item {
     FloatingToolbar {
         id: toolbar
         controller: root.controller
+        visible: !root.isPinnedAndInactive
         z: 100
         x: 15
         y: 15

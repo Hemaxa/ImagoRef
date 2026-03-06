@@ -9,25 +9,25 @@
 #include <QImage>
 #include <QBuffer>
 
-FileController::FileController(ImageItemModel *model, QUndoStack *undoStack, QObject *parent)
-    : QObject(parent)
+FileController::FileController(ImageItemModel *model, QUndoStack *undoStack, QObject *parent) : QObject(parent)
     , m_model(model)
     , m_undoStack(undoStack)
-{
-}
+{}
 
 QString FileController::currentFilePath() const
 {
     return m_currentFilePath;
 }
 
+//метод формирования заголовка окна
 QString FileController::windowTitle() const
 {
-    QString title = "ImagoRef - ";
+    QString title;
     if (m_currentFilePath.isEmpty()) {
-        title += "Новая доска";
-    } else {
-        title += QFileInfo(m_currentFilePath).fileName();
+        title = "Новая доска";
+    }
+    else {
+        title = QFileInfo(m_currentFilePath).fileName();
     }
     return title;
 }

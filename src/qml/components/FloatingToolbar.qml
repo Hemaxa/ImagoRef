@@ -152,6 +152,14 @@ Rectangle {
             enabled: controller.canRedo
             onClicked: controller.redo()
         }
+
+        // Закрепить поверх окон
+        ToolbarButton {
+            iconSource: "qrc:/icons/icons/pin.svg"
+            tooltip: "Закрепить поверх всех окон"
+            active: controller.toolController.isPinned
+            onClicked: controller.toolController.togglePin()
+        }
         
         // Настройки
         ToolbarButton {

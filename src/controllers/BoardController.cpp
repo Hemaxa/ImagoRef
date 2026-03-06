@@ -2,8 +2,7 @@
 #include "StackController.h"
 #include "SettingsManager.h"
 
-BoardController::BoardController(QObject *parent)
-    : QObject(parent)
+BoardController::BoardController(QObject *parent) : QObject(parent)
     , m_model(new ImageItemModel(this))
     , m_undoStack(new QUndoStack(this))
     , m_gridSize(SettingsManager::instance().gridSize())
@@ -12,34 +11,35 @@ BoardController::BoardController(QObject *parent)
     , m_clipboardController(new ClipboardController(m_model, m_undoStack, this))
     , m_toolController(new ToolController(m_model, m_undoStack, this))
 {
+    //вызов вспомогательного метода
     connectUndoSignals();
     
-    // Синхронизация gridSize с SettingsManager
+    //синхронизация gridSize с SettingsManager
     connect(&SettingsManager::instance(), &SettingsManager::gridSizeChanged, this, [this]() {
         m_gridSize = SettingsManager::instance().gridSize();
         m_fileController->setGridSize(m_gridSize);
-        emit gridSizeChanged();
+        emit gridSizeChanged(); //оповещаем QML
     });
     
-    // Синхронизация gridSize из файла при загрузке доски
+    //синхронизация gridSize из файла при загрузке доски
     connect(m_fileController, &FileController::gridSizeLoaded, this, [this](int loadedGridSize) {
         setGridSize(loadedGridSize);
     });
     
-    // Синхронизировать начальное значение
+    //синхронизировать начальное значение
     m_fileController->setGridSize(m_gridSize);
 }
 
-BoardController::~BoardController()
-{
-}
+BoardController::~BoardController() {}
 
+//метод связывания сигналов
 void BoardController::connectUndoSignals()
 {
     connect(m_undoStack, &QUndoStack::canUndoChanged, this, &BoardController::undoStateChanged);
     connect(m_undoStack, &QUndoStack::canRedoChanged, this, &BoardController::redoStateChanged);
 }
 
+//геттеры
 ImageItemModel* BoardController::model() const { return m_model; }
 FileController* BoardController::fileController() const { return m_fileController; }
 SelectionController* BoardController::selectionController() const { return m_selectionController; }
@@ -50,6 +50,7 @@ bool BoardController::canUndo() const { return m_undoStack->canUndo(); }
 bool BoardController::canRedo() const { return m_undoStack->canRedo(); }
 int BoardController::gridSize() const { return m_gridSize; }
 
+//сеттеры
 void BoardController::setGridSize(int size)
 {
     if (m_gridSize != size && size > 0) {
@@ -60,20 +61,13 @@ void BoardController::setGridSize(int size)
     }
 }
 
-// ============ Undo/Redo ============
-
-void BoardController::undo()
-{
-    m_undoStack->undo();
-}
-
+//Undo/Redo
 void BoardController::redo()
 {
     m_undoStack->redo();
 }
 
-// ============ Отслеживание перемещения/ресайза ============
-
+//отслеживание перемещения/ресайза
 void BoardController::beginMove(int index)
 {
     ImageData item = m_model->getItem(index);

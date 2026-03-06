@@ -12,11 +12,11 @@ Item {
     property int itemIndex: -1
     property real zoomLevel: 1.0
     
-    // Сигналы
+    //cигналы
     signal cropApplied(real cropX, real cropY, real cropWidth, real cropHeight)
     signal cropCancelled()
     
-    // Область обрезки (в координатах изображения)
+    //область обрезки (в координатах изображения)
     property real cropX: target.width * 0.1
     property real cropY: target.height * 0.1
     property real cropW: target.width * 0.8
@@ -27,7 +27,7 @@ Item {
     
     anchors.fill: parent
     
-    // Затемнение сверху
+    //затемнение сверху
     Rectangle {
         anchors.left: parent.left
         anchors.right: parent.right
@@ -36,7 +36,7 @@ Item {
         color: Qt.rgba(0, 0, 0, 0.6)
     }
     
-    // Затемнение снизу
+    //затемнение снизу
     Rectangle {
         anchors.left: parent.left
         anchors.right: parent.right
@@ -45,7 +45,7 @@ Item {
         color: Qt.rgba(0, 0, 0, 0.6)
     }
     
-    // Затемнение слева
+    //затемнение слева
     Rectangle {
         anchors.left: parent.left
         y: cropY
@@ -54,7 +54,7 @@ Item {
         color: Qt.rgba(0, 0, 0, 0.6)
     }
     
-    // Затемнение справа
+    //затемнение справа
     Rectangle {
         anchors.right: parent.right
         y: cropY
@@ -63,7 +63,7 @@ Item {
         color: Qt.rgba(0, 0, 0, 0.6)
     }
     
-    // Рамка области обрезки
+    //рамка области обрезки
     Rectangle {
         id: cropRect
         x: cropX
@@ -74,7 +74,7 @@ Item {
         border.color: "white"
         border.width: 2 / zoomLevel
         
-        // Сетка третей (правило третей)
+        //сетка третей (правило третей)
         Rectangle {
             x: parent.width / 3
             y: 0
@@ -104,7 +104,7 @@ Item {
             color: Qt.rgba(1, 1, 1, 0.4)
         }
         
-        // Перетаскивание всей области обрезки
+        //перетаскивание всей области обрезки
         MouseArea {
             anchors.fill: parent
             cursorShape: Qt.SizeAllCursor
@@ -130,7 +130,7 @@ Item {
         }
     }
     
-    // Угловые ручки
+    //угловые ручки
     Repeater {
         model: 4
         
@@ -172,22 +172,22 @@ Item {
                     var newH = cropH
                     
                     switch(corner) {
-                        case 0: // TopLeft
+                        case 0: //TopLeft
                             newX = Math.max(0, Math.min(cropX + cropW - minCropSize, cropX + dx))
                             newY = Math.max(0, Math.min(cropY + cropH - minCropSize, cropY + dy))
                             newW = cropW - (newX - cropX)
                             newH = cropH - (newY - cropY)
                             break
-                        case 1: // TopRight
+                        case 1: //TopRight
                             newY = Math.max(0, Math.min(cropY + cropH - minCropSize, cropY + dy))
                             newW = Math.max(minCropSize, Math.min(target.width - cropX, cropW + dx))
                             newH = cropH - (newY - cropY)
                             break
-                        case 2: // BottomRight
+                        case 2: //BottomRight
                             newW = Math.max(minCropSize, Math.min(target.width - cropX, cropW + dx))
                             newH = Math.max(minCropSize, Math.min(target.height - cropY, cropH + dy))
                             break
-                        case 3: // BottomLeft
+                        case 3: //BottomLeft
                             newX = Math.max(0, Math.min(cropX + cropW - minCropSize, cropX + dx))
                             newW = cropW - (newX - cropX)
                             newH = Math.max(minCropSize, Math.min(target.height - cropY, cropH + dy))
@@ -203,7 +203,7 @@ Item {
         }
     }
     
-    // Боковые ручки
+    //боковые ручки
     Repeater {
         model: 4
         
@@ -252,18 +252,18 @@ Item {
                     lastPos = pos
                     
                     switch(side) {
-                        case 0: // Top
+                        case 0: //Top
                             var newY = Math.max(0, Math.min(cropY + cropH - minCropSize, cropY + dy))
                             cropH = cropH - (newY - cropY)
                             cropY = newY
                             break
-                        case 1: // Right
+                        case 1: //Right
                             cropW = Math.max(minCropSize, Math.min(target.width - cropX, cropW + dx))
                             break
-                        case 2: // Bottom
+                        case 2: //Bottom
                             cropH = Math.max(minCropSize, Math.min(target.height - cropY, cropH + dy))
                             break
-                        case 3: // Left
+                        case 3: //Left
                             var newX = Math.max(0, Math.min(cropX + cropW - minCropSize, cropX + dx))
                             cropW = cropW - (newX - cropX)
                             cropX = newX
@@ -274,7 +274,7 @@ Item {
         }
     }
     
-    // Обработка клавиш
+    //обработка клавиш
     focus: true
     Keys.onPressed: function(event) {
         if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
@@ -288,7 +288,7 @@ Item {
     
     onVisibleChanged: {
         if (visible) {
-            // Сброс области обрезки при новом показе
+            //сброс области обрезки при новом показе
             cropX = target.width * 0.1
             cropY = target.height * 0.1
             cropW = target.width * 0.8

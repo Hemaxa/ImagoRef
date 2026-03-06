@@ -3,11 +3,7 @@
 
 #include <QRectF>
 
-SelectionController::SelectionController(ImageItemModel *model, QObject *parent)
-    : QObject(parent)
-    , m_model(model)
-{
-}
+SelectionController::SelectionController(ImageItemModel *model, QObject *parent) : QObject(parent), m_model(model) {}
 
 bool SelectionController::hasSelection() const
 {
@@ -16,6 +12,7 @@ bool SelectionController::hasSelection() const
 
 void SelectionController::selectItem(int index, bool addToSelection)
 {
+    //если клик без зажатого Shift/Ctrl, сначала снимаем выделение со всех остальных
     if (!addToSelection) {
         m_model->clearSelection();
     }
@@ -50,15 +47,17 @@ void SelectionController::clearSelection()
     emit selectionChanged();
 }
 
+//логика рамочного выделения
 void SelectionController::selectInRect(qreal x, qreal y, qreal width, qreal height, bool addToSelection)
 {
     QRectF selectionRect(x, y, width, height);
-    selectionRect = selectionRect.normalized();
+    selectionRect = selectionRect.normalized(); //normalized() исправляет отрицательные ширину/высоту, он пересчитает координаты так, чтобы размеры были положительными
     
     if (!addToSelection) {
         m_model->clearSelection();
     }
     
+    //проходим по всем картинкам и проверяем, пересекается ли их прямоугольник с прямоугольником рамки
     for (int i = 0; i < m_model->count(); ++i) {
         ImageData item = m_model->getItem(i);
         QRectF itemRect(item.x, item.y, item.width, item.height);

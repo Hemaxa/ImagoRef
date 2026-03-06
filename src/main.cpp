@@ -4,15 +4,21 @@
 #include <QQmlApplicationEngine> //движок, который загружает и управляет QML
 #include <QQuickStyle> //стили для QML
 #include <QIcon> //иконки для QML
+#include <QSurfaceFormat> //формат поверхности
 
 #include "SettingsManager.h"
 #include "ThemesManager.h"
 
 int main(int argc, char *argv[])
 {
+    // Поддержка прозрачности окон на macOS и Windows
+    QSurfaceFormat format;
+    format.setAlphaBufferSize(8);
+    QSurfaceFormat::setDefaultFormat(format);
+
     //создание объекта приложения
     QGuiApplication app(argc, argv);
-    
+
     //установка стиля Quick Controls (для корректной кастомизации интерфейса)
     //позваляет отказаться от системных стилей для элементов интерфейса
     QQuickStyle::setStyle("Basic");

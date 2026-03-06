@@ -16,7 +16,28 @@ ApplicationWindow {
     width: 900 //ширина
     height: 700 //высота
     title: boardController.fileController.windowTitle //заголовок окна берется из контроллера файлов посредством контроллера доски 
-    color: ThemeManager.backgroundColor //цвет фона берется из менеджера тем
+    
+    // Свойства для режима закрепления
+    property bool isPinned: boardController.toolController.isPinned
+    property bool isPinnedAndInactive: isPinned && !Qt.application.active
+    
+    color: "transparent" // Задаем всегда прозрачный цвет окна, чтобы у macOS был включен альфа-канал
+
+    background: Rectangle {
+        color: root.isPinnedAndInactive ? "transparent" : ThemeManager.backgroundColor
+    }
+
+    flags: {
+        var baseFlags = Qt.Window
+        if (isPinned) {
+            baseFlags |= Qt.WindowStaysOnTopHint
+        }
+        if (isPinnedAndInactive) {
+            baseFlags |= Qt.FramelessWindowHint | Qt.WindowTransparentForInput
+        }
+        return baseFlags
+    }
+
     
     //создает экземпляр контроллера доски
     BoardController {

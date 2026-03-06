@@ -1,3 +1,5 @@
+//FileController — контроллер файловых операций. Отвечает за создание, открытие и сохранение досок (.iref)
+
 #pragma once
 
 #include <QObject>
@@ -7,39 +9,42 @@
 
 class ImageItemModel;
 
-/**
- * @brief FileController — контроллер файловых операций.
- * Отвечает за создание, открытие и сохранение досок (.iref).
- */
 class FileController : public QObject {
     Q_OBJECT
     QML_UNCREATABLE("FileController is only available via BoardController.fileController")
 
+    //свойство проверки наличия файловго пути (новыя доска или открытый файл)
     Q_PROPERTY(QString currentFilePath READ currentFilePath NOTIFY filePathChanged)
+    //свойство генерации заголовка окна в зависимости от файла
     Q_PROPERTY(QString windowTitle READ windowTitle NOTIFY filePathChanged)
 
 public:
     explicit FileController(ImageItemModel *model, QUndoStack *undoStack, QObject *parent = nullptr);
 
+    //геттеры
     QString currentFilePath() const;
     QString windowTitle() const;
 
+    //методы файловых операций
     Q_INVOKABLE void newBoard();
     Q_INVOKABLE bool openBoard(const QUrl &fileUrl);
     Q_INVOKABLE bool saveBoard();
     Q_INVOKABLE bool saveBoardAs(const QUrl &fileUrl);
 
-    /// Устанавливает gridSize для записи в файл при сохранении
+    //сеттеры
     void setGridSize(int gridSize);
     
 signals:
+    //сигналы для обновления интерфейса
     void filePathChanged();
     void boardLoaded();
     void boardSaved();
-    /// Вызывается при загрузке доски с сохранённым gridSize
+
+    //вызывается при загрузке доски с сохранённым gridSize
     void gridSizeLoaded(int gridSize);
 
 private:
+    //внутренние поля класса
     ImageItemModel *m_model;
     QUndoStack *m_undoStack;
     QString m_currentFilePath;

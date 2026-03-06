@@ -14,9 +14,12 @@ class ImageItemModel;
 class ToolController : public QObject {
     Q_OBJECT
     QML_UNCREATABLE("ToolController is only available via BoardController.toolController")
+    Q_PROPERTY(bool isPinned READ isPinned NOTIFY isPinnedChanged)
 
 public:
     explicit ToolController(ImageItemModel *model, QUndoStack *undoStack, QObject *parent = nullptr);
+
+    bool isPinned() const;
 
     Q_INVOKABLE void deleteSelected();
     Q_INVOKABLE void snapToGrid();
@@ -24,11 +27,14 @@ public:
     Q_INVOKABLE void cropImage(int index, qreal cropX, qreal cropY, qreal cropWidth, qreal cropHeight);
     Q_INVOKABLE void setLabelForSelected(const QString &label);
     Q_INVOKABLE void arrangeAll();
+    Q_INVOKABLE void togglePin();
 
 signals:
     void selectionChanged();
+    void isPinnedChanged();
 
 private:
     ImageItemModel *m_model;
     QUndoStack *m_undoStack;
+    bool m_isPinned = false;
 };

@@ -9,7 +9,19 @@ ToolController::ToolController(ImageItemModel *model, QUndoStack *undoStack, QOb
     : QObject(parent)
     , m_model(model)
     , m_undoStack(undoStack)
+    , m_isPinned(false)
 {
+}
+
+bool ToolController::isPinned() const
+{
+    return m_isPinned;
+}
+
+void ToolController::togglePin()
+{
+    m_isPinned = !m_isPinned;
+    emit isPinnedChanged();
 }
 
 void ToolController::deleteSelected()
