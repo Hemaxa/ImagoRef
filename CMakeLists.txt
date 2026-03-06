@@ -44,6 +44,8 @@ target_sources(ImagoRef PRIVATE
 
     ${SRC_DIR}/models/ImageModel.h
     ${SRC_DIR}/models/ImageModel.cpp
+    ${SRC_DIR}/models/ImageProvider.h
+    ${SRC_DIR}/models/ImageProvider.cpp
 )
 
 qt_add_qml_module(ImagoRef

@@ -13,10 +13,14 @@ class ImageItemModel;
  */
 class ImagoImageProvider : public QQuickImageProvider {
 public:
-    explicit ImagoImageProvider(ImageItemModel *model);
+    explicit ImagoImageProvider();
 
     QPixmap requestPixmap(const QString &id, QSize *size, const QSize &requestedSize) override;
 
+    void setModel(ImageItemModel *model);
+    static ImagoImageProvider* instance();
+
 private:
-    ImageItemModel *m_model;
+    ImageItemModel *m_model = nullptr;
+    static ImagoImageProvider* s_instance;
 };

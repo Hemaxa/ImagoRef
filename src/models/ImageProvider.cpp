@@ -1,15 +1,32 @@
 #include "ImageProvider.h"
 #include "ImageModel.h"
 
-ImagoImageProvider::ImagoImageProvider(ImageItemModel *model)
+ImagoImageProvider* ImagoImageProvider::s_instance = nullptr;
+
+ImagoImageProvider::ImagoImageProvider()
     : QQuickImageProvider(QQuickImageProvider::Pixmap)
-    , m_model(model)
 {
+    s_instance = this;
+}
+
+ImagoImageProvider* ImagoImageProvider::instance()
+{
+    return s_instance;
+}
+
+void ImagoImageProvider::setModel(ImageItemModel *model)
+{
+    m_model = model;
 }
 
 QPixmap ImagoImageProvider::requestPixmap(const QString &id, QSize *size, const QSize &requestedSize)
 {
     Q_UNUSED(requestedSize)
+
+    if (!m_model) {
+        if (size) *size = QSize(0, 0);
+        return QPixmap();
+    }
 
     // id приходит в виде "<imageId>?t=<timestamp>" — отсекаем параметры
     QString imageId = id.section('?', 0, 0);

@@ -22,7 +22,12 @@ QVariant ImageItemModel::data(const QModelIndex &index, int role) const
 
     switch (role) {
     case IdRole: return item.id;
-    case SourceRole: return item.source;
+    case SourceRole:
+        if (item.source.isEmpty() && !item.id.isEmpty() && !item.pixmap.isNull()) {
+            // Возвращаем динамический URL из ImageProvider, чтобы QML мог загрузить картинку без файла
+            return QUrl(QString("image://imago/%1").arg(item.id));
+        }
+        return item.source;
     case XRole: return item.x;
     case YRole: return item.y;
     case WidthRole: return item.width;

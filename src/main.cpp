@@ -10,6 +10,7 @@
 
 #include "SettingsManager.h"
 #include "ThemesManager.h"
+#include "ImageProvider.h"
 
 int main(int argc, char *argv[])
 {
@@ -40,6 +41,10 @@ int main(int argc, char *argv[])
     
     //URL для загрузки главного QML файла (позволит корректно завершить работу приложения при неудачном обращении к Main.qml)
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreationFailed, &app, []() { QCoreApplication::exit(-1); }, Qt::QueuedConnection);
+    
+    //Регистрация провайдера изображений для загрузки из памяти
+    engine.addImageProvider("imago", new ImagoImageProvider());
+    
     engine.load(url);
     
     //проверка, что загруженные объекты не пустые

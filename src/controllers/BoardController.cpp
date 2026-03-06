@@ -1,6 +1,7 @@
 #include "BoardController.h"
 #include "StackController.h"
 #include "SettingsManager.h"
+#include "ImageProvider.h"
 
 BoardController::BoardController(QObject *parent) : QObject(parent)
     , m_model(new ImageItemModel(this))
@@ -16,6 +17,11 @@ BoardController::BoardController(QObject *parent) : QObject(parent)
     
     //синхронизировать начальное значение
     m_fileController->setGridSize(m_gridSize);
+    
+    //Передача модели в провайдер изображений (очистка не нужна, так как провайдер живет все время работы приложения)
+    if (ImagoImageProvider::instance()) {
+        ImagoImageProvider::instance()->setModel(m_model);
+    }
 }
 
 BoardController::~BoardController() {}
