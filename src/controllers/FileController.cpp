@@ -113,6 +113,7 @@ bool FileController::openBoard(const QUrl &fileUrl)
             QImage image;
             if (image.loadFromData(imageData, "PNG")) {
                 ImageData data;
+                data.id = itemObj["id"].toString();
                 data.source = QUrl();
                 data.pixmap = QPixmap::fromImage(image);
                 data.x = itemObj["pos_x"].toDouble();
@@ -169,6 +170,7 @@ bool FileController::saveBoardAs(const QUrl &fileUrl)
     
     for (const ImageData &item : m_model->allItems()) {
         QJsonObject itemObj;
+        itemObj["id"] = item.id;
         itemObj["pos_x"] = item.x;
         itemObj["pos_y"] = item.y;
         itemObj["width"] = item.width;
