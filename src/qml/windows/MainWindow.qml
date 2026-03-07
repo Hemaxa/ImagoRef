@@ -89,7 +89,7 @@ Item {
     
     //вставить из буфера
     Shortcut {
-        sequence: StandardKey.Paste
+        sequences: [StandardKey.Paste]
         onActivated: {
             //вычисляется центр экрана для вставки ровно по центру
             var center = Qt.point(canvasView.width / 2, canvasView.height / 2)
@@ -118,13 +118,13 @@ Item {
     
     //действие отмены
     Shortcut {
-        sequence: StandardKey.Undo
+        sequences: [StandardKey.Undo]
         onActivated: controller.undo()
     }
     
     //действия возврата
     Shortcut {
-        sequence: StandardKey.Redo
+        sequences: [StandardKey.Redo]
         onActivated: controller.redo()
     }
     
@@ -164,7 +164,7 @@ Item {
     
     //выбрать все
     Shortcut {
-        sequence: StandardKey.SelectAll
+        sequences: [StandardKey.SelectAll]
         onActivated: controller.selectionController.selectAll()
     }
     

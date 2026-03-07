@@ -40,7 +40,7 @@ Rectangle {
         
         // Вставить
         ToolbarButton {
-            iconSource: "qrc:/icons/icons/paste.svg"
+            iconSource: ThemeManager.pasteIconPath
             tooltip: "Вставить"
             shortcutText: "Ctrl+V"
             onClicked: root.pasteClicked()
@@ -48,7 +48,7 @@ Rectangle {
         
         // Удалить
         ToolbarButton {
-            iconSource: "qrc:/icons/icons/delete.svg"
+            iconSource: ThemeManager.deleteIconPath
             tooltip: "Удалить"
             shortcutText: "Delete"
             enabled: controller.selectionController.hasSelection
@@ -57,7 +57,7 @@ Rectangle {
         
         // Привязать к сетке
         ToolbarButton {
-            iconSource: "qrc:/icons/icons/grid_snap.svg"
+            iconSource: ThemeManager.gridSnapIconPath
             tooltip: "Привязать к сетке"
             shortcutText: "G"
             enabled: controller.selectionController.hasSelection
@@ -66,7 +66,7 @@ Rectangle {
         
         // Изменить размер
         ToolbarButton {
-            iconSource: "qrc:/icons/icons/scale.svg"
+            iconSource: ThemeManager.scaleIconPath
             tooltip: "Изменить размер"
             shortcutText: "S"
             active: root.resizeModeActive
@@ -76,7 +76,7 @@ Rectangle {
         
         // Обрезать
         ToolbarButton {
-            iconSource: "qrc:/icons/icons/crop.svg"
+            iconSource: ThemeManager.cropIconPath
             tooltip: "Обрезать"
             shortcutText: "C"
             active: root.cropModeActive
@@ -86,7 +86,7 @@ Rectangle {
         
         // Подписать
         ToolbarButton {
-            iconSource: "qrc:/icons/icons/label.svg"
+            iconSource: ThemeManager.labelIconPath
             tooltip: "Подписать"
             shortcutText: "L"
             enabled: controller.selectionController.hasSelection
@@ -95,7 +95,7 @@ Rectangle {
         
         // Расположить
         ToolbarButton {
-            iconSource: "qrc:/icons/icons/arrange.svg"
+            iconSource: ThemeManager.arrangeIconPath
             tooltip: "Расположить"
             shortcutText: "A"
             onClicked: controller.toolController.arrangeAll()
@@ -103,7 +103,7 @@ Rectangle {
         
         // Вращать против часовой
         ToolbarButton {
-            iconSource: "qrc:/icons/icons/rotate_left.svg"
+            iconSource: ThemeManager.rotateLeftIconPath
             tooltip: "Вращать против часовой"
             shortcutText: "Shift+R"
             enabled: controller.selectionController.hasSelection
@@ -112,7 +112,7 @@ Rectangle {
         
         // Вращать по часовой
         ToolbarButton {
-            iconSource: "qrc:/icons/icons/rotate_right.svg"
+            iconSource: ThemeManager.rotateRightIconPath
             tooltip: "Вращать по часовой"
             shortcutText: "R"
             enabled: controller.selectionController.hasSelection
@@ -121,7 +121,7 @@ Rectangle {
         
         // Приблизить
         ToolbarButton {
-            iconSource: "qrc:/icons/icons/zoom_in.svg"
+            iconSource: ThemeManager.zoomInIconPath
             tooltip: "Приблизить"
             shortcutText: "Ctrl++"
             onClicked: root.zoomInClicked()
@@ -129,7 +129,7 @@ Rectangle {
         
         // Отдалить
         ToolbarButton {
-            iconSource: "qrc:/icons/icons/zoom_out.svg"
+            iconSource: ThemeManager.zoomOutIconPath
             tooltip: "Отдалить"
             shortcutText: "Ctrl+-"
             onClicked: root.zoomOutClicked()
@@ -137,7 +137,7 @@ Rectangle {
         
         // Отменить
         ToolbarButton {
-            iconSource: "qrc:/icons/icons/undo.svg"
+            iconSource: ThemeManager.undoIconPath
             tooltip: "Отменить"
             shortcutText: "Ctrl+Z"
             enabled: controller.canUndo
@@ -146,7 +146,7 @@ Rectangle {
         
         // Повторить
         ToolbarButton {
-            iconSource: "qrc:/icons/icons/redo.svg"
+            iconSource: ThemeManager.redoIconPath
             tooltip: "Повторить"
             shortcutText: "Ctrl+Shift+Z"
             enabled: controller.canRedo
@@ -155,7 +155,7 @@ Rectangle {
 
         // Закрепить поверх окон
         ToolbarButton {
-            iconSource: "qrc:/icons/icons/pin.svg"
+            iconSource: ThemeManager.pinIconPath
             tooltip: "Закрепить поверх всех окон"
             active: controller.toolController.isPinned
             onClicked: controller.toolController.togglePin()
@@ -163,7 +163,7 @@ Rectangle {
         
         // Настройки
         ToolbarButton {
-            iconSource: "qrc:/icons/icons/settings.svg"
+            iconSource: ThemeManager.settingsIconPath
             tooltip: "Настройки"
             shortcutText: "Ctrl+,"
             onClicked: root.settingsClicked()

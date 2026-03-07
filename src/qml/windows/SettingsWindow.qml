@@ -192,20 +192,7 @@ Dialog {
                             id: themeComboBox
                             Layout.preferredWidth: 180
                             
-                            model: ListModel {
-                                ListElement { text: "Imago"; value: "imago" }
-                                ListElement { text: "Темная"; value: "dark" }
-                                ListElement { text: "Светлая"; value: "light" }
-                                ListElement { text: "Голубая"; value: "blue" }
-                                ListElement { text: "Аквамариновая"; value: "aquamarine" }
-                                ListElement { text: "Зеленая"; value: "green" }
-                                ListElement { text: "Фиолетовая"; value: "purple" }
-                                ListElement { text: "Розовая"; value: "pink" }
-                                ListElement { text: "Оранжевая"; value: "orange" }
-                            }
-                            
-                            textRole: "text"
-                            valueRole: "value"
+                            model: ThemeManager.availableThemes
                             
                             background: Rectangle {
                                 color: ThemeManager.controlBackground

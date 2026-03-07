@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="120" height="100" viewBox="0 0 120 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Заглушка для рамки проекта с диагональными полосками -->
+  <defs>
+    <pattern id="stripes" patternUnits="userSpaceOnUse" width="8" height="8" patternTransform="rotate(45)">
+      <rect width="4" height="8" fill="#000000"/>
+      <rect x="4" width="4" height="8" fill="#ffffff"/>
+    </pattern>
+  </defs>
+  <rect width="120" height="100" fill="url(#stripes)" rx="4"/>
+  <rect x="8" y="8" width="104" height="84" fill="#1a1a1a" rx="2"/>
+</svg>

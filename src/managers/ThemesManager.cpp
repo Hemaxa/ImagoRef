@@ -7,6 +7,11 @@
 #include <QDebug>
 #include <QSvgRenderer>
 #include <QPainter>
+#include <QCoreApplication>
+#include <QDir>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonValue>
 
 ThemeManager* ThemeManager::create(QQmlEngine *qmlEngine, QJSEngine *jsEngine)
 {
@@ -25,7 +30,7 @@ ThemeManager& ThemeManager::instance()
 
 ThemeManager::ThemeManager(QObject *parent) : QObject(parent)
 {
-    // Значения по умолчанию (тема imago)
+    // Значения по умолчанию
     m_themeColors["backgroundColor"] = QColor("#141414");
     m_themeColors["textColor"] = QColor("#e0e0e0");
     m_themeColors["accentColor"] = QColor("#E67E22");
@@ -36,6 +41,33 @@ ThemeManager::ThemeManager(QObject *parent) : QObject(parent)
     m_themeColors["borderColor"] = QColor("#3c3c3c");
     m_themeColors["panelColor"] = QColor("#3c3c3c");
     m_themeColors["controlBackground"] = QColor("#1f1f1f");
+
+    m_themeColors["welcomeBgColor"] = QColor("#FF6B35");
+    m_themeColors["welcomeBtnNewGradientStart"] = QColor("#FF69B4");
+    m_themeColors["welcomeBtnNewGradientEnd"] = QColor("#00CED1");
+    m_themeColors["welcomeBtnOpenColor"] = QColor("#ADFF2F");
+    m_themeColors["welcomeTextDark"] = QColor("#141414");
+    m_themeColors["welcomeAccentYellow"] = QColor("#FFE135");
+
+    scanAvailableThemes();
+}
+
+void ThemeManager::scanAvailableThemes()
+{
+    m_availableThemes.clear();
+    QString themesPath = QCoreApplication::applicationDirPath() + "/themes";
+    QDir dir(themesPath);
+    
+    if (dir.exists()) {
+        QStringList subdirs = dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+        for (const QString& subdir : subdirs) {
+            QString jsonPath = dir.absoluteFilePath(subdir + "/theme.json");
+            if (QFile::exists(jsonPath)) {
+                m_availableThemes.append(subdir);
+            }
+        }
+    }
+    emit availableThemesChanged();
 }
 
 void ThemeManager::applyTheme(const QString& themeName)
@@ -47,56 +79,46 @@ void ThemeManager::applyTheme(const QString& themeName)
 
 void ThemeManager::loadThemeFromFile(const QString& themeName)
 {
-    QString filePath = QString(":/themes/themes/%1.qss").arg(themeName);
-    QFile file(filePath);
-
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        qWarning() << "Не удалось открыть файл темы:" << filePath;
+    QString themesPath = QCoreApplication::applicationDirPath() + "/themes";
+    QString themeDir = themesPath + "/" + themeName;
+    QString jsonPath = themeDir + "/theme.json";
+    
+    QFile file(jsonPath);
+    if (!file.open(QIODevice::ReadOnly)) {
+        qWarning() << "Не удалось открыть файл темы:" << jsonPath;
         return;
     }
-
-    QString styleSheet = file.readAll();
+    
+    QByteArray jsonData = file.readAll();
     file.close();
-
-    parseThemeColors(styleSheet);
+    
+    parseThemeJson(jsonData, themeDir);
 }
 
-void ThemeManager::parseThemeColors(const QString& styleSheet)
+void ThemeManager::parseThemeJson(const QByteArray& jsonData, const QString& themeDir)
 {
-    // Парсим все переменные формата @key: value;
-    QRegularExpression regex("@(\\w+):\\s*([^;]+);");
-    auto it = regex.globalMatch(styleSheet);
-
-    while (it.hasNext()) {
-        QRegularExpressionMatch match = it.next();
-        QString key = match.captured(1);
-        QString value = match.captured(2).trimmed();
-
-        // Удаляем комментарии после значения
-        value = value.section("/*", 0, 0).trimmed();
-        if (value.isEmpty()) continue;
-
-        // Парсим цвет — поддержка hex (#rrggbb) и rgba(r,g,b,a)
-        QColor color;
-        if (value.startsWith("rgba(")) {
-            // rgba(r, g, b, a) — a может быть целым (0-255) или дробным (0.0-1.0)
-            QRegularExpression rgbaRegex("rgba\\((\\d+)\\s*,\\s*(\\d+)\\s*,\\s*(\\d+)\\s*,\\s*([\\d.]+)\\)");
-            auto rgbaMatch = rgbaRegex.match(value);
-            if (rgbaMatch.hasMatch()) {
-                int r = rgbaMatch.captured(1).toInt();
-                int g = rgbaMatch.captured(2).toInt();
-                int b = rgbaMatch.captured(3).toInt();
-                double a = rgbaMatch.captured(4).toDouble();
-                // Если a > 1, трактуем как 0-255; иначе как 0.0-1.0
-                int alpha = (a > 1.0) ? static_cast<int>(a) : static_cast<int>(a * 255);
-                color = QColor(r, g, b, alpha);
-            }
-        } else {
-            color = QColor(value);
+    QJsonParseError error;
+    QJsonDocument doc = QJsonDocument::fromJson(jsonData, &error);
+    if (error.error != QJsonParseError::NoError) {
+        qWarning() << "Ошибка парсинга theme.json:" << error.errorString();
+        return;
+    }
+    
+    QJsonObject root = doc.object();
+    
+    if (root.contains("colors")) {
+        QJsonObject colors = root["colors"].toObject();
+        for (auto it = colors.begin(); it != colors.end(); ++it) {
+            m_themeColors[it.key()] = QColor(it.value().toString());
         }
-
-        if (color.isValid()) {
-            m_themeColors[key] = color;
+    }
+    
+    if (root.contains("icons")) {
+        QJsonObject icons = root["icons"].toObject();
+        for (auto it = icons.begin(); it != icons.end(); ++it) {
+            QString relativePath = it.value().toString();
+            QString absolutePath = themeDir + "/" + relativePath;
+            m_themeIcons[it.key()] = "file://" + absolutePath;
         }
     }
 }
@@ -131,6 +153,8 @@ QPixmap ThemeManager::colorizeSvg(const QString& path, const QColor& color, cons
 }
 
 QString ThemeManager::getCurrentTheme() const { return m_currentTheme; }
+QStringList ThemeManager::getAvailableThemes() const { return m_availableThemes; }
+
 QColor ThemeManager::getBackgroundColor() const { return m_themeColors.value("backgroundColor"); }
 QColor ThemeManager::getTextColor() const { return m_themeColors.value("textColor"); }
 QColor ThemeManager::getAccentColor() const { return m_themeColors.value("accentColor"); }
@@ -141,3 +165,34 @@ QColor ThemeManager::getGridColor() const { return m_themeColors.value("gridColo
 QColor ThemeManager::getBorderColor() const { return m_themeColors.value("borderColor"); }
 QColor ThemeManager::getPanelColor() const { return m_themeColors.value("panelColor"); }
 QColor ThemeManager::getControlBackground() const { return m_themeColors.value("controlBackground"); }
+
+QColor ThemeManager::getWelcomeBgColor() const { return m_themeColors.value("welcomeBgColor"); }
+QColor ThemeManager::getWelcomeBtnNewGradientStart() const { return m_themeColors.value("welcomeBtnNewGradientStart"); }
+QColor ThemeManager::getWelcomeBtnNewGradientEnd() const { return m_themeColors.value("welcomeBtnNewGradientEnd"); }
+QColor ThemeManager::getWelcomeBtnOpenColor() const { return m_themeColors.value("welcomeBtnOpenColor"); }
+QColor ThemeManager::getWelcomeTextDark() const { return m_themeColors.value("welcomeTextDark"); }
+QColor ThemeManager::getWelcomeAccentYellow() const { return m_themeColors.value("welcomeAccentYellow"); }
+
+QString ThemeManager::getLogoPath() const { return m_themeIcons.value("logo"); }
+QString ThemeManager::getMascotPath() const { return m_themeIcons.value("mascot"); }
+QString ThemeManager::getWelcomeDecoDotsPath() const { return m_themeIcons.value("welcomeDecoDots"); }
+QString ThemeManager::getWelcomeDecoTrianglePath() const { return m_themeIcons.value("welcomeDecoTriangle"); }
+QString ThemeManager::getWelcomeDecoZigzagPath() const { return m_themeIcons.value("welcomeDecoZigzag"); }
+QString ThemeManager::getWelcomeDecoStarPath() const { return m_themeIcons.value("welcomeDecoStar"); }
+QString ThemeManager::getProjectFramePath() const { return m_themeIcons.value("projectFrame"); }
+
+QString ThemeManager::getPasteIconPath() const { return m_themeIcons.value("pasteIcon"); }
+QString ThemeManager::getDeleteIconPath() const { return m_themeIcons.value("deleteIcon"); }
+QString ThemeManager::getGridSnapIconPath() const { return m_themeIcons.value("gridSnapIcon"); }
+QString ThemeManager::getScaleIconPath() const { return m_themeIcons.value("scaleIcon"); }
+QString ThemeManager::getCropIconPath() const { return m_themeIcons.value("cropIcon"); }
+QString ThemeManager::getLabelIconPath() const { return m_themeIcons.value("labelIcon"); }
+QString ThemeManager::getArrangeIconPath() const { return m_themeIcons.value("arrangeIcon"); }
+QString ThemeManager::getRotateLeftIconPath() const { return m_themeIcons.value("rotateLeftIcon"); }
+QString ThemeManager::getRotateRightIconPath() const { return m_themeIcons.value("rotateRightIcon"); }
+QString ThemeManager::getZoomInIconPath() const { return m_themeIcons.value("zoomInIcon"); }
+QString ThemeManager::getZoomOutIconPath() const { return m_themeIcons.value("zoomOutIcon"); }
+QString ThemeManager::getUndoIconPath() const { return m_themeIcons.value("undoIcon"); }
+QString ThemeManager::getRedoIconPath() const { return m_themeIcons.value("redoIcon"); }
+QString ThemeManager::getPinIconPath() const { return m_themeIcons.value("pinIcon"); }
+QString ThemeManager::getSettingsIconPath() const { return m_themeIcons.value("settingsIcon"); }

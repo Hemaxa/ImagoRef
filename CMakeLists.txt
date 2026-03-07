@@ -68,6 +68,13 @@ qt_add_qml_module(ImagoRef
         res/resources.qrc
 )
 
+# Копирование папки с темами в директорию сборки
+add_custom_command(TARGET ImagoRef POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    "${CMAKE_CURRENT_SOURCE_DIR}/res/themes"
+    "$<TARGET_FILE_DIR:ImagoRef>/themes"
+)
+
 #директории с заголовочными файлами
 target_include_directories(ImagoRef PRIVATE
     ${SRC_DIR}/controllers

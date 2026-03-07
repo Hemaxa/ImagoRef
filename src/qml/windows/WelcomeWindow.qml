@@ -1,31 +1,28 @@
+//WelcomeWindow.qml - стартовое окно приложения
+
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Dialogs
 
-/**
- * WelcomeWindow.qml - стартовое окно приложения.
- * Дизайн: оранжевый фон с декоративными элементами,
- * сетка проектов 2×3, маскот и стилизованные кнопки.
- */
 Dialog {
     id: root
     
-    width: 900
-    height: 700
+    width: 600
+    height: 800
     modal: true
     closePolicy: Dialog.NoAutoClose
     
     signal newBoardRequested()
     signal openBoardRequested(url fileUrl)
     
-    // Цвета темы Welcome Window (можно вынести в ThemeManager позже)
-    readonly property color bgColor: "#FF6B35"  // Оранжевый фон
-    readonly property color btnNewGradientStart: "#FF69B4"
-    readonly property color btnNewGradientEnd: "#00CED1"
-    readonly property color btnOpenColor: "#ADFF2F"
-    readonly property color textDark: "#141414"
-    readonly property color accentYellow: "#FFE135"
+    // Цвета темы Welcome Window
+    property color bgColor: ThemeManager.welcomeBgColor
+    property color btnNewGradientStart: ThemeManager.welcomeBtnNewGradientStart
+    property color btnNewGradientEnd: ThemeManager.welcomeBtnNewGradientEnd
+    property color btnOpenColor: ThemeManager.welcomeBtnOpenColor
+    property color textDark: ThemeManager.welcomeTextDark
+    property color accentYellow: ThemeManager.welcomeAccentYellow
     
     // ========================================
     // BACKGROUND
@@ -33,12 +30,9 @@ Dialog {
     background: Rectangle {
         color: root.bgColor
         
-        // Декоративные элементы (разбросаны на фоне)
-        // Они позиционируются абсолютно
-        
-        // Верхний левый треугольник
+        // Декоративные элементы фона
         Image {
-            source: "qrc:/welcome/welcome/deco-triangle.svg"
+            source: ThemeManager.welcomeDecoTrianglePath
             x: 50; y: 80
             width: 40; height: 40
             rotation: -15
@@ -46,42 +40,42 @@ Dialog {
         
         // Зигзаг справа
         Image {
-            source: "qrc:/welcome/welcome/deco-zigzag.svg"
+            source: ThemeManager.welcomeDecoZigzagPath
             x: parent.width - 100; y: 150
             width: 60; height: 25
         }
         
         // Звезда слева
         Image {
-            source: "qrc:/welcome/welcome/deco-star.svg"
+            source: ThemeManager.welcomeDecoStarPath
             x: 30; y: 250
             width: 25; height: 25
         }
         
         // Точки справа вверху
         Image {
-            source: "qrc:/welcome/welcome/deco-dots.svg"
+            source: ThemeManager.welcomeDecoDotsPath
             x: parent.width - 80; y: 60
             width: 50; height: 50
         }
         
         // Еще элементы для заполнения
         Image {
-            source: "qrc:/welcome/welcome/deco-triangle.svg"
+            source: ThemeManager.welcomeDecoTrianglePath
             x: parent.width - 150; y: 400
             width: 35; height: 35
             rotation: 45
         }
         
         Image {
-            source: "qrc:/welcome/welcome/deco-zigzag.svg"
+            source: ThemeManager.welcomeDecoZigzagPath
             x: 80; y: parent.height - 150
             width: 50; height: 20
             rotation: -30
         }
         
         Image {
-            source: "qrc:/welcome/welcome/deco-star.svg"
+            source: ThemeManager.welcomeDecoStarPath
             x: parent.width - 60; y: parent.height - 200
             width: 20; height: 20
         }
@@ -96,11 +90,11 @@ Dialog {
         // Логотип вверху по центру
         Image {
             id: logoImage
-            source: "qrc:/welcome/welcome/logo.svg"
+            source: ThemeManager.logoPath
             anchors.horizontalCenter: parent.horizontalCenter
             y: 40
-            width: 350
-            height: 100
+            width: 550
+            height: 120
             fillMode: Image.PreserveAspectFit
         }
         
@@ -108,25 +102,25 @@ Dialog {
         Item {
             id: sectionHeader
             anchors.top: logoImage.bottom
-            anchors.topMargin: 40
+            anchors.topMargin: 10
             anchors.left: parent.left
-            anchors.leftMargin: 60
+            anchors.leftMargin: 40
             width: 200
             height: 40
-            
-            Text {
-                text: "Recent projects"
-                font.pixelSize: 24
-                font.bold: true
-                color: root.textDark
-            }
             
             // Желтая линия-подчеркивание
             Rectangle {
                 anchors.bottom: parent.bottom
                 width: parent.width
-                height: 6
+                height: 20
                 color: root.accentYellow
+            }
+
+            Text {
+                text: "Recent projects"
+                font.pixelSize: 30
+                font.bold: true
+                color: root.textDark
             }
         }
         
@@ -146,14 +140,14 @@ Dialog {
                 
                 // Карточка проекта
                 Item {
-                    width: 200
-                    height: 140
+                    width: 160
+                    height: 160
                     
                     // Рамка с полосками
                     Image {
                         id: frameImage
                         anchors.fill: parent
-                        source: "qrc:/welcome/welcome/project-frame.svg"
+                        source: ThemeManager.projectFramePath
                         fillMode: Image.Stretch
                     }
                     
@@ -162,12 +156,12 @@ Dialog {
                         anchors.centerIn: parent
                         width: parent.width - 20
                         height: parent.height - 20
-                        color: "#1a1a1a"
+                        color: ThemeManager.controlBackground
                         
                         Text {
                             anchors.centerIn: parent
                             text: "Project " + (index + 1)
-                            color: "#666"
+                            color: ThemeManager.textColor
                             font.pixelSize: 12
                         }
                     }
@@ -189,9 +183,11 @@ Dialog {
         // ========================================
         Image {
             id: mascotImage
-            source: "qrc:/welcome/welcome/mascot.svg"
+            source: ThemeManager.mascotPath
             anchors.left: parent.left
             anchors.bottom: parent.bottom
+            width: 280
+            height: 380
             fillMode: Image.PreserveAspectFit
         }
         
