@@ -18,13 +18,17 @@ BoardController::BoardController(QObject *parent) : QObject(parent)
     //синхронизировать начальное значение
     m_fileController->setGridSize(m_gridSize);
     
-    //Передача модели в провайдер изображений (очистка не нужна, так как провайдер живет все время работы приложения)
+    //Регистрация модели в глобальном провайдере изображений
     if (ImagoImageProvider::instance()) {
-        ImagoImageProvider::instance()->setModel(m_model);
+        ImagoImageProvider::instance()->registerModel(m_model);
     }
 }
 
-BoardController::~BoardController() {}
+BoardController::~BoardController() {
+    if (ImagoImageProvider::instance()) {
+        ImagoImageProvider::instance()->unregisterModel(m_model);
+    }
+}
 
 //метод связывания сигналов
 void BoardController::connectSignals()

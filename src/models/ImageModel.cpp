@@ -133,7 +133,7 @@ int ImageItemModel::getCount() const
 
 QString ImageItemModel::generateId()
 {
-    return QString("img_%1").arg(++m_idCounter);
+    return QUuid::createUuid().toString(QUuid::WithoutBraces);
 }
 
 void ImageItemModel::addImage(const ImageData &data)

@@ -8,7 +8,7 @@
 #include <QJsonArray>
 #include <QImage>
 #include <QBuffer>
-#include <QProcess>
+#include <JlCompress.h>
 #include <QTemporaryDir>
 #include <QDir>
 
@@ -56,10 +56,10 @@ bool FileController::openBoard(const QUrl &fileUrl)
     QTemporaryDir tempDir;
     if (!tempDir.isValid()) return false;
 
-    QProcess unzipProcess;
-    unzipProcess.setWorkingDirectory(tempDir.path());
-    unzipProcess.start("unzip", QStringList() << "-o" << "-q" << filePath);
-    unzipProcess.waitForFinished(-1);
+    if (JlCompress::extractDir(filePath, tempDir.path()).isEmpty()) {
+        // JlCompress returns a list of files; if empty, it might have failed to extract
+        // (but we will still try to load data.json just in case)
+    }
 
     QByteArray docData;
     QFile jsonFile(tempDir.path() + "/data.json");
@@ -206,12 +206,9 @@ bool FileController::saveBoardAs(const QUrl &fileUrl)
         QFile::remove(filePath);
     }
 
-    QProcess zipProcess;
-    zipProcess.setWorkingDirectory(tempDir.path());
-    zipProcess.start("zip", QStringList() << "-r" << "-q" << filePath << "data.json" << "images");
-    zipProcess.waitForFinished(-1);
+    bool success = JlCompress::compressDir(filePath, tempDir.path());
 
-    if (zipProcess.exitCode() != 0) {
+    if (!success) {
         return false;
     }
 

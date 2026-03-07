@@ -83,6 +83,21 @@ target_include_directories(ImagoRef PRIVATE
 )
 
 # ====================================================================
+# QUAZIP
+# ====================================================================
+find_package(ZLIB REQUIRED)
+
+include(FetchContent)
+FetchContent_Declare(
+    quazip
+    GIT_REPOSITORY https://github.com/stachenov/quazip.git
+    GIT_TAG        v1.4
+)
+FetchContent_MakeAvailable(quazip)
+
+target_link_libraries(ImagoRef PRIVATE QuaZip::QuaZip)
+
+# ====================================================================
 # НАСТРОЙКИ ДЛЯ MACOS
 # ====================================================================
 if(APPLE)

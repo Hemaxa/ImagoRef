@@ -17,10 +17,11 @@ public:
 
     QPixmap requestPixmap(const QString &id, QSize *size, const QSize &requestedSize) override;
 
-    void setModel(ImageItemModel *model);
+    void registerModel(ImageItemModel *model);
+    void unregisterModel(ImageItemModel *model);
     static ImagoImageProvider* instance();
 
 private:
-    ImageItemModel *m_model = nullptr;
+    QList<ImageItemModel*> m_models;
     static ImagoImageProvider* s_instance;
 };

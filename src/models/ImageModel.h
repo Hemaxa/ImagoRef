@@ -97,7 +97,6 @@ signals:
 
 private:
     QVector<ImageData> m_items;
-    int m_idCounter = 0;
     
     QString generateId();
 };

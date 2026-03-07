@@ -14,38 +14,38 @@ ImagoImageProvider* ImagoImageProvider::instance()
     return s_instance;
 }
 
-void ImagoImageProvider::setModel(ImageItemModel *model)
+void ImagoImageProvider::registerModel(ImageItemModel *model)
 {
-    m_model = model;
+    if (model && !m_models.contains(model)) {
+        m_models.append(model);
+    }
+}
+
+void ImagoImageProvider::unregisterModel(ImageItemModel *model)
+{
+    m_models.removeAll(model);
 }
 
 QPixmap ImagoImageProvider::requestPixmap(const QString &id, QSize *size, const QSize &requestedSize)
 {
     Q_UNUSED(requestedSize)
 
-    if (!m_model) {
-        if (size) *size = QSize(0, 0);
-        return QPixmap();
-    }
-
     // id приходит в виде "<imageId>?t=<timestamp>" — отсекаем параметры
     QString imageId = id.section('?', 0, 0);
 
-    int index = m_model->indexById(imageId);
-    if (index < 0) {
-        // Элемент не найден — возвращаем пустой pixmap
-        if (size) *size = QSize(0, 0);
-        return QPixmap();
+    for (ImageItemModel *model : std::as_const(m_models)) {
+        int index = model->indexById(imageId);
+        if (index >= 0) {
+            ImageData item = model->getItem(index);
+            QPixmap pixmap = item.pixmap;
+            
+            if (!pixmap.isNull()) {
+                if (size) *size = pixmap.size();
+                return pixmap;
+            }
+        }
     }
 
-    ImageData item = m_model->getItem(index);
-    QPixmap pixmap = item.pixmap;
-
-    if (pixmap.isNull()) {
-        if (size) *size = QSize(0, 0);
-        return QPixmap();
-    }
-
-    if (size) *size = pixmap.size();
-    return pixmap;
+    if (size) *size = QSize(0, 0);
+    return QPixmap();
 }
