@@ -30,6 +30,7 @@ void SettingsManager::loadSettings()
     m_canvasPattern = m_settings.value("canvas/pattern", "dots").toString();
     m_labelFontSize = m_settings.value("label/fontSize", 14).toInt();
     m_arrangeSpacing = m_settings.value("arrange/spacing", 20).toInt();
+    m_hasPromptedUpscale = m_settings.value("models/hasPromptedUpscale", false).toBool();
 }
 
 void SettingsManager::saveSettings()
@@ -39,6 +40,7 @@ void SettingsManager::saveSettings()
     m_settings.setValue("canvas/pattern", m_canvasPattern);
     m_settings.setValue("label/fontSize", m_labelFontSize);
     m_settings.setValue("arrange/spacing", m_arrangeSpacing);
+    m_settings.setValue("models/hasPromptedUpscale", m_hasPromptedUpscale);
 }
 
 QString SettingsManager::getThemeName() const
@@ -108,5 +110,16 @@ void SettingsManager::setArrangeSpacing(int spacing)
         m_arrangeSpacing = spacing;
         saveSettings();
         emit arrangeSpacingChanged();
+    }
+}
+
+bool SettingsManager::getHasPromptedUpscale() const { return m_hasPromptedUpscale; }
+
+void SettingsManager::setHasPromptedUpscale(bool prompted)
+{
+    if (m_hasPromptedUpscale != prompted) {
+        m_hasPromptedUpscale = prompted;
+        saveSettings();
+        emit hasPromptedUpscaleChanged();
     }
 }

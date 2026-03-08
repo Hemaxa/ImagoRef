@@ -185,6 +185,7 @@ QString ThemeManager::getPasteIconPath() const { return m_themeIcons.value("past
 QString ThemeManager::getDeleteIconPath() const { return m_themeIcons.value("deleteIcon"); }
 QString ThemeManager::getGridSnapIconPath() const { return m_themeIcons.value("gridSnapIcon"); }
 QString ThemeManager::getScaleIconPath() const { return m_themeIcons.value("scaleIcon"); }
+QString ThemeManager::getUpscaleIconPath() const { return m_themeIcons.value("upscaleIcon", m_themeIcons.value("scaleIcon")); }
 QString ThemeManager::getCropIconPath() const { return m_themeIcons.value("cropIcon"); }
 QString ThemeManager::getLabelIconPath() const { return m_themeIcons.value("labelIcon"); }
 QString ThemeManager::getArrangeIconPath() const { return m_themeIcons.value("arrangeIcon"); }

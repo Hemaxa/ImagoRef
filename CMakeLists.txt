@@ -36,11 +36,15 @@ target_sources(ImagoRef PRIVATE
     ${SRC_DIR}/controllers/ClipboardController.cpp
     ${SRC_DIR}/controllers/ToolController.h
     ${SRC_DIR}/controllers/ToolController.cpp
+    ${SRC_DIR}/controllers/UpscaleController.h
+    ${SRC_DIR}/controllers/UpscaleController.cpp
 
     ${SRC_DIR}/managers/SettingsManager.h
     ${SRC_DIR}/managers/SettingsManager.cpp
     ${SRC_DIR}/managers/ThemesManager.h
     ${SRC_DIR}/managers/ThemesManager.cpp
+    ${SRC_DIR}/managers/ModelsManager.h
+    ${SRC_DIR}/managers/ModelsManager.cpp
 
     ${SRC_DIR}/models/ImageModel.h
     ${SRC_DIR}/models/ImageModel.cpp
@@ -80,6 +84,8 @@ target_include_directories(ImagoRef PRIVATE
     ${SRC_DIR}/controllers
     ${SRC_DIR}/managers
     ${SRC_DIR}/models
+    ${ncnn_SOURCE_DIR}/src
+    ${ncnn_BINARY_DIR}/src
 )
 
 # ====================================================================
@@ -96,6 +102,28 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(quazip)
 
 target_link_libraries(ImagoRef PRIVATE QuaZip::QuaZip)
+
+# ====================================================================
+# NCNN
+# ====================================================================
+set(NCNN_VULKAN OFF CACHE BOOL "build vulkan compute support" FORCE)
+set(NCNN_BUILD_BENCHMARK OFF CACHE BOOL "build benchmark" FORCE)
+set(NCNN_BUILD_EXAMPLES OFF CACHE BOOL "build examples" FORCE)
+set(NCNN_BUILD_TESTS OFF CACHE BOOL "build tests" FORCE)
+set(NCNN_BUILD_TOOLS OFF CACHE BOOL "build tools" FORCE)
+set(NCNN_BUILD_EXAMPLES OFF CACHE BOOL "build examples" FORCE)
+set(NCNN_INSTALL_MODULES OFF CACHE BOOL "install modules" FORCE)
+set(NCNN_PIXEL ON CACHE BOOL "build with pixel conversions" FORCE)
+
+FetchContent_Declare(
+    ncnn
+    GIT_REPOSITORY https://github.com/Tencent/ncnn.git
+    GIT_TAG        20260113
+)
+FetchContent_MakeAvailable(ncnn)
+
+target_link_libraries(ImagoRef PRIVATE ncnn)
+
 
 # ====================================================================
 # НАСТРОЙКИ ДЛЯ MACOS

@@ -12,6 +12,7 @@
 #include "SelectionController.h"
 #include "ClipboardController.h"
 #include "ToolController.h"
+#include "UpscaleController.h"
 
 class BoardController : public QObject {
     Q_OBJECT //обязательный макрос для любого класса Qt, который использует сигналы, слоты или свойства (Q_PROPERTY)
@@ -25,6 +26,7 @@ class BoardController : public QObject {
     Q_PROPERTY(SelectionController* selectionController READ getSelectionController CONSTANT)
     Q_PROPERTY(ClipboardController* clipboardController READ getClipboardController CONSTANT)
     Q_PROPERTY(ToolController* toolController READ getToolController CONSTANT)
+    Q_PROPERTY(UpscaleController* upscaleController READ getUpscaleController CONSTANT)
 
     //состояния для кнопок Undo/Redo
     Q_PROPERTY(bool canUndo READ getCanUndo NOTIFY undoStateChanged)
@@ -44,6 +46,7 @@ public:
     SelectionController* getSelectionController() const;
     ClipboardController* getClipboardController() const;
     ToolController* getToolController() const;
+    UpscaleController* getUpscaleController() const;
 
     bool getCanUndo() const;
     bool getCanRedo() const;
@@ -83,6 +86,7 @@ private:
     SelectionController *m_selectionController;
     ClipboardController *m_clipboardController;
     ToolController *m_toolController;
+    UpscaleController *m_upscaleController;
 
     //переменные для хранения начального состояния объекта, когда пользователь только начинает его редактировать (изменения размера, перемещение)
     QPointF m_moveStartPos;

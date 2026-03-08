@@ -1,5 +1,6 @@
 #include "ImageModel.h"
 #include <QUuid>
+#include <QDateTime>
 
 ImageItemModel::ImageItemModel(QObject *parent)
     : QAbstractListModel(parent)
@@ -25,7 +26,8 @@ QVariant ImageItemModel::data(const QModelIndex &index, int role) const
     case SourceRole:
         if (item.source.isEmpty() && !item.id.isEmpty() && !item.pixmap.isNull()) {
             // Возвращаем динамический URL из ImageProvider, чтобы QML мог загрузить картинку без файла
-            return QUrl(QString("image://imago/%1").arg(item.id));
+            // Добавляем параметр версии, чтобы избежать кэширования старого изображения в QML
+            return QUrl(QString("image://imago/%1?v=%2").arg(item.id).arg(item.version));
         }
         return item.source;
     case XRole: return item.x;
@@ -306,6 +308,9 @@ void ImageItemModel::updatePixmap(int index, const QPixmap &pixmap)
         return;
 
     m_items[index].pixmap = pixmap;
+    m_items[index].source = QUrl(); // Очищаем локальный путь, чтобы QML тянул из провайдера
+    m_items[index].version = QDateTime::currentMSecsSinceEpoch(); // Обновляем версию для сброса кэша QML
+    
     // Pixmap не привязан к роли в QML, но можно оповестить об изменении source
     QModelIndex modelIndex = createIndex(index, 0);
     emit dataChanged(modelIndex, modelIndex, {SourceRole});

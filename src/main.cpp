@@ -11,6 +11,7 @@
 #include "SettingsManager.h"
 #include "ThemesManager.h"
 #include "ImageProvider.h"
+#include "ModelsManager.h"
 
 int main(int argc, char *argv[])
 {
@@ -34,6 +35,7 @@ int main(int argc, char *argv[])
 
     engine.rootContext()->setContextProperty("ThemeManager", &ThemeManager::instance());
     engine.rootContext()->setContextProperty("SettingsManager", &SettingsManager::instance());
+    engine.rootContext()->setContextProperty("ModelsManager", &ModelsManager::instance());
     ThemeManager::instance().applyTheme(SettingsManager::instance().getThemeName());
 
     //загрузка главного QML файла из модуля Qt6

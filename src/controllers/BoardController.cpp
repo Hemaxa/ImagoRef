@@ -2,6 +2,7 @@
 #include "StackController.h"
 #include "SettingsManager.h"
 #include "ImageProvider.h"
+#include "ModelsManager.h"
 
 BoardController::BoardController(QObject *parent) : QObject(parent)
     , m_model(new ImageItemModel(this))
@@ -10,6 +11,7 @@ BoardController::BoardController(QObject *parent) : QObject(parent)
     , m_selectionController(new SelectionController(m_model, this))
     , m_clipboardController(new ClipboardController(m_model, m_undoStack, this))
     , m_toolController(new ToolController(m_model, m_undoStack, this))
+    , m_upscaleController(new UpscaleController(m_model, &ModelsManager::instance(), this))
     , m_gridSize(SettingsManager::instance().getGridSize())
 {
     //вызов вспомогательного метода
@@ -55,6 +57,7 @@ FileController* BoardController::getFileController() const { return m_fileContro
 SelectionController* BoardController::getSelectionController() const { return m_selectionController; }
 ClipboardController* BoardController::getClipboardController() const { return m_clipboardController; }
 ToolController* BoardController::getToolController() const { return m_toolController; }
+UpscaleController* BoardController::getUpscaleController() const { return m_upscaleController; }
 
 bool BoardController::getCanUndo() const { return m_undoStack->canUndo(); }
 bool BoardController::getCanRedo() const { return m_undoStack->canRedo(); }

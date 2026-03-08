@@ -19,6 +19,7 @@ class SettingsManager : public QObject {
     Q_PROPERTY(QString canvasPattern READ getCanvasPattern WRITE setCanvasPattern NOTIFY canvasPatternChanged)
     Q_PROPERTY(int labelFontSize READ getLabelFontSize WRITE setLabelFontSize NOTIFY labelFontSizeChanged)
     Q_PROPERTY(int arrangeSpacing READ getArrangeSpacing WRITE setArrangeSpacing NOTIFY arrangeSpacingChanged)
+    Q_PROPERTY(bool hasPromptedUpscale READ getHasPromptedUpscale WRITE setHasPromptedUpscale NOTIFY hasPromptedUpscaleChanged)
 
 public:
     static SettingsManager* create(QQmlEngine *qmlEngine, QJSEngine *jsEngine);
@@ -42,12 +43,16 @@ public:
     int getArrangeSpacing() const;
     void setArrangeSpacing(int spacing);
 
+    bool getHasPromptedUpscale() const;
+    void setHasPromptedUpscale(bool prompted);
+
 signals:
     void themeNameChanged();
     void gridSizeChanged();
     void canvasPatternChanged();
     void labelFontSizeChanged();
     void arrangeSpacingChanged();
+    void hasPromptedUpscaleChanged();
 
 private:
     explicit SettingsManager(QObject* parent = nullptr);
@@ -60,4 +65,5 @@ private:
     QString m_canvasPattern;
     int m_labelFontSize;
     int m_arrangeSpacing;
+    bool m_hasPromptedUpscale;
 };

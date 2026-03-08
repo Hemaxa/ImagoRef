@@ -26,6 +26,8 @@ struct ImageData {
     qreal cropY = 0;
     qreal cropWidth = 0;  // 0 означает "нет обрезки" (полная ширина)
     qreal cropHeight = 0; // 0 означает "нет обрезки" (полная высота)
+    
+    qint64 version = 0; //версия изображения для обновления кэша QML
 };
 
 class ImageItemModel : public QAbstractListModel {

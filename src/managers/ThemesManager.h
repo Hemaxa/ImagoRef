@@ -48,6 +48,7 @@ class ThemeManager : public QObject {
     Q_PROPERTY(QString deleteIconPath READ getDeleteIconPath NOTIFY themeChanged)
     Q_PROPERTY(QString gridSnapIconPath READ getGridSnapIconPath NOTIFY themeChanged)
     Q_PROPERTY(QString scaleIconPath READ getScaleIconPath NOTIFY themeChanged)
+    Q_PROPERTY(QString upscaleIconPath READ getUpscaleIconPath NOTIFY themeChanged)
     Q_PROPERTY(QString cropIconPath READ getCropIconPath NOTIFY themeChanged)
     Q_PROPERTY(QString labelIconPath READ getLabelIconPath NOTIFY themeChanged)
     Q_PROPERTY(QString arrangeIconPath READ getArrangeIconPath NOTIFY themeChanged)
@@ -101,6 +102,7 @@ public:
     QString getDeleteIconPath() const;
     QString getGridSnapIconPath() const;
     QString getScaleIconPath() const;
+    QString getUpscaleIconPath() const;
     QString getCropIconPath() const;
     QString getLabelIconPath() const;
     QString getArrangeIconPath() const;

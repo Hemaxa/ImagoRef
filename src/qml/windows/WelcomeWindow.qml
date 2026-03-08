@@ -302,4 +302,26 @@ Dialog {
         nameFilters: ["ImagoRef доска (*.iref)", "Все файлы (*)"]
         onAccepted: root.openBoardRequested(selectedFile)
     }
+
+    // ========================================
+    // UPSCALE MODEL PROMPT
+    // ========================================
+    MessageDialog {
+        id: upscalePromptDialog
+        title: "Скачать модель Upscale"
+        text: "Для использования функции Upscale (увеличение разрешения с помощью нейросети Real-ESRGAN) необходимо скачать модель (около 35 МБ).\n\nВы хотите скачать её сейчас? Вы всегда сможете сделать это позже в Настройках."
+        buttons: MessageDialog.Yes | MessageDialog.No
+        onButtonClicked: function(button, role) {
+            SettingsManager.hasPromptedUpscale = true
+            if (button === MessageDialog.Yes) {
+                ModelsManager.downloadModel()
+            }
+        }
+    }
+    
+    onOpened: {
+        if (!SettingsManager.hasPromptedUpscale && !ModelsManager.isModelDownloaded) {
+            upscalePromptDialog.open()
+        }
+    }
 }

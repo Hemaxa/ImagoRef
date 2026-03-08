@@ -351,6 +351,48 @@ Dialog {
                         }
                     }
                     
+                    // Управление моделью Upscale
+                    RowLayout {
+                        spacing: 0
+                        
+                        Label {
+                            text: "Модель Upscale"
+                            color: ThemeManager.textColor
+                            Layout.preferredWidth: 160
+                        }
+                        
+                        // Кнопка скачивания или удаления
+                        Button {
+                            Layout.preferredWidth: 180
+                            text: ModelsManager.isDownloading ? "Скачивание (" + Math.round(ModelsManager.downloadProgress * 100) + "%)" 
+                                                              : (ModelsManager.isModelDownloaded ? "Удалить модель" : "Скачать модель (35 МБ)")
+                            enabled: !ModelsManager.isDownloading
+                            
+                            contentItem: Text {
+                                text: parent.text
+                                font.pixelSize: 13
+                                color: ThemeManager.textColor
+                                horizontalAlignment: Text.AlignHCenter
+                                verticalAlignment: Text.AlignVCenter
+                            }
+                            
+                            background: Rectangle {
+                                color: ThemeManager.controlBackground
+                                border.color: ThemeManager.borderColor
+                                border.width: 1
+                                radius: 6
+                            }
+                            
+                            onClicked: {
+                                if (ModelsManager.isModelDownloaded) {
+                                    ModelsManager.deleteModel()
+                                } else {
+                                    ModelsManager.downloadModel()
+                                }
+                            }
+                        }
+                    }
+                    
                     Item { Layout.fillHeight: true }
                 }
             }

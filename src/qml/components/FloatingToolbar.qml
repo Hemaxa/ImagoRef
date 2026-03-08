@@ -64,6 +64,21 @@ Rectangle {
             onClicked: controller.toolController.snapToGrid()
         }
         
+        // Увеличить разрешение
+        ToolbarButton {
+            iconSource: ThemeManager.upscaleIconPath
+            tooltip: "Увеличить разрешение"
+            shortcutText: "U"
+            visible: ModelsManager.isModelDownloaded
+            enabled: controller.selectionController.hasSelection
+            onClicked: {
+                var selectedIndices = controller.model.getSelectedIndices()
+                for (var i = 0; i < selectedIndices.length; ++i) {
+                    controller.upscaleController.upscaleImage(selectedIndices[i])
+                }
+            }
+        }
+        
         // Изменить размер
         ToolbarButton {
             iconSource: ThemeManager.scaleIconPath

@@ -29,6 +29,7 @@
         "pasteIcon": "MainWindow/tools/paste.svg",
         "deleteIcon": "MainWindow/tools/delete.svg",
         "gridSnapIcon": "MainWindow/tools/grid_snap.svg",
+        "upscaleIconPath": "MainWindow/tools/upscale.svg",
         "scaleIcon": "MainWindow/tools/scale.svg",
         "cropIcon": "MainWindow/tools/crop.svg",
         "labelIcon": "MainWindow/tools/label.svg",
