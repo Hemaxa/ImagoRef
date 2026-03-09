@@ -120,13 +120,45 @@ Item {
         Component.onCompleted: {
             contentX = sceneSize * zoomLevel / 2 - width / 2
             contentY = sceneSize * zoomLevel / 2 - height / 2
+            
+            // Записываем начальное положение
+            controller.cameraZoom = zoomLevel
+            controller.cameraX = contentX
+            controller.cameraY = contentY
         }
+        
+        // Передаем координаты в C++ при их изменении
+        onContentXChanged: controller.cameraX = contentX
+        onContentYChanged: controller.cameraY = contentY
 
         interactive: false
+        
+    }
+        
+    // Синхронизация масштаба
+    onZoomLevelChanged: controller.cameraZoom = zoomLevel
 
-        //контейнер сцены с масштабированием
-        Item {
-            id: sceneContainer
+    // Восстановление позиции камеры при открытии файла
+    Connections {
+        target: controller.fileController
+        function onBoardLoaded() {
+            if (controller.cameraX >= 0 && controller.cameraY >= 0) {
+                root.zoomLevel = controller.cameraZoom
+                flickable.contentX = controller.cameraX
+                flickable.contentY = controller.cameraY
+            } else {
+                root.zoomLevel = 0.3
+                flickable.contentX = root.sceneSize * root.zoomLevel / 2 - root.width / 2
+                flickable.contentY = root.sceneSize * root.zoomLevel / 2 - root.height / 2
+            }
+        }
+    }
+
+    //контейнер сцены с масштабированием
+    Item {
+        id: sceneContainer
+        parent: flickable.contentItem
+
             width: sceneSize
             height: sceneSize
             scale: zoomLevel //устанавливаем коэффициент зума для всего содержимого рабочей области
@@ -149,8 +181,8 @@ Item {
             Canvas {
                 id: patternCanvas
                 visible: false
-                width: Math.max(SettingsManager.gridSize, 20)
-                height: Math.max(SettingsManager.gridSize, 20)
+                width: Math.max(SettingsManager.gridSize, 5)
+                height: Math.max(SettingsManager.gridSize, 5)
 
                 property bool ready: false
                 property color dotColor: ThemeManager.gridColor
@@ -190,7 +222,7 @@ Item {
                 //перерисовка тайла при изменении параметров
                 onDotColorChanged: { ready = false; requestPaint() }
                 onPatternChanged: { ready = false; requestPaint() }
-                onGSizeChanged: { width = Math.max(gSize, 20); height = Math.max(gSize, 20); ready = false; requestPaint() }
+                onGSizeChanged: { width = Math.max(gSize, 5); height = Math.max(gSize, 5); ready = false; requestPaint() }
                 Component.onCompleted: requestPaint()
             }
 
@@ -249,7 +281,6 @@ Item {
                 }
             }
         }
-    }
 
     //рамка выделения поверх Flickable
     Rectangle {

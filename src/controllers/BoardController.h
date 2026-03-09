@@ -35,6 +35,10 @@ class BoardController : public QObject {
     //размер сетки
     Q_PROPERTY(int gridSize READ getGridSize WRITE setGridSize NOTIFY gridSizeChanged)
 
+    Q_PROPERTY(qreal cameraX READ getCameraX WRITE setCameraX NOTIFY cameraChanged)
+    Q_PROPERTY(qreal cameraY READ getCameraY WRITE setCameraY NOTIFY cameraChanged)
+    Q_PROPERTY(qreal cameraZoom READ getCameraZoom WRITE setCameraZoom NOTIFY cameraChanged)
+
 public:
     //конструктор принимает родительский QObject для автоматического управления памятью
     explicit BoardController(QObject *parent = nullptr);
@@ -51,9 +55,15 @@ public:
     bool getCanUndo() const;
     bool getCanRedo() const;
     int getGridSize() const;
+    qreal getCameraX() const;
+    qreal getCameraY() const;
+    qreal getCameraZoom() const;
 
     //сеттеры для свойств
     void setGridSize(int size);
+    void setCameraX(qreal x);
+    void setCameraY(qreal y);
+    void setCameraZoom(qreal zoom);
 
     //свойство Q_INVOKABLE позволяет вызывать эти C++ методы прямо из JavaScript/QML кода
     //Undo/Redo
@@ -71,6 +81,7 @@ signals:
     void undoStateChanged();
     void redoStateChanged();
     void gridSizeChanged();
+    void cameraChanged();
 
 private:
     //вспомогательный метод для настройки сигналов
@@ -80,6 +91,9 @@ private:
     ImageItemModel *m_model;
     QUndoStack *m_undoStack;
     int m_gridSize;
+    qreal m_cameraX;
+    qreal m_cameraY;
+    qreal m_cameraZoom;
 
     //указатели на остальные контроллеры
     FileController *m_fileController;

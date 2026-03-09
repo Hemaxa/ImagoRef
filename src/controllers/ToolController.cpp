@@ -50,14 +50,37 @@ void ToolController::snapToGrid()
 
     for (const QVariant &v : indices) {
         int i = v.toInt();
-        ImageData item = m_model->getItem(i);
-        qreal newX = std::round(item.x / gridSize) * gridSize;
-        qreal newY = std::round(item.y / gridSize) * gridSize;
+        ImageData data = m_model->getItem(i);
+        
+        qreal oldX = data.x;
+        qreal oldY = data.y;
+        
+        qreal cx = oldX + data.width / 2.0;
+        qreal cy = oldY + data.height / 2.0;
 
-        if (item.x != newX || item.y != newY) {
+        qreal rad = data.rotation * M_PI / 180.0;
+        qreal cosA = std::cos(rad);
+        qreal sinA = std::sin(rad);
+
+        qreal rx = (-data.width / 2.0) * cosA - (-data.height / 2.0) * sinA;
+        qreal ry = (-data.width / 2.0) * sinA + (-data.height / 2.0) * cosA;
+
+        qreal targetX = cx + rx;
+        qreal targetY = cy + ry;
+
+        qreal snappedX = std::round(targetX / gridSize) * gridSize;
+        qreal snappedY = std::round(targetY / gridSize) * gridSize;
+
+        qreal newCx = snappedX - rx;
+        qreal newCy = snappedY - ry;
+
+        qreal newX = newCx - data.width / 2.0;
+        qreal newY = newCy - data.height / 2.0;
+
+        if (!qFuzzyCompare(oldX, newX) || !qFuzzyCompare(oldY, newY)) {
             m_undoStack->push(new MoveImageCommand(
                 m_model, i, 
-                QPointF(item.x, item.y),
+                QPointF(oldX, oldY),
                 QPointF(newX, newY)
             ));
         }
@@ -148,7 +171,7 @@ void ToolController::setLabelForSelected(const QString &label)
     m_undoStack->endMacro();
 }
 
-void ToolController::arrangeAll()
+void ToolController::arrangeAll(qreal centerX, qreal centerY)
 {
     int count = m_model->getCount();
     if (count == 0) return;
@@ -187,7 +210,7 @@ void ToolController::arrangeAll()
     qreal maxRowWidth = std::sqrt(totalArea) * 1.3;
     if (maxRowWidth < 800) maxRowWidth = 800;
 
-    qreal startX = 10000.0 - maxRowWidth / 2.0;
+    qreal startX = centerX - maxRowWidth / 2.0;
     
     qreal totalHeight = 0;
     {
@@ -203,7 +226,7 @@ void ToolController::arrangeAll()
         }
         totalHeight += rh;
     }
-    qreal startY = 10000.0 - totalHeight / 2.0;
+    qreal startY = centerY - totalHeight / 2.0;
 
     QVector<int> sortedIndices;
     QVector<QPointF> oldPositions;

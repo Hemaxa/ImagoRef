@@ -48,6 +48,11 @@ Item {
             var scenePos = canvasView.mapToScene(center)
             controller.clipboardController.pasteFromClipboard(scenePos.x, scenePos.y)
         }
+        onArrangeClicked: {
+            var center = Qt.point(canvasView.width / 2, canvasView.height / 2)
+            var scenePos = canvasView.mapToScene(center)
+            controller.toolController.arrangeAll(scenePos.x, scenePos.y)
+        }
 
         resizeModeActive: canvasView.resizeMode
         cropModeActive: canvasView.cropMode
@@ -181,7 +186,11 @@ Item {
     //расположить
     Shortcut {
         sequence: "A"
-        onActivated: controller.toolController.arrangeAll()
+        onActivated: {
+            var center = Qt.point(canvasView.width / 2, canvasView.height / 2)
+            var scenePos = canvasView.mapToScene(center)
+            controller.toolController.arrangeAll(scenePos.x, scenePos.y)
+        }
     }
     
     //диалог ввода подписи

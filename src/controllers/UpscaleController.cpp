@@ -124,6 +124,12 @@ void UpscaleController::upscaleImage(int index) {
     emit upscaleStarted(index);
 
     QImage srcImage = data.pixmap.toImage();
+    
+    // To save processing time and physically preserve the crop, extract it BEFORE upscaling
+    if (data.cropWidth > 0 && data.cropHeight > 0) {
+        srcImage = srcImage.copy(data.cropX, data.cropY, data.cropWidth, data.cropHeight);
+    }
+    
     UpscaleWorker *worker = new UpscaleWorker(index, srcImage, m_modelsManager->getModelPath(), m_modelsManager->getParamPath());
     connect(worker, &UpscaleWorker::finished, this, &UpscaleController::onUpscaleFinished, Qt::QueuedConnection);
     connect(worker, &UpscaleWorker::failed, this, &UpscaleController::onUpscaleFailed, Qt::QueuedConnection);
@@ -134,7 +140,15 @@ void UpscaleController::upscaleImage(int index) {
 void UpscaleController::onUpscaleFinished(int index, QImage result) {
     m_activeTasks.remove(index);
     if (index >= 0 && index < m_model->getCount()) {
+        ImageData data = m_model->getItem(index);
+        
         m_model->updatePixmap(index, QPixmap::fromImage(result));
+        
+        // The image was already physically cropped before upscaling. We must reset the crop 
+        // to show the entire new upscaled pixmap within the visual item bounds.
+        if (data.cropWidth > 0 && data.cropHeight > 0) {
+            m_model->updateCrop(index, 0, 0, 0, 0);
+        }
     }
     emit upscaleFinished(index);
 }

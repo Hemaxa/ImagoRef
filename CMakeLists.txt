@@ -93,11 +93,14 @@ target_include_directories(ImagoRef PRIVATE
 # ====================================================================
 find_package(ZLIB REQUIRED)
 
+set(QUAZIP_ENABLE_TESTS OFF CACHE BOOL "Build QuaZip tests" FORCE)
+
 include(FetchContent)
 FetchContent_Declare(
     quazip
     GIT_REPOSITORY https://github.com/stachenov/quazip.git
     GIT_TAG        v1.4
+    GIT_SHALLOW    ON
 )
 FetchContent_MakeAvailable(quazip)
 
@@ -119,6 +122,7 @@ FetchContent_Declare(
     ncnn
     GIT_REPOSITORY https://github.com/Tencent/ncnn.git
     GIT_TAG        20260113
+    GIT_SHALLOW    ON
 )
 FetchContent_MakeAvailable(ncnn)
 

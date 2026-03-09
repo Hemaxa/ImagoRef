@@ -1,5 +1,6 @@
 #include "FileController.h"
 #include "ImageModel.h"
+#include "BoardController.h"
 
 #include <QFile>
 #include <QFileInfo>
@@ -89,6 +90,13 @@ bool FileController::openBoard(const QUrl &fileUrl)
         int loadedGridSize = canvasObj["gridSize"].toInt(25);
         m_gridSize = loadedGridSize;
         emit gridSizeLoaded(loadedGridSize);
+        
+        if (canvasObj.contains("cameraX") && canvasObj.contains("cameraY")) {
+            qreal camX = canvasObj["cameraX"].toDouble();
+            qreal camY = canvasObj["cameraY"].toDouble();
+            qreal camZoom = canvasObj["cameraZoom"].toDouble(0.3); // default zoom is 0.3
+            emit cameraLoaded(camX, camY, camZoom);
+        }
     }
 
     if (rootObj.contains("items")) {
@@ -158,6 +166,15 @@ bool FileController::saveBoardAs(const QUrl &fileUrl)
     
     QJsonObject canvasObj;
     canvasObj["gridSize"] = m_gridSize;
+    
+    BoardController* board = qobject_cast<BoardController*>(parent());
+    if (board) {
+        // Save camera properties
+        canvasObj["cameraX"] = board->getCameraX();
+        canvasObj["cameraY"] = board->getCameraY();
+        canvasObj["cameraZoom"] = board->getCameraZoom();
+    }
+    
     rootObj["canvas"] = canvasObj;
 
     QTemporaryDir tempDir;

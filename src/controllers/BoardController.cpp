@@ -13,6 +13,9 @@ BoardController::BoardController(QObject *parent) : QObject(parent)
     , m_toolController(new ToolController(m_model, m_undoStack, this))
     , m_upscaleController(new UpscaleController(m_model, &ModelsManager::instance(), this))
     , m_gridSize(SettingsManager::instance().getGridSize())
+    , m_cameraX(-1)
+    , m_cameraY(-1)
+    , m_cameraZoom(0.3)
 {
     //вызов вспомогательного метода
     connectSignals();
@@ -49,6 +52,14 @@ void BoardController::connectSignals()
     connect(m_fileController, &FileController::gridSizeLoaded, this, [this](int loadedGridSize) {
         setGridSize(loadedGridSize);
     });
+
+    //синхронизация камеры из файла при загрузке доски
+    connect(m_fileController, &FileController::cameraLoaded, this, [this](qreal x, qreal y, qreal zoom) {
+        m_cameraX = x;
+        m_cameraY = y;
+        m_cameraZoom = zoom;
+        emit cameraChanged();
+    });
 }
 
 //геттеры
@@ -62,6 +73,9 @@ UpscaleController* BoardController::getUpscaleController() const { return m_upsc
 bool BoardController::getCanUndo() const { return m_undoStack->canUndo(); }
 bool BoardController::getCanRedo() const { return m_undoStack->canRedo(); }
 int BoardController::getGridSize() const { return m_gridSize; }
+qreal BoardController::getCameraX() const { return m_cameraX; }
+qreal BoardController::getCameraY() const { return m_cameraY; }
+qreal BoardController::getCameraZoom() const { return m_cameraZoom; }
 
 //сеттеры
 void BoardController::setGridSize(int size)
@@ -71,6 +85,27 @@ void BoardController::setGridSize(int size)
         m_fileController->setGridSize(size);
         SettingsManager::instance().setGridSize(size);
         emit gridSizeChanged();
+    }
+}
+
+void BoardController::setCameraX(qreal x) {
+    if (!qFuzzyCompare(m_cameraX, x)) {
+        m_cameraX = x;
+        emit cameraChanged();
+    }
+}
+
+void BoardController::setCameraY(qreal y) {
+    if (!qFuzzyCompare(m_cameraY, y)) {
+        m_cameraY = y;
+        emit cameraChanged();
+    }
+}
+
+void BoardController::setCameraZoom(qreal zoom) {
+    if (!qFuzzyCompare(m_cameraZoom, zoom)) {
+        m_cameraZoom = zoom;
+        emit cameraChanged();
     }
 }
 

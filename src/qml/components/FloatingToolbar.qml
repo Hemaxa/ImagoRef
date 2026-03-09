@@ -18,6 +18,7 @@ Rectangle {
     signal cropModeClicked()
     signal labelClicked()
     signal pasteClicked()
+    signal arrangeClicked()
     
     //cостояние активных инструментов
     property bool resizeModeActive: false
@@ -113,7 +114,7 @@ Rectangle {
             iconSource: ThemeManager.arrangeIconPath
             tooltip: "Расположить"
             shortcutText: "A"
-            onClicked: controller.toolController.arrangeAll()
+            onClicked: root.arrangeClicked()
         }
         
         // Вращать против часовой

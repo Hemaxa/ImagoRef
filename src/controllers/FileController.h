@@ -42,6 +42,7 @@ signals:
 
     //вызывается при загрузке доски с сохранённым gridSize
     void gridSizeLoaded(int gridSize);
+    void cameraLoaded(qreal x, qreal y, qreal zoom);
 
 private:
     //внутренние поля класса
