@@ -31,6 +31,7 @@ void SettingsManager::loadSettings()
     m_labelFontSize = m_settings.value("label/fontSize", 14).toInt();
     m_arrangeSpacing = m_settings.value("arrange/spacing", 20).toInt();
     m_hasPromptedUpscale = m_settings.value("models/hasPromptedUpscale", false).toBool();
+    m_toolbarColumns = m_settings.value("toolbar/columns", 1).toInt();
 }
 
 void SettingsManager::saveSettings()
@@ -41,6 +42,7 @@ void SettingsManager::saveSettings()
     m_settings.setValue("label/fontSize", m_labelFontSize);
     m_settings.setValue("arrange/spacing", m_arrangeSpacing);
     m_settings.setValue("models/hasPromptedUpscale", m_hasPromptedUpscale);
+    m_settings.setValue("toolbar/columns", m_toolbarColumns);
 }
 
 QString SettingsManager::getThemeName() const
@@ -121,5 +123,16 @@ void SettingsManager::setHasPromptedUpscale(bool prompted)
         m_hasPromptedUpscale = prompted;
         saveSettings();
         emit hasPromptedUpscaleChanged();
+    }
+}
+
+int SettingsManager::getToolbarColumns() const { return m_toolbarColumns; }
+
+void SettingsManager::setToolbarColumns(int columns)
+{
+    if (m_toolbarColumns != columns) {
+        m_toolbarColumns = columns;
+        saveSettings();
+        emit toolbarColumnsChanged();
     }
 }

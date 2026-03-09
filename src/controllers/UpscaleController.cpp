@@ -1,6 +1,7 @@
 #include "UpscaleController.h"
 #include "ImageModel.h"
 #include "ModelsManager.h"
+#include "StackController.h" // Added for QUndoCommand
 
 #include <QThreadPool>
 #include <QPainter>
@@ -101,8 +102,8 @@ void UpscaleWorker::run() {
     }
 }
 
-UpscaleController::UpscaleController(ImageItemModel *model, ModelsManager *modelsManager, QObject *parent)
-    : QObject(parent), m_model(model), m_modelsManager(modelsManager) {
+UpscaleController::UpscaleController(ImageItemModel *model, ModelsManager *modelsManager, QUndoStack *undoStack, QObject *parent)
+    : QObject(parent), m_model(model), m_modelsManager(modelsManager), m_undoStack(undoStack) {
 }
 
 void UpscaleController::upscaleImage(int index) {
@@ -142,12 +143,24 @@ void UpscaleController::onUpscaleFinished(int index, QImage result) {
     if (index >= 0 && index < m_model->getCount()) {
         ImageData data = m_model->getItem(index);
         
-        m_model->updatePixmap(index, QPixmap::fromImage(result));
+        QPixmap oldPixmap = data.pixmap;
+        QRectF oldCrop(data.cropX, data.cropY, data.cropWidth, data.cropHeight);
+        QPixmap newPixmap = QPixmap::fromImage(result);
+        QRectF newCrop(0, 0, 0, 0); // No crop initially for the upscaled version
         
-        // The image was already physically cropped before upscaling. We must reset the crop 
-        // to show the entire new upscaled pixmap within the visual item bounds.
-        if (data.cropWidth > 0 && data.cropHeight > 0) {
-            m_model->updateCrop(index, 0, 0, 0, 0);
+        // Push to undo stack
+        if (m_undoStack) {
+            m_undoStack->push(new UpscaleImageCommand(
+                m_model, index,
+                oldPixmap, oldCrop,
+                newPixmap, newCrop
+            ));
+        } else {
+            // Fallback (just in case)
+            m_model->updatePixmap(index, newPixmap);
+            if (data.cropWidth > 0 && data.cropHeight > 0) {
+                m_model->updateCrop(index, 0, 0, 0, 0);
+            }
         }
     }
     emit upscaleFinished(index);

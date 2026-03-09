@@ -24,20 +24,62 @@ Rectangle {
     property bool resizeModeActive: false
     property bool cropModeActive: false
     
-    width: 60
-    height: toolbarLayout.height + 6
+    // Width and layout dependencies based on columns
+    property int columns: SettingsManager.toolbarColumns
+    property int itemSize: 50
+    property int itemSpacing: 3
+    property int paddingVal: 3
+    
+    // Explicitly size the background larger than the grid structure
+    width: (columns * itemSize) + ((columns - 1) * itemSpacing) + (paddingVal * 2) 
+    height: toolbarLayout.implicitHeight + (paddingVal * 2)
+    
     color: ThemeManager.panelColor
     border.color: ThemeManager.borderColor
     border.width: 3
     radius: 3
-    clip: true  // Обрезаем содержимое по скруглённым краям
     
-    ColumnLayout {
-        id: toolbarLayout
-        anchors.horizontalCenter: parent.horizontalCenter
+    // Remove 'clip: true' if it was eating the 3px border
+    // Let's rely on properly sized layout instead
+    
+    // Drag handle for resizing horizontally
+    MouseArea {
+        id: rightResizeHandle
+        anchors.right: parent.right
         anchors.top: parent.top
-        anchors.topMargin: 3
-        spacing: 3
+        anchors.bottom: parent.bottom
+        width: 10
+        cursorShape: Qt.SizeHorCursor
+        
+        property int startX: 0
+        property int startColumns: 1
+        
+        onPressed: (mouse) => {
+            startX = mouse.x
+            startColumns = SettingsManager.toolbarColumns
+        }
+        
+        onPositionChanged: (mouse) => {
+            let dx = mouse.x - startX
+            
+            // To prevent flickering (switching back and forth over a single pixel boundary):
+            // We use a significant threshold (e.g. half a button width = 25px)
+            if (startColumns === 1 && dx > 25) { 
+                SettingsManager.toolbarColumns = 2
+                // Do not update startX or startColumns, so they have to drag ALL the way back
+                // past the original point + threshold to flip it back.
+            } else if (startColumns === 2 && dx < -25) { 
+                SettingsManager.toolbarColumns = 1
+            }
+        }
+    }
+    
+    GridLayout {
+        id: toolbarLayout
+        columns: root.columns
+        anchors.centerIn: parent
+        rowSpacing: root.itemSpacing
+        columnSpacing: root.itemSpacing
         
         // Вставить
         ToolbarButton {
@@ -114,6 +156,7 @@ Rectangle {
             iconSource: ThemeManager.arrangeIconPath
             tooltip: "Расположить"
             shortcutText: "A"
+            enabled: controller.model.count > 0
             onClicked: root.arrangeClicked()
         }
         

@@ -43,8 +43,13 @@ Item {
         smooth: true
         mipmap: true
         
+        // Custom ImageProviders don't support sourceClipRect, so we pass crop params via URL
+        // and the provider crops it. To prevent double-cropping bugs if Qt ever changes behavior,
+        // we skip sourceClipRect for our custom provider.
+        property bool isCustomProvider: root.imageSource.toString().indexOf("image://imago/") === 0
+        
         //неразрушающая обрезка
-        sourceClipRect: (root.modelCropWidth > 0 && root.modelCropHeight > 0) ? Qt.rect(root.modelCropX, root.modelCropY, root.modelCropWidth, root.modelCropHeight) : undefined
+        sourceClipRect: (!isCustomProvider && root.modelCropWidth > 0 && root.modelCropHeight > 0) ? Qt.rect(root.modelCropX, root.modelCropY, root.modelCropWidth, root.modelCropHeight) : undefined
     }
 
     //подпись над изображением

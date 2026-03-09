@@ -27,7 +27,14 @@ QVariant ImageItemModel::data(const QModelIndex &index, int role) const
         if (item.source.isEmpty() && !item.id.isEmpty() && !item.pixmap.isNull()) {
             // Возвращаем динамический URL из ImageProvider, чтобы QML мог загрузить картинку без файла
             // Добавляем параметр версии, чтобы избежать кэширования старого изображения в QML
-            return QUrl(QString("image://imago/%1?v=%2").arg(item.id).arg(item.version));
+            QString urlStr = QString("image://imago/%1?v=%2").arg(item.id).arg(item.version);
+            if (item.cropWidth > 0 && item.cropHeight > 0) {
+                // Pass crop parameters to the provider since sourceClipRect isn't supported for custom providers
+                urlStr += QString("&cx=%1&cy=%2&cw=%3&ch=%4")
+                            .arg(item.cropX).arg(item.cropY)
+                            .arg(item.cropWidth).arg(item.cropHeight);
+            }
+            return QUrl(urlStr);
         }
         return item.source;
     case XRole: return item.x;
@@ -276,7 +283,11 @@ void ImageItemModel::updateCrop(int index, qreal x, qreal y, qreal width, qreal 
     m_items[index].cropHeight = height;
     
     QModelIndex modelIndex = createIndex(index, 0);
-    emit dataChanged(modelIndex, modelIndex, {CropXRole, CropYRole, CropWidthRole, CropHeightRole});
+    QList<int> roles = {CropXRole, CropYRole, CropWidthRole, CropHeightRole};
+    if (m_items[index].source.isEmpty()) {
+        roles.append(SourceRole); // Force QML to reload from ImageProvider with new crop parameters
+    }
+    emit dataChanged(modelIndex, modelIndex, roles);
 }
 
 void ImageItemModel::updateLabel(int index, const QString &label)

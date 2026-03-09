@@ -9,9 +9,15 @@ AddImageCommand::AddImageCommand(ImageItemModel *model, const QString &imageId,
     : QUndoCommand("Добавление изображения", parent)
     , m_model(model)
     , m_imageId(imageId)
-    , m_source(source)
-    , m_x(x), m_y(y), m_width(w), m_height(h)
 {
+    // Initialize data with basic information, we expect the controller to have already
+    // added it to the model. We can fetch it on the first redo.
+    m_data.id = imageId;
+    m_data.source = source;
+    m_data.x = x;
+    m_data.y = y;
+    m_data.width = w;
+    m_data.height = h;
 }
 
 void AddImageCommand::undo()
@@ -23,17 +29,16 @@ void AddImageCommand::redo()
 {
     if (m_firstRedo) {
         m_firstRedo = false;
+        // On first redo (creation), grab the full image data from the model so we have
+        // the QPixmap, crop settings, and label saved for future redo's.
+        int idx = m_model->indexById(m_imageId);
+        if (idx >= 0) {
+            m_data = m_model->getItem(idx);
+        }
         return; // Изображение уже добавлено при создании команды
     }
     
-    ImageData data;
-    data.id = m_imageId;
-    data.source = m_source;
-    data.x = m_x;
-    data.y = m_y;
-    data.width = m_width;
-    data.height = m_height;
-    m_model->addImage(data);
+    m_model->addImage(m_data);
 }
 
 // ============ RemoveImageCommand ============
@@ -49,16 +54,7 @@ RemoveImageCommand::RemoveImageCommand(ImageItemModel *model, const QList<int> &
     
     for (int idx : sortedIndices) {
         ImageData item = m_model->getItem(idx);
-        ImageSnapshot snap;
-        snap.id = item.id;
-        snap.source = item.source;
-        snap.x = item.x;
-        snap.y = item.y;
-        snap.width = item.width;
-        snap.height = item.height;
-        snap.rotation = item.rotation;
-        snap.zValue = item.zValue;
-        m_snapshots.append(snap);
+        m_snapshots.append(item);
     }
 }
 
@@ -66,23 +62,13 @@ void RemoveImageCommand::undo()
 {
     // Восстанавливаем в обратном порядке (чтобы индексы были правильными)
     for (int i = m_snapshots.count() - 1; i >= 0; --i) {
-        const ImageSnapshot &snap = m_snapshots[i];
-        ImageData data;
-        data.id = snap.id;
-        data.source = snap.source;
-        data.x = snap.x;
-        data.y = snap.y;
-        data.width = snap.width;
-        data.height = snap.height;
-        data.rotation = snap.rotation;
-        data.zValue = snap.zValue;
-        m_model->addImage(data);
+        m_model->addImage(m_snapshots[i]);
     }
 }
 
 void RemoveImageCommand::redo()
 {
-    for (const ImageSnapshot &snap : m_snapshots) {
+    for (const ImageData &snap : m_snapshots) {
         m_model->removeById(snap.id);
     }
 }
@@ -251,4 +237,30 @@ void ArrangeCommand::redo()
     for (int i = 0; i < m_indices.count(); ++i) {
         m_model->updatePosition(m_indices[i], m_newPositions[i].x(), m_newPositions[i].y());
     }
+}
+
+// ============ UpscaleImageCommand ============
+
+UpscaleImageCommand::UpscaleImageCommand(ImageItemModel *model, int index,
+                                         const QPixmap &oldPixmap, const QRectF &oldCrop,
+                                         const QPixmap &newPixmap, const QRectF &newCrop,
+                                         QUndoCommand *parent)
+    : QUndoCommand("Увеличение разрешения", parent)
+    , m_model(model)
+    , m_index(index)
+    , m_oldPixmap(oldPixmap), m_newPixmap(newPixmap)
+    , m_oldCrop(oldCrop), m_newCrop(newCrop)
+{
+}
+
+void UpscaleImageCommand::undo()
+{
+    m_model->updatePixmap(m_index, m_oldPixmap);
+    m_model->updateCrop(m_index, m_oldCrop.x(), m_oldCrop.y(), m_oldCrop.width(), m_oldCrop.height());
+}
+
+void UpscaleImageCommand::redo()
+{
+    m_model->updatePixmap(m_index, m_newPixmap);
+    m_model->updateCrop(m_index, m_newCrop.x(), m_newCrop.y(), m_newCrop.width(), m_newCrop.height());
 }

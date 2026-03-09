@@ -7,7 +7,7 @@
 #include <QString>
 #include <QUrl>
 
-class ImageItemModel;
+#include "ImageModel.h"
 
 /**
  * @brief AddImageCommand - команда добавления изображения на холст.
@@ -23,8 +23,7 @@ public:
 private:
     ImageItemModel *m_model;
     QString m_imageId;
-    QUrl m_source;
-    qreal m_x, m_y, m_width, m_height;
+    ImageData m_data; // Store full image data for redo
     bool m_firstRedo = true;
 };
 
@@ -33,12 +32,6 @@ private:
  */
 class RemoveImageCommand : public QUndoCommand {
 public:
-    struct ImageSnapshot {
-        QString id;
-        QUrl source;
-        qreal x, y, width, height, rotation, zValue;
-    };
-
     RemoveImageCommand(ImageItemModel *model, const QList<int> &indices,
                        QUndoCommand *parent = nullptr);
     void undo() override;
@@ -46,7 +39,7 @@ public:
 
 private:
     ImageItemModel *m_model;
-    QList<ImageSnapshot> m_snapshots;
+    QList<ImageData> m_snapshots; // Store full ImageData to preserve pixmap, crop, label etc.
 };
 
 /**
@@ -160,4 +153,23 @@ private:
     ImageItemModel *m_model;
     QVector<int> m_indices;
     QVector<QPointF> m_oldPositions, m_newPositions;
+};
+
+/**
+ * @brief UpscaleImageCommand - команда применения/отмены увеличения разрешения.
+ */
+class UpscaleImageCommand : public QUndoCommand {
+public:
+    UpscaleImageCommand(ImageItemModel *model, int index,
+                        const QPixmap &oldPixmap, const QRectF &oldCrop,
+                        const QPixmap &newPixmap, const QRectF &newCrop,
+                        QUndoCommand *parent = nullptr);
+    void undo() override;
+    void redo() override;
+
+private:
+    ImageItemModel *m_model;
+    int m_index;
+    QPixmap m_oldPixmap, m_newPixmap;
+    QRectF m_oldCrop, m_newCrop;
 };

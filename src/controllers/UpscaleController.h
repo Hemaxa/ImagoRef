@@ -5,6 +5,7 @@
 #include <QRunnable>
 #include <QImage>
 #include <QSet>
+#include <QUndoStack>
 
 class ImageItemModel;
 class ModelsManager;
@@ -33,7 +34,7 @@ class UpscaleController : public QObject {
     Q_OBJECT
 
 public:
-    explicit UpscaleController(ImageItemModel *model, ModelsManager *modelsManager, QObject *parent = nullptr);
+    explicit UpscaleController(ImageItemModel *model, ModelsManager *modelsManager, QUndoStack *undoStack, QObject *parent = nullptr);
 
     Q_INVOKABLE void upscaleImage(int index);
 
@@ -49,5 +50,6 @@ private slots:
 private:
     ImageItemModel *m_model;
     ModelsManager *m_modelsManager;
+    QUndoStack *m_undoStack;
     QSet<int> m_activeTasks;
 };

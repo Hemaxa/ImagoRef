@@ -114,9 +114,13 @@ void ToolController::cropImage(int index, qreal cropX, qreal cropY, qreal cropWi
     qreal sourceWidth = (item.cropWidth > 0) ? item.cropWidth : item.pixmap.width();
     qreal sourceHeight = (item.cropHeight > 0) ? item.cropHeight : item.pixmap.height();
     
+    // Scale from scene dimensions back to the current pixmap dimensions
     qreal scaleX = sourceWidth / item.width;
     qreal scaleY = sourceHeight / item.height;
     
+    // Calculate new crop relative to the current pixmap
+    
+    // Update crop inside the pixmap bounds. If it already had a crop, we add to it.
     qreal currentSourceX = (item.cropWidth > 0) ? item.cropX : 0;
     qreal currentSourceY = (item.cropHeight > 0) ? item.cropY : 0;
     

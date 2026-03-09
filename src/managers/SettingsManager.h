@@ -20,6 +20,7 @@ class SettingsManager : public QObject {
     Q_PROPERTY(int labelFontSize READ getLabelFontSize WRITE setLabelFontSize NOTIFY labelFontSizeChanged)
     Q_PROPERTY(int arrangeSpacing READ getArrangeSpacing WRITE setArrangeSpacing NOTIFY arrangeSpacingChanged)
     Q_PROPERTY(bool hasPromptedUpscale READ getHasPromptedUpscale WRITE setHasPromptedUpscale NOTIFY hasPromptedUpscaleChanged)
+    Q_PROPERTY(int toolbarColumns READ getToolbarColumns WRITE setToolbarColumns NOTIFY toolbarColumnsChanged)
 
 public:
     static SettingsManager* create(QQmlEngine *qmlEngine, QJSEngine *jsEngine);
@@ -46,6 +47,9 @@ public:
     bool getHasPromptedUpscale() const;
     void setHasPromptedUpscale(bool prompted);
 
+    int getToolbarColumns() const;
+    void setToolbarColumns(int columns);
+
 signals:
     void themeNameChanged();
     void gridSizeChanged();
@@ -53,6 +57,7 @@ signals:
     void labelFontSizeChanged();
     void arrangeSpacingChanged();
     void hasPromptedUpscaleChanged();
+    void toolbarColumnsChanged();
 
 private:
     explicit SettingsManager(QObject* parent = nullptr);
@@ -66,4 +71,5 @@ private:
     int m_labelFontSize;
     int m_arrangeSpacing;
     bool m_hasPromptedUpscale;
+    int m_toolbarColumns;
 };
