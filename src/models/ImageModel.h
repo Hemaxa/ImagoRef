@@ -38,21 +38,22 @@ class ImageItemModel : public QAbstractListModel {
     Q_PROPERTY(int count READ getCount NOTIFY countChanged)
 
 public:
+    //словарь переменных для C++ и QML
     enum Roles {
-        IdRole = Qt::UserRole + 1, // Уникальный ID (строка)
-        SourceRole,                // URL источника изображение
-        XRole,                     // Позиция X
-        YRole,                     // Позиция Y
-        WidthRole,                 // Ширина
-        HeightRole,                // Высота
-        RotationRole,              // Угол поворота (градусы)
-        ZValueRole,                // Z-index (слой)
-        SelectedRole,              // Статус выделения (bool)
-        LabelRole,                 // Подпись изображения (строка)
-        CropXRole,                 // Обрезка X (исходные координаты)
-        CropYRole,                 // Обрезка Y (исходные координаты)
-        CropWidthRole,             // Обрезка Width (исходные координаты)
-        CropHeightRole             // Обрезка Height (исходные координаты)
+        IdRole = Qt::UserRole + 1,
+        SourceRole,
+        XRole,
+        YRole,
+        WidthRole,
+        HeightRole,
+        RotationRole,
+        ZValueRole,
+        SelectedRole,
+        LabelRole,
+        CropXRole,
+        CropYRole,
+        CropWidthRole,
+        CropHeightRole
     };
 
     explicit ImageItemModel(QObject *parent = nullptr);
@@ -61,7 +62,7 @@ public:
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role) const override;
     bool setData(const QModelIndex &index, const QVariant &value, int role) override;
-    QHash<int, QByteArray> roleNames() const override;
+    QHash<int, QByteArray> roleNames() const override; //связь QML и C++
     Qt::ItemFlags flags(const QModelIndex &index) const override;
 
     // Публичные методы для управления

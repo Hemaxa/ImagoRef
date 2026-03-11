@@ -76,6 +76,11 @@ public:
     Q_INVOKABLE void beginResize(int index);
     Q_INVOKABLE void endResize(int index, qreal newX, qreal newY, qreal newWidth, qreal newHeight);
 
+    // Отслеживание перемещения нескольких элементов (выделения)
+    Q_INVOKABLE void beginMoveSelection();
+    Q_INVOKABLE void updateMoveSelection(qreal deltaX, qreal deltaY);
+    Q_INVOKABLE void endMoveSelection();
+
 signals:
     //сигналы, которые оповещают QML об изменениях (связаны с макросами NOTIFY в Q_PROPERTY)
     void undoStateChanged();
@@ -106,4 +111,8 @@ private:
     QPointF m_moveStartPos;
     QRectF m_resizeStartRect;
     QPointF m_resizeStartPos;
+
+    // Переменные для хранения начального состояния группы элементов при перетаскивании выделения
+    QVector<int> m_moveSelectionIndices;
+    QVector<QPointF> m_moveSelectionStartPos;
 };

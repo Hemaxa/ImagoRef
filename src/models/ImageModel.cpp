@@ -2,37 +2,28 @@
 #include <QUuid>
 #include <QDateTime>
 
-ImageItemModel::ImageItemModel(QObject *parent)
-    : QAbstractListModel(parent)
-{
-}
+ImageItemModel::ImageItemModel(QObject *parent) : QAbstractListModel(parent) {}
 
-int ImageItemModel::rowCount(const QModelIndex &parent) const
-{
-    if (parent.isValid())
-        return 0;
-    return m_items.count();
-}
-
+//метод получения свойтсва объекта
 QVariant ImageItemModel::data(const QModelIndex &index, int role) const
 {
+    //проверка существования индекса в массиве
     if (!index.isValid() || index.row() >= m_items.count())
         return QVariant();
 
+    //получаем нужную картинку
     const ImageData &item = m_items.at(index.row());
 
     switch (role) {
     case IdRole: return item.id;
-    case SourceRole:
-        if (item.source.isEmpty() && !item.id.isEmpty() && !item.pixmap.isNull()) {
-            // Возвращаем динамический URL из ImageProvider, чтобы QML мог загрузить картинку без файла
-            // Добавляем параметр версии, чтобы избежать кэширования старого изображения в QML
+    case SourceRole: //источник картинки
+        if (item.source.isEmpty() && !item.id.isEmpty() && !item.pixmap.isNull()) { //если картинка получена не по пути на диске (без файла)
+            //возвращаем динамический URL из ImageProvider
+            //добавляем параметр версии, чтобы избежать кэширования старого изображения в QML
             QString urlStr = QString("image://imago/%1?v=%2").arg(item.id).arg(item.version);
             if (item.cropWidth > 0 && item.cropHeight > 0) {
-                // Pass crop parameters to the provider since sourceClipRect isn't supported for custom providers
-                urlStr += QString("&cx=%1&cy=%2&cw=%3&ch=%4")
-                            .arg(item.cropX).arg(item.cropY)
-                            .arg(item.cropWidth).arg(item.cropHeight);
+                //пробрасываем параметры обрезки картинки в ImagoImageProvider
+                urlStr += QString("&cx=%1&cy=%2&cw=%3&ch=%4").arg(item.cropX).arg(item.cropY).arg(item.cropWidth).arg(item.cropHeight);
             }
             return QUrl(urlStr);
         }
@@ -53,8 +44,10 @@ QVariant ImageItemModel::data(const QModelIndex &index, int role) const
     }
 }
 
+//метод установки свойтсва объекта
 bool ImageItemModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
+    //проверка существования индекса в массиве
     if (!index.isValid() || index.row() >= m_items.count())
         return false;
 
@@ -102,6 +95,7 @@ bool ImageItemModel::setData(const QModelIndex &index, const QVariant &value, in
         return false;
     }
 
+    //сигнал о том, что данные изменились
     if (changed) {
         emit dataChanged(index, index, {role});
     }
@@ -110,6 +104,7 @@ bool ImageItemModel::setData(const QModelIndex &index, const QVariant &value, in
 
 QHash<int, QByteArray> ImageItemModel::roleNames() const
 {
+    //связывание констант C++ со строковыми именами
     return {
         {IdRole, "itemId"},
         {SourceRole, "source"},
@@ -128,6 +123,7 @@ QHash<int, QByteArray> ImageItemModel::roleNames() const
     };
 }
 
+//метод разрешения на редактирование
 Qt::ItemFlags ImageItemModel::flags(const QModelIndex &index) const
 {
     if (!index.isValid())
@@ -135,8 +131,16 @@ Qt::ItemFlags ImageItemModel::flags(const QModelIndex &index) const
     return Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 }
 
+//количество объектов
 int ImageItemModel::getCount() const
 {
+    return m_items.count();
+}
+
+int ImageItemModel::rowCount(const QModelIndex &parent) const
+{
+    if (parent.isValid())
+        return 0;
     return m_items.count();
 }
 
@@ -285,7 +289,7 @@ void ImageItemModel::updateCrop(int index, qreal x, qreal y, qreal width, qreal 
     QModelIndex modelIndex = createIndex(index, 0);
     QList<int> roles = {CropXRole, CropYRole, CropWidthRole, CropHeightRole};
     if (m_items[index].source.isEmpty()) {
-        roles.append(SourceRole); // Force QML to reload from ImageProvider with new crop parameters
+        roles.append(SourceRole);
     }
     emit dataChanged(modelIndex, modelIndex, roles);
 }

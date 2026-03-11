@@ -181,13 +181,13 @@ Item {
             Canvas {
                 id: patternCanvas
                 visible: false
-                width: Math.max(SettingsManager.gridSize, 5)
-                height: Math.max(SettingsManager.gridSize, 5)
+                width: gSize
+                height: gSize
 
                 property bool ready: false
                 property color dotColor: ThemeManager.gridColor
                 property string pattern: root.canvasPattern
-                property int gSize: width
+                property int gSize: Math.max(SettingsManager.gridSize, 5)
 
                 onPaint: {
                     var ctx = getContext("2d")
@@ -222,7 +222,7 @@ Item {
                 //перерисовка тайла при изменении параметров
                 onDotColorChanged: { ready = false; requestPaint() }
                 onPatternChanged: { ready = false; requestPaint() }
-                onGSizeChanged: { width = Math.max(gSize, 5); height = Math.max(gSize, 5); ready = false; requestPaint() }
+                onGSizeChanged: { ready = false; requestPaint() }
                 Component.onCompleted: requestPaint()
             }
 
@@ -308,10 +308,7 @@ Item {
         property bool isPanning: false
         property bool isSelecting: false
         property bool isDragging: false //перетаскивание выделенного изображения
-        property int dragIndex: -1 //индекс перетаскиваемого элемента
         property point dragStartScene //начальная позиция мыши в сцене при начале drag
-        property real dragItemStartX: 0 //начальная X позиция элемента при начале drag
-        property real dragItemStartY: 0 //начальная Y позиция элемента при начале drag
 
         onPressed: function(mouse) {
             if (mouse.button === Qt.MiddleButton) {
@@ -351,11 +348,8 @@ Item {
                 //drag только если инструменты не активны
                 if (!resizeMode && !cropMode) {
                     isDragging = true
-                    dragIndex = hitIdx
                     dragStartScene = scenePos
-                    dragItemStartX = controller.selectionController.getItemX(hitIdx)
-                    dragItemStartY = controller.selectionController.getItemY(hitIdx)
-                    controller.beginMove(hitIdx)
+                    controller.beginMoveSelection()
                     cursorShape = Qt.ClosedHandCursor
                 }
             }
@@ -388,23 +382,13 @@ Item {
                 flickable.contentY -= dy
                 lastPos = Qt.point(mouse.x, mouse.y)
             }
-            else if (isDragging && dragIndex >= 0) {
-                //перемещение элемента — дельта от начальной точки мыши
+            else if (isDragging) {
+                //перемещение элементов — дельта от начальной точки мыши
                 var currentScene = mapToScene(Qt.point(mouse.x, mouse.y))
                 var deltaX = currentScene.x - dragStartScene.x
                 var deltaY = currentScene.y - dragStartScene.y
-                var newX = dragItemStartX + deltaX
-                var newY = dragItemStartY + deltaY
-
-                //clamping к границам рабочей области
-                var itemW = controller.selectionController.getItemWidth(dragIndex)
-                var itemH = controller.selectionController.getItemHeight(dragIndex)
-                if (itemW <= 0) itemW = 100
-                if (itemH <= 0) itemH = 100
-                newX = Math.max(0, Math.min(sceneSize - itemW, newX))
-                newY = Math.max(0, Math.min(sceneSize - itemH, newY))
-
-                controller.model.updatePosition(dragIndex, newX, newY)
+                
+                controller.updateMoveSelection(deltaX, deltaY)
                 cursorShape = Qt.ClosedHandCursor
             }
             else if (isSelecting) {
@@ -430,13 +414,8 @@ Item {
                 isDragging = false
                 cursorShape = Qt.ArrowCursor
 
-                // Создаём undo-команду если позиция изменилась
-                if (dragIndex >= 0) {
-                    var finalX = controller.selectionController.getItemX(dragIndex)
-                    var finalY = controller.selectionController.getItemY(dragIndex)
-                    controller.endMove(dragIndex, finalX, finalY)
-                }
-                dragIndex = -1
+                // Создаём undo-команду для выделения (сравнивает старые и новые координаты внутри C++)
+                controller.endMoveSelection()
             }
             else if (isSelecting) {
                 isSelecting = false

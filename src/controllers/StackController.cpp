@@ -109,6 +109,46 @@ bool MoveImageCommand::mergeWith(const QUndoCommand *other)
     return true;
 }
 
+// ============ MoveImagesCommand ============
+
+MoveImagesCommand::MoveImagesCommand(ImageItemModel *model, const QVector<int>& indices,
+                                     const QVector<QPointF> &oldPos, const QVector<QPointF> &newPos,
+                                     QUndoCommand *parent)
+    : QUndoCommand("Перемещение элементов", parent)
+    , m_model(model)
+    , m_indices(indices)
+    , m_oldPos(oldPos)
+    , m_newPos(newPos)
+{
+}
+
+void MoveImagesCommand::undo()
+{
+    for (int i = 0; i < m_indices.size(); ++i) {
+        m_model->updatePosition(m_indices[i], m_oldPos[i].x(), m_oldPos[i].y());
+    }
+}
+
+void MoveImagesCommand::redo()
+{
+    for (int i = 0; i < m_indices.size(); ++i) {
+        m_model->updatePosition(m_indices[i], m_newPos[i].x(), m_newPos[i].y());
+    }
+}
+
+bool MoveImagesCommand::mergeWith(const QUndoCommand *other)
+{
+    if (other->id() != id())
+        return false;
+
+    const MoveImagesCommand *cmd = static_cast<const MoveImagesCommand*>(other);
+    if (cmd->m_indices != m_indices) // Must be exactly the same subset of indices
+        return false;
+
+    m_newPos = cmd->m_newPos;
+    return true;
+}
+
 // ============ ResizeImageCommand ============
 
 ResizeImageCommand::ResizeImageCommand(ImageItemModel *model, int index,

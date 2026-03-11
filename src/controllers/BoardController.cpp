@@ -158,3 +158,69 @@ void BoardController::endResize(int index, qreal newX, qreal newY, qreal newWidt
         ));
     }
 }
+
+// Отслеживание перемещения выделения
+void BoardController::beginMoveSelection()
+{
+    m_moveSelectionIndices.clear();
+    m_moveSelectionStartPos.clear();
+
+    QVariantList selected = m_model->getSelectedIndices();
+    for (const QVariant& v : selected) {
+        int index = v.toInt();
+        ImageData item = m_model->getItem(index);
+        m_moveSelectionIndices.append(index);
+        m_moveSelectionStartPos.append(QPointF(item.x, item.y));
+    }
+}
+
+void BoardController::updateMoveSelection(qreal deltaX, qreal deltaY)
+{
+    for (int i = 0; i < m_moveSelectionIndices.size(); ++i) {
+        int index = m_moveSelectionIndices[i];
+        QPointF startPos = m_moveSelectionStartPos[i];
+        
+        qreal newX = startPos.x() + deltaX;
+        qreal newY = startPos.y() + deltaY;
+        
+        // Clamping к границам рабочей области (30000x30000 - как в CanvasView)
+        ImageData item = m_model->getItem(index);
+        qreal itemW = item.width > 0 ? item.width : 100;
+        qreal itemH = item.height > 0 ? item.height : 100;
+        
+        newX = qMax(0.0, qMin(30000.0 - itemW, newX));
+        newY = qMax(0.0, qMin(30000.0 - itemH, newY));
+        
+        m_model->updatePosition(index, newX, newY);
+    }
+}
+
+void BoardController::endMoveSelection()
+{
+    if (m_moveSelectionIndices.isEmpty())
+        return;
+        
+    QVector<QPointF> newPositions;
+    bool hasChanges = false;
+    
+    for (int i = 0; i < m_moveSelectionIndices.size(); ++i) {
+        int index = m_moveSelectionIndices[i];
+        ImageData item = m_model->getItem(index);
+        QPointF newPos(item.x, item.y);
+        newPositions.append(newPos);
+        
+        if (newPos != m_moveSelectionStartPos[i]) {
+            hasChanges = true;
+        }
+    }
+    
+    if (hasChanges) {
+        m_undoStack->push(new MoveImagesCommand(
+            m_model, m_moveSelectionIndices,
+            m_moveSelectionStartPos, newPositions
+        ));
+    }
+    
+    m_moveSelectionIndices.clear();
+    m_moveSelectionStartPos.clear();
+}

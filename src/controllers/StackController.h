@@ -63,6 +63,26 @@ private:
 };
 
 /**
+ * @brief MoveImagesCommand - команда перемещения нескольких изображений одновременно.
+ */
+class MoveImagesCommand : public QUndoCommand {
+public:
+    MoveImagesCommand(ImageItemModel *model, const QVector<int>& indices,
+                      const QVector<QPointF> &oldPos, const QVector<QPointF> &newPos,
+                      QUndoCommand *parent = nullptr);
+    void undo() override;
+    void redo() override;
+    int id() const override { return 1002; }
+    bool mergeWith(const QUndoCommand *other) override;
+
+private:
+    ImageItemModel *m_model;
+    QVector<int> m_indices;
+    QVector<QPointF> m_oldPos;
+    QVector<QPointF> m_newPos;
+};
+
+/**
  * @brief ResizeImageCommand - команда изменения размера изображения.
  */
 class ResizeImageCommand : public QUndoCommand {
