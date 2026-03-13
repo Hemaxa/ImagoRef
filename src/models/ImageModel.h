@@ -5,13 +5,16 @@
 #include <QAbstractListModel> //умные списки в Qt, через которые QML автоматически перерисует элемент при изменении свойств
 #include <QPixmap> //изображения в Qt
 #include <QUrl> //класс для работы с путями
-#include <QtQml/qqml.h>
+#include <QtQml/qqml.h> //работа с QML
 
-//ImageData - структура данных для хранения информации об одном изображении
-struct ImageData {
+//ImagoImageData - структура данных для хранения информации об одном изображении
+struct ImagoImageData {
+    //данные изображения
     QString id; //уникальный идентификатор изображения
     QUrl source; //путь к изображению
     QPixmap pixmap; //оригинальное изображение (QPixmap)
+    
+    //параметры изображения
     qreal x = 0; //координата x изображения
     qreal y = 0; //координата y изображения
     qreal width = 0; //ширина изображения
@@ -22,15 +25,15 @@ struct ImageData {
     QString label; //подпись изображения
     
     //параметры обрезки (в координатах исходного изображения)
-    qreal cropX = 0;
-    qreal cropY = 0;
-    qreal cropWidth = 0;  // 0 означает "нет обрезки" (полная ширина)
-    qreal cropHeight = 0; // 0 означает "нет обрезки" (полная высота)
+    qreal cropX = 0; //координата x обрезанной части
+    qreal cropY = 0; //координата у обрезанной части
+    qreal cropWidth = 0; //ширина обрезки
+    qreal cropHeight = 0; //высота обрезки
     
     qint64 version = 0; //версия изображения для обновления кэша QML
 };
 
-class ImageItemModel : public QAbstractListModel {
+class ImagoImageModel : public QAbstractListModel {
     Q_OBJECT
     QML_ELEMENT //позволяет создавать класс из QML
 
@@ -56,50 +59,47 @@ public:
         CropHeightRole
     };
 
-    explicit ImageItemModel(QObject *parent = nullptr);
+    //конструктор
+    explicit ImagoImageModel(QObject *parent = nullptr);
 
-    // QAbstractListModel interface
-    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-    QVariant data(const QModelIndex &index, int role) const override;
-    bool setData(const QModelIndex &index, const QVariant &value, int role) override;
+    //переопределнные методы для QAbstractListModel
+    int rowCount(const QModelIndex &parent = QModelIndex()) const override; //количество объектов
+    QVariant data(const QModelIndex &index, int role) const override; //получение свойств
+    bool setData(const QModelIndex &index, const QVariant &value, int role) override; //установка свойств
     QHash<int, QByteArray> roleNames() const override; //связь QML и C++
-    Qt::ItemFlags flags(const QModelIndex &index) const override;
+    Qt::ItemFlags flags(const QModelIndex &index) const override; //разрешения на редактирования объекта
 
-    // Публичные методы для управления
+    //методы для управления
     int getCount() const;
-    void addImage(const ImageData &data);
+    void addImage(const ImagoImageData &data);
     void removeImage(int index);
-    void removeById(const QString &id);
+    void removeImageById(const QString &id);
     void clear();
-    Q_INVOKABLE ImageData getItem(int index) const;
-    int indexById(const QString &id) const;
+    Q_INVOKABLE ImagoImageData getItem(int index) const;
+    int getIndexById(const QString &id) const;
     
-    // Для сериализации
-    QVector<ImageData> allItems() const;
-    void setItems(const QVector<ImageData> &items);
+    //работа со всеми объектами сразу (FileController)
+    QVector<ImagoImageData> getAllItems() const;
+    void setAllItems(const QVector<ImagoImageData> &items);
 
-    // Методы для доступа из QML
-    Q_INVOKABLE void updatePosition(int index, qreal x, qreal y);
-    Q_INVOKABLE void updateSize(int index, qreal width, qreal height);
-    Q_INVOKABLE void updateRotation(int index, qreal rotation);
+    //методы для доступа из QML
+    Q_INVOKABLE void setPosition(int index, qreal x, qreal y);
+    Q_INVOKABLE void setSize(int index, qreal width, qreal height);
+    Q_INVOKABLE void setRotation(int index, qreal rotation);
+    Q_INVOKABLE void setCrop(int index, qreal x, qreal y, qreal width, qreal height);
+    Q_INVOKABLE void setLabel(int index, const QString &label);
     Q_INVOKABLE void setSelected(int index, bool selected);
     Q_INVOKABLE void clearSelection();
     Q_INVOKABLE QVariantList getSelectedIndices() const;
-    
-    // Обновление обрезки (non-destructive)
-    Q_INVOKABLE void updateCrop(int index, qreal x, qreal y, qreal width, qreal height);
-    
-    // Обновление подписи
-    Q_INVOKABLE void updateLabel(int index, const QString &label);
-    
-    // Обновление пиксмапа (для обрезки)
-    void updatePixmap(int index, const QPixmap &pixmap);
+
+    void setPixmap(int index, const QPixmap &pixmap);
 
 signals:
+    //изменение количества объектов
     void countChanged();
 
 private:
-    QVector<ImageData> m_items;
+    QVector<ImagoImageData> m_items; //вектор всех объектов программы 
     
-    QString generateId();
+    QString generateId(); //генерация уникального ID объекта
 };

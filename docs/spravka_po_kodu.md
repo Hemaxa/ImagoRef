@@ -20,7 +20,7 @@
 ```mermaid
 graph TD
     A[QML - View] --> B[BoardController - ViewModel]
-    B --> C[ImageItemModel - Model]
+    B --> C[ImagoImageModel - Model]
     B --> D[QUndoStack]
     E[SettingsManager] --> A
     F[ThemeManager] --> A
@@ -28,7 +28,7 @@ graph TD
 
 - **View**: QML файлы отвечают за UI (Main.qml, MainWindow.qml, компоненты)
 - **ViewModel**: `BoardController` связывает QML с данными, управляет логикой
-- **Model**: `ImageItemModel` хранит список изображений и их свойства
+- **Model**: `ImagoImageModel` хранит список изображений и их свойства
 
 ---
 
@@ -40,7 +40,7 @@ ImagoRef/
 │   ├── main.cpp              # Точка входа приложения
 │   ├── backend/              # C++ бэкенд (логика и данные)
 │   │   ├── BoardController.h/.cpp
-│   │   ├── ImageItemModel.h/.cpp
+│   │   ├── ImagoImageModel.h/.cpp
 │   │   ├── SettingsManager.h/.cpp
 │   │   ├── ThemeManager.h/.cpp
 │   │   └── UndoCommands.h/.cpp
@@ -86,7 +86,7 @@ int main(int argc, char *argv[])
 | Класс | Макрос | Доступ в QML |
 |-------|--------|--------------|
 | `BoardController` | `QML_ELEMENT` | Создается в `Main.qml` |
-| `ImageItemModel` | `QML_ELEMENT` | Через `controller.model` |
+| `ImagoImageModel` | `QML_ELEMENT` | Через `controller.model` |
 | `SettingsManager` | `QML_SINGLETON` | Через контекст `Settings` |
 | `ThemeManager` | `QML_SINGLETON` | Через контекст `Theme` |
 
@@ -104,7 +104,7 @@ int main(int argc, char *argv[])
 
 | Свойство | Тип | Описание |
 |----------|-----|----------|
-| `model` | `ImageItemModel*` | Модель изображений (read-only) |
+| `model` | `ImagoImageModel*` | Модель изображений (read-only) |
 | `currentFilePath` | `QString` | Путь к текущему файлу доски |
 | `windowTitle` | `QString` | Заголовок окна (зависит от имени файла) |
 | `canUndo` | `bool` | Можно ли отменить действие |
@@ -172,16 +172,16 @@ int main(int argc, char *argv[])
 
 ---
 
-### ImageItemModel
+### ImagoImageModel
 
-**Файлы**: `ImageItemModel.h`, `ImageItemModel.cpp`
+**Файлы**: `ImagoImageModel.h`, `ImagoImageModel.cpp`
 
 **Роль**: Модель данных (`QAbstractListModel`), хранящая список изображений на холсте. Используется `Repeater` в QML для отображения изображений.
 
-#### Структура ImageData
+#### Структура ImagoImageData
 
 ```cpp
-struct ImageData {
+struct ImagoImageData {
     QString id;       // Уникальный идентификатор
     QUrl source;      // Путь к изображению
     QPixmap pixmap;   // Оригинальный пиксмап
@@ -211,9 +211,9 @@ struct ImageData {
 
 | Метод | Описание |
 |-------|----------|
-| `updatePosition(int index, qreal x, qreal y)` | Обновляет позицию элемента |
-| `updateSize(int index, qreal w, qreal h)` | Обновляет размер элемента |
-| `updateRotation(int index, qreal rotation)` | Обновляет угол поворота |
+| `setPosition(int index, qreal x, qreal y)` | Обновляет позицию элемента |
+| `setSize(int index, qreal w, qreal h)` | Обновляет размер элемента |
+| `setRotation(int index, qreal rotation)` | Обновляет угол поворота |
 | `setSelected(int index, bool selected)` | Устанавливает статус выделения |
 | `clearSelection()` | Сбрасывает выделение всех элементов |
 | `selectedIndices()` | Возвращает список индексов выделенных элементов |
@@ -524,7 +524,7 @@ sequenceDiagram
     participant CanvasView.DropArea
     participant BoardController
     participant AddImageCommand
-    participant ImageItemModel
+    participant ImagoImageModel
     participant QML Repeater
 
     User->>CanvasView.DropArea: Перетаскивает файл
@@ -532,8 +532,8 @@ sequenceDiagram
     BoardController->>BoardController: Загружает QPixmap
     BoardController->>AddImageCommand: new AddImageCommand(...)
     BoardController->>QUndoStack: push(command)
-    AddImageCommand->>ImageItemModel: addImage(ImageData)
-    ImageItemModel->>QML Repeater: Сигнал rowsInserted
+    AddImageCommand->>ImagoImageModel: addImage(ImagoImageData)
+    ImagoImageModel->>QML Repeater: Сигнал rowsInserted
     QML Repeater-->>User: Отображает новый ImageItem
 ```
 
@@ -544,12 +544,12 @@ sequenceDiagram
     participant User
     participant MainWindow
     participant BoardController
-    participant ImageItemModel
+    participant ImagoImageModel
 
     User->>MainWindow: Ctrl+S
     MainWindow->>BoardController: saveBoard()
-    BoardController->>ImageItemModel: allItems()
-    loop Для каждого ImageData
+    BoardController->>ImagoImageModel: getAllItems()
+    loop Для каждого ImagoImageData
         BoardController->>BoardController: Конвертирует pixmap в Base64
     end
     BoardController->>BoardController: Формирует JSON объект
@@ -573,7 +573,7 @@ sequenceDiagram
     ImageItem.MouseArea->>BoardController: endMove(index, newX, newY)
     BoardController->>MoveImageCommand: new MoveImageCommand(...)
     BoardController->>QUndoStack: push(command)
-    ImageItem.MouseArea->>ImageItemModel: updatePosition(index, x, y)
+    ImageItem.MouseArea->>ImagoImageModel: setPosition(index, x, y)
 ```
 
 ---

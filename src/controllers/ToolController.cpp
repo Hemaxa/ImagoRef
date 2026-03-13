@@ -5,7 +5,7 @@
 
 #include <cmath>
 
-ToolController::ToolController(ImageItemModel *model, QUndoStack *undoStack, QObject *parent)
+ToolController::ToolController(ImagoImageModel *model, QUndoStack *undoStack, QObject *parent)
     : QObject(parent)
     , m_model(model)
     , m_undoStack(undoStack)
@@ -50,7 +50,7 @@ void ToolController::snapToGrid()
 
     for (const QVariant &v : indices) {
         int i = v.toInt();
-        ImageData data = m_model->getItem(i);
+        ImagoImageData data = m_model->getItem(i);
         
         qreal oldX = data.x;
         qreal oldY = data.y;
@@ -108,7 +108,7 @@ void ToolController::cropImage(int index, qreal cropX, qreal cropY, qreal cropWi
 {
     if (index < 0 || index >= m_model->getCount()) return;
     
-    ImageData item = m_model->getItem(index);
+    ImagoImageData item = m_model->getItem(index);
     if (item.pixmap.isNull()) return;
     
     qreal sourceWidth = (item.cropWidth > 0) ? item.cropWidth : item.pixmap.width();
@@ -166,7 +166,7 @@ void ToolController::setLabelForSelected(const QString &label)
 
     for (const QVariant &v : indices) {
         int idx = v.toInt();
-        ImageData item = m_model->getItem(idx);
+        ImagoImageData item = m_model->getItem(idx);
         if (item.label != label) {
             m_undoStack->push(new SetLabelCommand(m_model, idx, item.label, label));
         }
@@ -195,7 +195,7 @@ void ToolController::arrangeAll(qreal centerX, qreal centerY)
     qreal totalArea = 0;
     
     for (int i = 0; i < count; ++i) {
-        ImageData data = m_model->getItem(i);
+        ImagoImageData data = m_model->getItem(i);
         
         qreal rad = std::fabs(data.rotation) * M_PI / 180.0;
         qreal cosA = std::fabs(std::cos(rad));
@@ -250,7 +250,7 @@ void ToolController::arrangeAll(qreal centerX, qreal centerY)
         qreal newX = currentX + item.bbWidth / 2.0 - item.itemWidth / 2.0;
         qreal newY = currentY + item.bbHeight / 2.0 - item.itemHeight / 2.0;
 
-        ImageData data = m_model->getItem(item.index);
+        ImagoImageData data = m_model->getItem(item.index);
         sortedIndices.append(item.index);
         oldPositions.append(QPointF(data.x, data.y));
         newPositions.append(QPointF(newX, newY));

@@ -16,14 +16,14 @@ ImagoImageProvider* ImagoImageProvider::instance()
     return s_instance;
 }
 
-void ImagoImageProvider::registerModel(ImageItemModel *model)
+void ImagoImageProvider::registerModel(ImagoImageModel *model)
 {
     if (model && !m_models.contains(model)) {
         m_models.append(model);
     }
 }
 
-void ImagoImageProvider::unregisterModel(ImageItemModel *model)
+void ImagoImageProvider::unregisterModel(ImagoImageModel *model)
 {
     m_models.removeAll(model);
 }
@@ -36,10 +36,10 @@ QPixmap ImagoImageProvider::requestPixmap(const QString &id, QSize *size, const 
     QString imageId = id.section('?', 0, 0);
     QUrlQuery query(id.section('?', 1));
 
-    for (ImageItemModel *model : std::as_const(m_models)) {
-        int index = model->indexById(imageId);
+    for (ImagoImageModel *model : std::as_const(m_models)) {
+        int index = model->getIndexById(imageId);
         if (index >= 0) {
-            ImageData item = model->getItem(index);
+            ImagoImageData item = model->getItem(index);
             QPixmap pixmap = item.pixmap;
             
             if (!pixmap.isNull()) {

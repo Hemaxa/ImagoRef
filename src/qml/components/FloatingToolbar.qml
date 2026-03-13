@@ -24,23 +24,19 @@ Rectangle {
     property bool resizeModeActive: false
     property bool cropModeActive: false
     
-    // Width and layout dependencies based on columns
+    // Оставляем только нужные свойства
     property int columns: SettingsManager.toolbarColumns
-    property int itemSize: 50
     property int itemSpacing: 3
-    property int paddingVal: 3
-    
-    // Explicitly size the background larger than the grid structure
-    width: (columns * itemSize) + ((columns - 1) * itemSpacing) + (paddingVal * 2) 
+    property int paddingVal: 5
+
+    // БИНГО! Привязываем размер фона к реальному размеру сетки (implicitWidth/Height)
+    width: toolbarLayout.implicitWidth + (paddingVal * 2)
     height: toolbarLayout.implicitHeight + (paddingVal * 2)
-    
-    color: ThemeManager.panelColor
+
+    color: Qt.rgba(ThemeManager.panelColor.r, ThemeManager.panelColor.g, ThemeManager.panelColor.b, 1.0)
     border.color: ThemeManager.borderColor
-    border.width: 3
+    border.width: 1
     radius: 3
-    
-    // Remove 'clip: true' if it was eating the 3px border
-    // Let's rely on properly sized layout instead
     
     // Drag handle for resizing horizontally
     MouseArea {
@@ -48,7 +44,7 @@ Rectangle {
         anchors.right: parent.right
         anchors.top: parent.top
         anchors.bottom: parent.bottom
-        width: 10
+        width: 15
         cursorShape: Qt.SizeHorCursor
         
         property int startX: 0

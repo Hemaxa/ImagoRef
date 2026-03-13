@@ -5,7 +5,7 @@
 #include <QObject>
 #include <QtQml/qqml.h>
 
-class ImageItemModel; //предварительное объявление класса
+class ImagoImageModel; //предварительное объявление класса
 
 class SelectionController : public QObject {
     Q_OBJECT
@@ -16,7 +16,7 @@ class SelectionController : public QObject {
     Q_PROPERTY(bool hasSelection READ getHasSelection NOTIFY selectionChanged)
 
 public:
-    explicit SelectionController(ImageItemModel *model, QObject *parent = nullptr);
+    explicit SelectionController(ImagoImageModel *model, QObject *parent = nullptr);
 
     //метод, который проверяет, есть ли хоть одна выделенная картинка
     bool getHasSelection() const;
@@ -45,5 +45,5 @@ signals:
 
 private:
     //внутренние переменные класса
-    ImageItemModel *m_model;
+    ImagoImageModel *m_model;
 };

@@ -102,7 +102,7 @@ void UpscaleWorker::run() {
     }
 }
 
-UpscaleController::UpscaleController(ImageItemModel *model, ModelsManager *modelsManager, QUndoStack *undoStack, QObject *parent)
+UpscaleController::UpscaleController(ImagoImageModel *model, ModelsManager *modelsManager, QUndoStack *undoStack, QObject *parent)
     : QObject(parent), m_model(model), m_modelsManager(modelsManager), m_undoStack(undoStack) {
 }
 
@@ -115,7 +115,7 @@ void UpscaleController::upscaleImage(int index) {
         return;
     }
 
-    ImageData data = m_model->getItem(index);
+    ImagoImageData data = m_model->getItem(index);
     if (data.pixmap.isNull()) {
         emit upscaleFailed(index, "Empty image");
         return;
@@ -141,7 +141,7 @@ void UpscaleController::upscaleImage(int index) {
 void UpscaleController::onUpscaleFinished(int index, QImage result) {
     m_activeTasks.remove(index);
     if (index >= 0 && index < m_model->getCount()) {
-        ImageData data = m_model->getItem(index);
+        ImagoImageData data = m_model->getItem(index);
         
         QPixmap oldPixmap = data.pixmap;
         QRectF oldCrop(data.cropX, data.cropY, data.cropWidth, data.cropHeight);
@@ -157,9 +157,9 @@ void UpscaleController::onUpscaleFinished(int index, QImage result) {
             ));
         } else {
             // Fallback (just in case)
-            m_model->updatePixmap(index, newPixmap);
+            m_model->setPixmap(index, newPixmap);
             if (data.cropWidth > 0 && data.cropHeight > 0) {
-                m_model->updateCrop(index, 0, 0, 0, 0);
+                m_model->setCrop(index, 0, 0, 0, 0);
             }
         }
     }

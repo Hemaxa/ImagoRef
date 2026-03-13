@@ -5,7 +5,7 @@
 #include <QTransform>
 #include <QPolygonF>
 
-SelectionController::SelectionController(ImageItemModel *model, QObject *parent) : QObject(parent), m_model(model) {}
+SelectionController::SelectionController(ImagoImageModel *model, QObject *parent) : QObject(parent), m_model(model) {}
 
 bool SelectionController::getHasSelection() const
 {
@@ -30,7 +30,7 @@ void SelectionController::deselectItem(int index)
 
 void SelectionController::toggleSelection(int index)
 {
-    ImageData item = m_model->getItem(index);
+    ImagoImageData item = m_model->getItem(index);
     m_model->setSelected(index, !item.selected);
     emit selectionChanged();
 }
@@ -63,7 +63,7 @@ void SelectionController::selectInRect(qreal x, qreal y, qreal width, qreal heig
     
     //проходим по всем картинкам и проверяем, пересекается ли их прямоугольник с прямоугольником рамки
     for (int i = 0; i < m_model->getCount(); ++i) {
-        ImageData item = m_model->getItem(i);
+        ImagoImageData item = m_model->getItem(i);
         QRectF itemRect(item.x, item.y, item.width, item.height);
         
         QTransform transform;
@@ -84,7 +84,7 @@ void SelectionController::selectInRect(qreal x, qreal y, qreal width, qreal heig
 int SelectionController::hitTest(qreal x, qreal y) const
 {
     for (int i = m_model->getCount() - 1; i >= 0; --i) {
-        ImageData item = m_model->getItem(i);
+        ImagoImageData item = m_model->getItem(i);
         QRectF rect(item.x, item.y, item.width, item.height);
         
         QTransform transform;
@@ -100,6 +100,7 @@ int SelectionController::hitTest(qreal x, qreal y) const
     return -1;
 }
 
+//геттеры минимально необходимых свойств модели
 qreal SelectionController::getItemX(int index) const
 {
     if (index >= 0 && index < m_model->getCount())

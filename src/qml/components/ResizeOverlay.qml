@@ -178,8 +178,8 @@ Item {
                     var newX = newCx - newW / 2
                     var newY = newCy - newH / 2
                     
-                    controller.model.updatePosition(itemIndex, newX, newY)
-                    controller.model.updateSize(itemIndex, newW, newH)
+                    controller.model.setPosition(itemIndex, newX, newY)
+                    controller.model.setSize(itemIndex, newW, newH)
                 }
                 
                 onReleased: {

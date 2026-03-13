@@ -7,7 +7,7 @@
 #include <QSet>
 #include <QUndoStack>
 
-class ImageItemModel;
+class ImagoImageModel;
 class ModelsManager;
 
 // Worker to run upscale in a background thread
@@ -34,7 +34,7 @@ class UpscaleController : public QObject {
     Q_OBJECT
 
 public:
-    explicit UpscaleController(ImageItemModel *model, ModelsManager *modelsManager, QUndoStack *undoStack, QObject *parent = nullptr);
+    explicit UpscaleController(ImagoImageModel *model, ModelsManager *modelsManager, QUndoStack *undoStack, QObject *parent = nullptr);
 
     Q_INVOKABLE void upscaleImage(int index);
 
@@ -48,7 +48,7 @@ private slots:
     void onUpscaleFailed(int index, QString error);
 
 private:
-    ImageItemModel *m_model;
+    ImagoImageModel *m_model;
     ModelsManager *m_modelsManager;
     QUndoStack *m_undoStack;
     QSet<int> m_activeTasks;

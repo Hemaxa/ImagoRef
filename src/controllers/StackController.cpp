@@ -1,17 +1,10 @@
 #include "StackController.h"
 #include "ImageModel.h"
 
-// ============ AddImageCommand ============
-
-AddImageCommand::AddImageCommand(ImageItemModel *model, const QString &imageId,
-                                 const QUrl &source, qreal x, qreal y, qreal w, qreal h,
-                                 QUndoCommand *parent)
-    : QUndoCommand("Добавление изображения", parent)
+AddImageCommand::AddImageCommand(ImagoImageModel *model, const QString &imageId, const QUrl &source, qreal x, qreal y, qreal w, qreal h, QUndoCommand *parent) : QUndoCommand("Добавление изображения", parent)
     , m_model(model)
     , m_imageId(imageId)
 {
-    // Initialize data with basic information, we expect the controller to have already
-    // added it to the model. We can fetch it on the first redo.
     m_data.id = imageId;
     m_data.source = source;
     m_data.x = x;
@@ -22,45 +15,39 @@ AddImageCommand::AddImageCommand(ImageItemModel *model, const QString &imageId,
 
 void AddImageCommand::undo()
 {
-    m_model->removeById(m_imageId);
+    m_model->removeImageById(m_imageId);
 }
 
 void AddImageCommand::redo()
 {
     if (m_firstRedo) {
         m_firstRedo = false;
-        // On first redo (creation), grab the full image data from the model so we have
-        // the QPixmap, crop settings, and label saved for future redo's.
-        int idx = m_model->indexById(m_imageId);
+        int idx = m_model->getIndexById(m_imageId);
         if (idx >= 0) {
             m_data = m_model->getItem(idx);
         }
-        return; // Изображение уже добавлено при создании команды
+        return; //изображение уже добавлено при создании команды
     }
     
     m_model->addImage(m_data);
 }
 
-// ============ RemoveImageCommand ============
-
-RemoveImageCommand::RemoveImageCommand(ImageItemModel *model, const QList<int> &indices,
-                                       QUndoCommand *parent)
-    : QUndoCommand(QString("Удаление %1 элементов").arg(indices.count()), parent)
+RemoveImageCommand::RemoveImageCommand(ImagoImageModel *model, const QList<int> &indices, QUndoCommand *parent) : QUndoCommand(QString("Удаление %1 элементов").arg(indices.count()), parent)
     , m_model(model)
 {
-    // Сохраняем снимки удаляемых элементов (в обратном порядке для корректного удаления)
+    //сохраняем снимки удаляемых элементов (в обратном порядке для корректного удаления)
     QList<int> sortedIndices = indices;
     std::sort(sortedIndices.begin(), sortedIndices.end(), std::greater<int>());
     
     for (int idx : sortedIndices) {
-        ImageData item = m_model->getItem(idx);
+        ImagoImageData item = m_model->getItem(idx);
         m_snapshots.append(item);
     }
 }
 
 void RemoveImageCommand::undo()
 {
-    // Восстанавливаем в обратном порядке (чтобы индексы были правильными)
+    //восстанавливаем в обратном порядке (чтобы индексы были правильными)
     for (int i = m_snapshots.count() - 1; i >= 0; --i) {
         m_model->addImage(m_snapshots[i]);
     }
@@ -68,17 +55,12 @@ void RemoveImageCommand::undo()
 
 void RemoveImageCommand::redo()
 {
-    for (const ImageData &snap : m_snapshots) {
-        m_model->removeById(snap.id);
+    for (const ImagoImageData &snap : m_snapshots) {
+        m_model->removeImageById(snap.id);
     }
 }
 
-// ============ MoveImageCommand ============
-
-MoveImageCommand::MoveImageCommand(ImageItemModel *model, int index,
-                                   const QPointF &oldPos, const QPointF &newPos,
-                                   QUndoCommand *parent)
-    : QUndoCommand("Перемещение элемента", parent)
+MoveImageCommand::MoveImageCommand(ImagoImageModel *model, int index, const QPointF &oldPos, const QPointF &newPos, QUndoCommand *parent) : QUndoCommand("Перемещение элемента", parent)
     , m_model(model)
     , m_index(index)
     , m_oldPos(oldPos)
@@ -88,12 +70,12 @@ MoveImageCommand::MoveImageCommand(ImageItemModel *model, int index,
 
 void MoveImageCommand::undo()
 {
-    m_model->updatePosition(m_index, m_oldPos.x(), m_oldPos.y());
+    m_model->setPosition(m_index, m_oldPos.x(), m_oldPos.y());
 }
 
 void MoveImageCommand::redo()
 {
-    m_model->updatePosition(m_index, m_newPos.x(), m_newPos.y());
+    m_model->setPosition(m_index, m_newPos.x(), m_newPos.y());
 }
 
 bool MoveImageCommand::mergeWith(const QUndoCommand *other)
@@ -109,12 +91,7 @@ bool MoveImageCommand::mergeWith(const QUndoCommand *other)
     return true;
 }
 
-// ============ MoveImagesCommand ============
-
-MoveImagesCommand::MoveImagesCommand(ImageItemModel *model, const QVector<int>& indices,
-                                     const QVector<QPointF> &oldPos, const QVector<QPointF> &newPos,
-                                     QUndoCommand *parent)
-    : QUndoCommand("Перемещение элементов", parent)
+MoveImagesCommand::MoveImagesCommand(ImagoImageModel *model, const QVector<int>& indices, const QVector<QPointF> &oldPos, const QVector<QPointF> &newPos, QUndoCommand *parent) : QUndoCommand("Перемещение элементов", parent)
     , m_model(model)
     , m_indices(indices)
     , m_oldPos(oldPos)
@@ -125,14 +102,14 @@ MoveImagesCommand::MoveImagesCommand(ImageItemModel *model, const QVector<int>& 
 void MoveImagesCommand::undo()
 {
     for (int i = 0; i < m_indices.size(); ++i) {
-        m_model->updatePosition(m_indices[i], m_oldPos[i].x(), m_oldPos[i].y());
+        m_model->setPosition(m_indices[i], m_oldPos[i].x(), m_oldPos[i].y());
     }
 }
 
 void MoveImagesCommand::redo()
 {
     for (int i = 0; i < m_indices.size(); ++i) {
-        m_model->updatePosition(m_indices[i], m_newPos[i].x(), m_newPos[i].y());
+        m_model->setPosition(m_indices[i], m_newPos[i].x(), m_newPos[i].y());
     }
 }
 
@@ -149,13 +126,7 @@ bool MoveImagesCommand::mergeWith(const QUndoCommand *other)
     return true;
 }
 
-// ============ ResizeImageCommand ============
-
-ResizeImageCommand::ResizeImageCommand(ImageItemModel *model, int index,
-                                       const QRectF &oldRect, const QPointF &oldPos,
-                                       const QRectF &newRect, const QPointF &newPos,
-                                       QUndoCommand *parent)
-    : QUndoCommand("Изменение размера", parent)
+ResizeImageCommand::ResizeImageCommand(ImagoImageModel *model, int index, const QRectF &oldRect, const QPointF &oldPos, const QRectF &newRect, const QPointF &newPos, QUndoCommand *parent) : QUndoCommand("Изменение размера", parent)
     , m_model(model)
     , m_index(index)
     , m_oldRect(oldRect), m_newRect(newRect)
@@ -165,21 +136,17 @@ ResizeImageCommand::ResizeImageCommand(ImageItemModel *model, int index,
 
 void ResizeImageCommand::undo()
 {
-    m_model->updatePosition(m_index, m_oldPos.x(), m_oldPos.y());
-    m_model->updateSize(m_index, m_oldRect.width(), m_oldRect.height());
+    m_model->setPosition(m_index, m_oldPos.x(), m_oldPos.y());
+    m_model->setSize(m_index, m_oldRect.width(), m_oldRect.height());
 }
 
 void ResizeImageCommand::redo()
 {
-    m_model->updatePosition(m_index, m_newPos.x(), m_newPos.y());
-    m_model->updateSize(m_index, m_newRect.width(), m_newRect.height());
+    m_model->setPosition(m_index, m_newPos.x(), m_newPos.y());
+    m_model->setSize(m_index, m_newRect.width(), m_newRect.height());
 }
 
-// ============ RotateImageCommand ============
-
-RotateImageCommand::RotateImageCommand(ImageItemModel *model, int index, qreal angleDelta,
-                                       QUndoCommand *parent)
-    : QUndoCommand("Вращение элемента", parent)
+RotateImageCommand::RotateImageCommand(ImagoImageModel *model, int index, qreal angleDelta, QUndoCommand *parent) : QUndoCommand("Вращение элемента", parent)
     , m_model(model)
     , m_index(index)
     , m_angleDelta(angleDelta)
@@ -188,23 +155,17 @@ RotateImageCommand::RotateImageCommand(ImageItemModel *model, int index, qreal a
 
 void RotateImageCommand::undo()
 {
-    ImageData item = m_model->getItem(m_index);
-    m_model->updateRotation(m_index, item.rotation - m_angleDelta);
+    ImagoImageData item = m_model->getItem(m_index);
+    m_model->setRotation(m_index, item.rotation - m_angleDelta);
 }
 
 void RotateImageCommand::redo()
 {
-    ImageData item = m_model->getItem(m_index);
-    m_model->updateRotation(m_index, item.rotation + m_angleDelta);
+    ImagoImageData item = m_model->getItem(m_index);
+    m_model->setRotation(m_index, item.rotation + m_angleDelta);
 }
 
-// ============ CropImageCommand ============
-
-CropImageCommand::CropImageCommand(ImageItemModel *model, int index,
-                                   const QPointF &oldPos, const QSizeF &oldSize, const QRectF &oldCrop,
-                                   const QPointF &newPos, const QSizeF &newSize, const QRectF &newCrop,
-                                   QUndoCommand *parent)
-    : QUndoCommand("Обрезка изображения", parent)
+CropImageCommand::CropImageCommand(ImagoImageModel *model, int index, const QPointF &oldPos, const QSizeF &oldSize, const QRectF &oldCrop, const QPointF &newPos, const QSizeF &newSize, const QRectF &newCrop, QUndoCommand *parent) : QUndoCommand("Обрезка изображения", parent)
     , m_model(model)
     , m_index(index)
     , m_oldPos(oldPos), m_newPos(newPos)
@@ -215,24 +176,19 @@ CropImageCommand::CropImageCommand(ImageItemModel *model, int index,
 
 void CropImageCommand::undo()
 {
-    m_model->updatePosition(m_index, m_oldPos.x(), m_oldPos.y());
-    m_model->updateSize(m_index, m_oldSize.width(), m_oldSize.height());
-    m_model->updateCrop(m_index, m_oldCrop.x(), m_oldCrop.y(), m_oldCrop.width(), m_oldCrop.height());
+    m_model->setPosition(m_index, m_oldPos.x(), m_oldPos.y());
+    m_model->setSize(m_index, m_oldSize.width(), m_oldSize.height());
+    m_model->setCrop(m_index, m_oldCrop.x(), m_oldCrop.y(), m_oldCrop.width(), m_oldCrop.height());
 }
 
 void CropImageCommand::redo()
 {
-    m_model->updatePosition(m_index, m_newPos.x(), m_newPos.y());
-    m_model->updateSize(m_index, m_newSize.width(), m_newSize.height());
-    m_model->updateCrop(m_index, m_newCrop.x(), m_newCrop.y(), m_newCrop.width(), m_newCrop.height());
+    m_model->setPosition(m_index, m_newPos.x(), m_newPos.y());
+    m_model->setSize(m_index, m_newSize.width(), m_newSize.height());
+    m_model->setCrop(m_index, m_newCrop.x(), m_newCrop.y(), m_newCrop.width(), m_newCrop.height());
 }
 
-// ============ SetLabelCommand ============
-
-SetLabelCommand::SetLabelCommand(ImageItemModel *model, int index,
-                                 const QString &oldLabel, const QString &newLabel,
-                                 QUndoCommand *parent)
-    : QUndoCommand("Изменение подписи", parent)
+SetLabelCommand::SetLabelCommand(ImagoImageModel *model, int index, const QString &oldLabel, const QString &newLabel, QUndoCommand *parent) : QUndoCommand("Изменение подписи", parent)
     , m_model(model)
     , m_index(index)
     , m_oldLabel(oldLabel)
@@ -242,22 +198,15 @@ SetLabelCommand::SetLabelCommand(ImageItemModel *model, int index,
 
 void SetLabelCommand::undo()
 {
-    m_model->updateLabel(m_index, m_oldLabel);
+    m_model->setLabel(m_index, m_oldLabel);
 }
 
 void SetLabelCommand::redo()
 {
-    m_model->updateLabel(m_index, m_newLabel);
+    m_model->setLabel(m_index, m_newLabel);
 }
 
-// ============ ArrangeCommand ============
-
-ArrangeCommand::ArrangeCommand(ImageItemModel *model,
-                               const QVector<int> &indices,
-                               const QVector<QPointF> &oldPositions,
-                               const QVector<QPointF> &newPositions,
-                               QUndoCommand *parent)
-    : QUndoCommand("Расположить изображения", parent)
+ArrangeCommand::ArrangeCommand(ImagoImageModel *model, const QVector<int> &indices, const QVector<QPointF> &oldPositions, const QVector<QPointF> &newPositions, QUndoCommand *parent) : QUndoCommand("Расположить изображения", parent)
     , m_model(model)
     , m_indices(indices)
     , m_oldPositions(oldPositions)
@@ -268,24 +217,18 @@ ArrangeCommand::ArrangeCommand(ImageItemModel *model,
 void ArrangeCommand::undo()
 {
     for (int i = 0; i < m_indices.count(); ++i) {
-        m_model->updatePosition(m_indices[i], m_oldPositions[i].x(), m_oldPositions[i].y());
+        m_model->setPosition(m_indices[i], m_oldPositions[i].x(), m_oldPositions[i].y());
     }
 }
 
 void ArrangeCommand::redo()
 {
     for (int i = 0; i < m_indices.count(); ++i) {
-        m_model->updatePosition(m_indices[i], m_newPositions[i].x(), m_newPositions[i].y());
+        m_model->setPosition(m_indices[i], m_newPositions[i].x(), m_newPositions[i].y());
     }
 }
 
-// ============ UpscaleImageCommand ============
-
-UpscaleImageCommand::UpscaleImageCommand(ImageItemModel *model, int index,
-                                         const QPixmap &oldPixmap, const QRectF &oldCrop,
-                                         const QPixmap &newPixmap, const QRectF &newCrop,
-                                         QUndoCommand *parent)
-    : QUndoCommand("Увеличение разрешения", parent)
+UpscaleImageCommand::UpscaleImageCommand(ImagoImageModel *model, int index, const QPixmap &oldPixmap, const QRectF &oldCrop, const QPixmap &newPixmap, const QRectF &newCrop, QUndoCommand *parent) : QUndoCommand("Увеличение разрешения", parent)
     , m_model(model)
     , m_index(index)
     , m_oldPixmap(oldPixmap), m_newPixmap(newPixmap)
@@ -295,12 +238,12 @@ UpscaleImageCommand::UpscaleImageCommand(ImageItemModel *model, int index,
 
 void UpscaleImageCommand::undo()
 {
-    m_model->updatePixmap(m_index, m_oldPixmap);
-    m_model->updateCrop(m_index, m_oldCrop.x(), m_oldCrop.y(), m_oldCrop.width(), m_oldCrop.height());
+    m_model->setPixmap(m_index, m_oldPixmap);
+    m_model->setCrop(m_index, m_oldCrop.x(), m_oldCrop.y(), m_oldCrop.width(), m_oldCrop.height());
 }
 
 void UpscaleImageCommand::redo()
 {
-    m_model->updatePixmap(m_index, m_newPixmap);
-    m_model->updateCrop(m_index, m_newCrop.x(), m_newCrop.y(), m_newCrop.width(), m_newCrop.height());
+    m_model->setPixmap(m_index, m_newPixmap);
+    m_model->setCrop(m_index, m_newCrop.x(), m_newCrop.y(), m_newCrop.width(), m_newCrop.height());
 }

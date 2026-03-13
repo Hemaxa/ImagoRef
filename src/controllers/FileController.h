@@ -7,7 +7,7 @@
 #include <QUndoStack>
 #include <QtQml/qqml.h>
 
-class ImageItemModel;
+class ImagoImageModel;
 
 class FileController : public QObject {
     Q_OBJECT
@@ -19,7 +19,7 @@ class FileController : public QObject {
     Q_PROPERTY(QString windowTitle READ getWindowTitle NOTIFY filePathChanged)
 
 public:
-    explicit FileController(ImageItemModel *model, QUndoStack *undoStack, QObject *parent = nullptr);
+    explicit FileController(ImagoImageModel *model, QUndoStack *undoStack, QObject *parent = nullptr);
 
     //геттеры
     QString getCurrentFilePath() const;
@@ -46,7 +46,7 @@ signals:
 
 private:
     //внутренние поля класса
-    ImageItemModel *m_model;
+    ImagoImageModel *m_model;
     QUndoStack *m_undoStack;
     QString m_currentFilePath;
     int m_gridSize = 25;

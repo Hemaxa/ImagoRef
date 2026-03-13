@@ -5,7 +5,7 @@
 #include "ModelsManager.h"
 
 BoardController::BoardController(QObject *parent) : QObject(parent)
-    , m_model(new ImageItemModel(this))
+    , m_model(new ImagoImageModel(this))
     , m_undoStack(new QUndoStack(this))
     , m_fileController(new FileController(m_model, m_undoStack, this))
     , m_selectionController(new SelectionController(m_model, this))
@@ -23,7 +23,7 @@ BoardController::BoardController(QObject *parent) : QObject(parent)
     //синхронизировать начальное значение
     m_fileController->setGridSize(m_gridSize);
     
-    //Регистрация модели в глобальном провайдере изображений
+    //регистрация модели в глобальном провайдере изображений ImagoImageProvider
     if (ImagoImageProvider::instance()) {
         ImagoImageProvider::instance()->registerModel(m_model);
     }
@@ -31,13 +31,14 @@ BoardController::BoardController(QObject *parent) : QObject(parent)
 
 BoardController::~BoardController() {
     if (ImagoImageProvider::instance()) {
-        ImagoImageProvider::instance()->unregisterModel(m_model);
+        ImagoImageProvider::instance()->unregisterModel(m_model); //убираем модель из регистрации
     }
 }
 
 //метод связывания сигналов
 void BoardController::connectSignals()
 {
+    //синхронизация стека с сигналами об изменении
     connect(m_undoStack, &QUndoStack::canUndoChanged, this, &BoardController::undoStateChanged);
     connect(m_undoStack, &QUndoStack::canRedoChanged, this, &BoardController::redoStateChanged);
     
@@ -63,7 +64,7 @@ void BoardController::connectSignals()
 }
 
 //геттеры
-ImageItemModel* BoardController::getModel() const { return m_model; }
+ImagoImageModel* BoardController::getModel() const { return m_model; }
 FileController* BoardController::getFileController() const { return m_fileController; }
 SelectionController* BoardController::getSelectionController() const { return m_selectionController; }
 ClipboardController* BoardController::getClipboardController() const { return m_clipboardController; }
@@ -120,10 +121,10 @@ void BoardController::redo()
     m_undoStack->redo();
 }
 
-//отслеживание перемещения/ресайза
+//отслеживание перемещения
 void BoardController::beginMove(int index)
 {
-    ImageData item = m_model->getItem(index);
+    ImagoImageData item = m_model->getItem(index);
     m_moveStartPos = QPointF(item.x, item.y);
 }
 
@@ -138,9 +139,10 @@ void BoardController::endMove(int index, qreal newX, qreal newY)
     }
 }
 
+//отслеживание изменения размера
 void BoardController::beginResize(int index)
 {
-    ImageData item = m_model->getItem(index);
+    ImagoImageData item = m_model->getItem(index);
     m_resizeStartRect = QRectF(0, 0, item.width, item.height);
     m_resizeStartPos = QPointF(item.x, item.y);
 }
@@ -159,7 +161,7 @@ void BoardController::endResize(int index, qreal newX, qreal newY, qreal newWidt
     }
 }
 
-// Отслеживание перемещения выделения
+//отслеживание перемещения выделения
 void BoardController::beginMoveSelection()
 {
     m_moveSelectionIndices.clear();
@@ -168,7 +170,7 @@ void BoardController::beginMoveSelection()
     QVariantList selected = m_model->getSelectedIndices();
     for (const QVariant& v : selected) {
         int index = v.toInt();
-        ImageData item = m_model->getItem(index);
+        ImagoImageData item = m_model->getItem(index);
         m_moveSelectionIndices.append(index);
         m_moveSelectionStartPos.append(QPointF(item.x, item.y));
     }
@@ -183,15 +185,15 @@ void BoardController::updateMoveSelection(qreal deltaX, qreal deltaY)
         qreal newX = startPos.x() + deltaX;
         qreal newY = startPos.y() + deltaY;
         
-        // Clamping к границам рабочей области (30000x30000 - как в CanvasView)
-        ImageData item = m_model->getItem(index);
+        //приклеивание к границам рабочей области
+        ImagoImageData item = m_model->getItem(index);
         qreal itemW = item.width > 0 ? item.width : 100;
         qreal itemH = item.height > 0 ? item.height : 100;
         
         newX = qMax(0.0, qMin(30000.0 - itemW, newX));
         newY = qMax(0.0, qMin(30000.0 - itemH, newY));
         
-        m_model->updatePosition(index, newX, newY);
+        m_model->setPosition(index, newX, newY);
     }
 }
 
@@ -205,7 +207,7 @@ void BoardController::endMoveSelection()
     
     for (int i = 0; i < m_moveSelectionIndices.size(); ++i) {
         int index = m_moveSelectionIndices[i];
-        ImageData item = m_model->getItem(index);
+        ImagoImageData item = m_model->getItem(index);
         QPointF newPos(item.x, item.y);
         newPositions.append(newPos);
         

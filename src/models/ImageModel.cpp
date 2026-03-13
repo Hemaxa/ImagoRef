@@ -2,23 +2,23 @@
 #include <QUuid>
 #include <QDateTime>
 
-ImageItemModel::ImageItemModel(QObject *parent) : QAbstractListModel(parent) {}
+ImagoImageModel::ImagoImageModel(QObject *parent) : QAbstractListModel(parent) {}
 
 //метод получения свойтсва объекта
-QVariant ImageItemModel::data(const QModelIndex &index, int role) const
+QVariant ImagoImageModel::data(const QModelIndex &index, int role) const
 {
     //проверка существования индекса в массиве
     if (!index.isValid() || index.row() >= m_items.count())
         return QVariant();
 
     //получаем нужную картинку
-    const ImageData &item = m_items.at(index.row());
+    const ImagoImageData &item = m_items.at(index.row());
 
     switch (role) {
     case IdRole: return item.id;
     case SourceRole: //источник картинки
         if (item.source.isEmpty() && !item.id.isEmpty() && !item.pixmap.isNull()) { //если картинка получена не по пути на диске (без файла)
-            //возвращаем динамический URL из ImageProvider
+            //возвращаем динамический URL из ImagoImageProvider
             //добавляем параметр версии, чтобы избежать кэширования старого изображения в QML
             QString urlStr = QString("image://imago/%1?v=%2").arg(item.id).arg(item.version);
             if (item.cropWidth > 0 && item.cropHeight > 0) {
@@ -45,13 +45,13 @@ QVariant ImageItemModel::data(const QModelIndex &index, int role) const
 }
 
 //метод установки свойтсва объекта
-bool ImageItemModel::setData(const QModelIndex &index, const QVariant &value, int role)
+bool ImagoImageModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
     //проверка существования индекса в массиве
     if (!index.isValid() || index.row() >= m_items.count())
         return false;
 
-    ImageData &item = m_items[index.row()];
+    ImagoImageData &item = m_items[index.row()];
     bool changed = false;
 
     switch (role) {
@@ -102,7 +102,7 @@ bool ImageItemModel::setData(const QModelIndex &index, const QVariant &value, in
     return changed;
 }
 
-QHash<int, QByteArray> ImageItemModel::roleNames() const
+QHash<int, QByteArray> ImagoImageModel::roleNames() const
 {
     //связывание констант C++ со строковыми именами
     return {
@@ -124,44 +124,46 @@ QHash<int, QByteArray> ImageItemModel::roleNames() const
 }
 
 //метод разрешения на редактирование
-Qt::ItemFlags ImageItemModel::flags(const QModelIndex &index) const
+Qt::ItemFlags ImagoImageModel::flags(const QModelIndex &index) const
 {
     if (!index.isValid())
         return Qt::NoItemFlags;
     return Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 }
 
-//количество объектов
-int ImageItemModel::getCount() const
+int ImagoImageModel::getCount() const
 {
     return m_items.count();
 }
 
-int ImageItemModel::rowCount(const QModelIndex &parent) const
+int ImagoImageModel::rowCount(const QModelIndex &parent) const
 {
     if (parent.isValid())
         return 0;
     return m_items.count();
 }
 
-QString ImageItemModel::generateId()
+QString ImagoImageModel::generateId()
 {
     return QUuid::createUuid().toString(QUuid::WithoutBraces);
 }
 
-void ImageItemModel::addImage(const ImageData &data)
+//добавление объекта
+void ImagoImageModel::addImage(const ImagoImageData &data)
 {
     beginInsertRows(QModelIndex(), m_items.count(), m_items.count());
-    ImageData newItem = data;
+    ImagoImageData newItem = data;
     if (newItem.id.isEmpty()) {
+        //создание ID, если новый объект
         newItem.id = generateId();
     }
     m_items.append(newItem);
     endInsertRows();
-    emit countChanged();
+    emit countChanged(); //сигнал о том, что количество объектов изменилось
 }
 
-void ImageItemModel::removeImage(int index)
+//удаление объекта
+void ImagoImageModel::removeImage(int index)
 {
     if (index < 0 || index >= m_items.count())
         return;
@@ -172,15 +174,17 @@ void ImageItemModel::removeImage(int index)
     emit countChanged();
 }
 
-void ImageItemModel::removeById(const QString &id)
+//удаление объекта по ID
+void ImagoImageModel::removeImageById(const QString &id)
 {
-    int idx = indexById(id);
+    int idx = getIndexById(id);
     if (idx >= 0) {
         removeImage(idx);
     }
 }
 
-void ImageItemModel::clear()
+//полное очистка всех объектов
+void ImagoImageModel::clear()
 {
     if (m_items.isEmpty())
         return;
@@ -191,14 +195,15 @@ void ImageItemModel::clear()
     emit countChanged();
 }
 
-ImageData ImageItemModel::getItem(int index) const
+//получение копии объекта
+ImagoImageData ImagoImageModel::getItem(int index) const
 {
     if (index < 0 || index >= m_items.count())
-        return ImageData();
+        return ImagoImageData();
     return m_items.at(index);
 }
 
-int ImageItemModel::indexById(const QString &id) const
+int ImagoImageModel::getIndexById(const QString &id) const
 {
     for (int i = 0; i < m_items.count(); ++i) {
         if (m_items.at(i).id == id) {
@@ -208,12 +213,12 @@ int ImageItemModel::indexById(const QString &id) const
     return -1;
 }
 
-QVector<ImageData> ImageItemModel::allItems() const
+QVector<ImagoImageData> ImagoImageModel::getAllItems() const
 {
     return m_items;
 }
 
-void ImageItemModel::setItems(const QVector<ImageData> &items)
+void ImagoImageModel::setAllItems(const QVector<ImagoImageData> &items)
 {
     beginResetModel();
     m_items = items;
@@ -221,7 +226,8 @@ void ImageItemModel::setItems(const QVector<ImageData> &items)
     emit countChanged();
 }
 
-void ImageItemModel::updatePosition(int index, qreal x, qreal y)
+//методы изменения параметров объекта
+void ImagoImageModel::setPosition(int index, qreal x, qreal y)
 {
     if (index < 0 || index >= m_items.count())
         return;
@@ -232,7 +238,7 @@ void ImageItemModel::updatePosition(int index, qreal x, qreal y)
     emit dataChanged(modelIndex, modelIndex, {XRole, YRole});
 }
 
-void ImageItemModel::updateSize(int index, qreal width, qreal height)
+void ImagoImageModel::setSize(int index, qreal width, qreal height)
 {
     if (index < 0 || index >= m_items.count())
         return;
@@ -243,7 +249,7 @@ void ImageItemModel::updateSize(int index, qreal width, qreal height)
     emit dataChanged(modelIndex, modelIndex, {WidthRole, HeightRole});
 }
 
-void ImageItemModel::updateRotation(int index, qreal rotation)
+void ImagoImageModel::setRotation(int index, qreal rotation)
 {
     if (index < 0 || index >= m_items.count())
         return;
@@ -253,7 +259,7 @@ void ImageItemModel::updateRotation(int index, qreal rotation)
     emit dataChanged(modelIndex, modelIndex, {RotationRole});
 }
 
-void ImageItemModel::setSelected(int index, bool selected)
+void ImagoImageModel::setSelected(int index, bool selected)
 {
     if (index < 0 || index >= m_items.count())
         return;
@@ -265,7 +271,7 @@ void ImageItemModel::setSelected(int index, bool selected)
     }
 }
 
-void ImageItemModel::clearSelection()
+void ImagoImageModel::clearSelection()
 {
     for (int i = 0; i < m_items.count(); ++i) {
         if (m_items[i].selected) {
@@ -276,7 +282,7 @@ void ImageItemModel::clearSelection()
     }
 }
 
-void ImageItemModel::updateCrop(int index, qreal x, qreal y, qreal width, qreal height)
+void ImagoImageModel::setCrop(int index, qreal x, qreal y, qreal width, qreal height)
 {
     if (index < 0 || index >= m_items.count())
         return;
@@ -294,7 +300,7 @@ void ImageItemModel::updateCrop(int index, qreal x, qreal y, qreal width, qreal 
     emit dataChanged(modelIndex, modelIndex, roles);
 }
 
-void ImageItemModel::updateLabel(int index, const QString &label)
+void ImagoImageModel::setLabel(int index, const QString &label)
 {
     if (index < 0 || index >= m_items.count())
         return;
@@ -306,7 +312,7 @@ void ImageItemModel::updateLabel(int index, const QString &label)
     }
 }
 
-QVariantList ImageItemModel::getSelectedIndices() const
+QVariantList ImagoImageModel::getSelectedIndices() const
 {
     QVariantList result;
     for (int i = 0; i < m_items.count(); ++i) {
@@ -317,16 +323,16 @@ QVariantList ImageItemModel::getSelectedIndices() const
     return result;
 }
 
-void ImageItemModel::updatePixmap(int index, const QPixmap &pixmap)
+void ImagoImageModel::setPixmap(int index, const QPixmap &pixmap)
 {
     if (index < 0 || index >= m_items.count())
         return;
 
     m_items[index].pixmap = pixmap;
-    m_items[index].source = QUrl(); // Очищаем локальный путь, чтобы QML тянул из провайдера
-    m_items[index].version = QDateTime::currentMSecsSinceEpoch(); // Обновляем версию для сброса кэша QML
+    m_items[index].source = QUrl(); //очищаем локальный путь, чтобы QML брал пиксели из ImagoImageProvider
+    m_items[index].version = QDateTime::currentMSecsSinceEpoch(); //обновляем версию для сброса кэша QML
     
-    // Pixmap не привязан к роли в QML, но можно оповестить об изменении source
+    //pixmap не привязан к роли в QML, но можно оповестить об изменении source
     QModelIndex modelIndex = createIndex(index, 0);
     emit dataChanged(modelIndex, modelIndex, {SourceRole});
 }

@@ -13,7 +13,7 @@
 #include <QTemporaryDir>
 #include <QDir>
 
-FileController::FileController(ImageItemModel *model, QUndoStack *undoStack, QObject *parent) : QObject(parent)
+FileController::FileController(ImagoImageModel *model, QUndoStack *undoStack, QObject *parent) : QObject(parent)
     , m_model(model)
     , m_undoStack(undoStack)
 {}
@@ -51,15 +51,17 @@ void FileController::newBoard()
 
 bool FileController::openBoard(const QUrl &fileUrl)
 {
+    //получение путя в системе
     QString filePath = fileUrl.toLocalFile();
     if (!QFile::exists(filePath)) return false;
 
+    //создаем временную папку, куда будем распаковывать наш проект-архив
     QTemporaryDir tempDir;
     if (!tempDir.isValid()) return false;
 
+    //распаковываем ZIP-архив (filePath) во временную папку (tempDir.path())
     if (JlCompress::extractDir(filePath, tempDir.path()).isEmpty()) {
-        // JlCompress returns a list of files; if empty, it might have failed to extract
-        // (but we will still try to load data.json just in case)
+        //игнорирование ошибки распаковки
     }
 
     QByteArray docData;
@@ -67,8 +69,9 @@ bool FileController::openBoard(const QUrl &fileUrl)
     if (jsonFile.exists() && jsonFile.open(QIODevice::ReadOnly)) {
         docData = jsonFile.readAll();
         jsonFile.close();
-    } else {
-        // Fallback to reading the file directly if it wasn't a zip (old format compatibility)
+    }
+    else {
+        //если файла data.json внутри нет (или это вообще был не архив), мы предполагаем, что пользователь пытается открыть старый проект из предыдущей версии приложения
         QFile file(filePath);
         if (!file.open(QIODevice::ReadOnly)) {
             return false;
@@ -77,14 +80,17 @@ bool FileController::openBoard(const QUrl &fileUrl)
         file.close();
     }
 
+    //пытаемся превратить прочитанный текст в JSON документ
     QJsonDocument doc = QJsonDocument::fromJson(docData);
     if (doc.isNull()) return false;
     
+    //перед загрузкой новой доски полностью очищаем старую
     m_model->clear();
     m_undoStack->clear();
 
     QJsonObject rootObj = doc.object();
 
+    //загрузка настроек холста
     if (rootObj.contains("canvas")) {
         QJsonObject canvasObj = rootObj["canvas"].toObject();
         int loadedGridSize = canvasObj["gridSize"].toInt(25);
@@ -94,11 +100,12 @@ bool FileController::openBoard(const QUrl &fileUrl)
         if (canvasObj.contains("cameraX") && canvasObj.contains("cameraY")) {
             qreal camX = canvasObj["cameraX"].toDouble();
             qreal camY = canvasObj["cameraY"].toDouble();
-            qreal camZoom = canvasObj["cameraZoom"].toDouble(0.3); // default zoom is 0.3
+            qreal camZoom = canvasObj["cameraZoom"].toDouble(0.3);
             emit cameraLoaded(camX, camY, camZoom);
         }
     }
 
+    //загрузка объектов
     if (rootObj.contains("items")) {
         QJsonArray itemsArray = rootObj["items"].toArray();
         for (const QJsonValue &value : itemsArray) {
@@ -120,7 +127,7 @@ bool FileController::openBoard(const QUrl &fileUrl)
 
             QImage image;
             if (image.loadFromData(imageData, "PNG")) {
-                ImageData data;
+                ImagoImageData data;
                 data.id = itemObj["id"].toString();
                 data.source = QUrl();
                 data.pixmap = QPixmap::fromImage(image);
@@ -131,8 +138,6 @@ bool FileController::openBoard(const QUrl &fileUrl)
                 data.rotation = itemObj["rotation"].toDouble();
                 data.zValue = itemObj["zValue"].toDouble();
                 data.label = itemObj["label"].toString();
-                
-                // Data loss fix (crop parameters)
                 data.cropX = itemObj["cropX"].toDouble();
                 data.cropY = itemObj["cropY"].toDouble();
                 data.cropWidth = itemObj["cropWidth"].toDouble();
@@ -149,43 +154,54 @@ bool FileController::openBoard(const QUrl &fileUrl)
     return true;
 }
 
+//метод простого сохранения
 bool FileController::saveBoard()
 {
+    //проверка наличия пути к файлу
     if (m_currentFilePath.isEmpty()) {
         return false;
     }
+    //вызываем метод сохранения по пути с только что найденным нами путем
     return saveBoardAs(QUrl::fromLocalFile(m_currentFilePath));
 }
 
 bool FileController::saveBoardAs(const QUrl &fileUrl)
 {
+    //получение путя в системе
     QString filePath = fileUrl.toLocalFile();
     
+    //создание главного JSON объекта с описанием проекта
     QJsonObject rootObj;
     rootObj["version"] = "1.0";
     
+    //создание вложенного объекта с настройками холста
     QJsonObject canvasObj;
     canvasObj["gridSize"] = m_gridSize;
     
     BoardController* board = qobject_cast<BoardController*>(parent());
     if (board) {
-        // Save camera properties
+        //сохранение параметров камеры
         canvasObj["cameraX"] = board->getCameraX();
         canvasObj["cameraY"] = board->getCameraY();
         canvasObj["cameraZoom"] = board->getCameraZoom();
     }
     
+    //включение вложенного объекта в основной
     rootObj["canvas"] = canvasObj;
 
+    //создание временной папки
     QTemporaryDir tempDir;
     if (!tempDir.isValid()) return false;
 
+    //создание папки со всеми объектами
     QDir dir(tempDir.path());
     dir.mkdir("images");
 
+    //создание массива с параметрами отдельной картинки
     QJsonArray itemsArray;
     
-    for (const ImageData &item : m_model->allItems()) {
+    //проход по всем картинкам и сохранение их параметров в массив
+    for (const ImagoImageData &item : m_model->getAllItems()) {
         QJsonObject itemObj;
         itemObj["id"] = item.id;
         itemObj["pos_x"] = item.x;
@@ -195,42 +211,54 @@ bool FileController::saveBoardAs(const QUrl &fileUrl)
         itemObj["rotation"] = item.rotation;
         itemObj["zValue"] = item.zValue;
         itemObj["label"] = item.label;
-        
-        // Data loss fix (crop parameters)
         itemObj["cropX"] = item.cropX;
         itemObj["cropY"] = item.cropY;
         itemObj["cropWidth"] = item.cropWidth;
         itemObj["cropHeight"] = item.cropHeight;
 
+        //относительный путь до картинки
         QString imageRelPath = QString("images/%1.png").arg(item.id);
         itemObj["imagePath"] = imageRelPath;
         
+        //сохранение картинки из оперативной памяти
         QString imageAbsPath = dir.filePath(imageRelPath);
         item.pixmap.save(imageAbsPath, "PNG");
 
+        //добавляем объект в массив
         itemsArray.append(itemObj);
     }
+
+    //включение вложенного объекта в основной
     rootObj["items"] = itemsArray;
 
+    //превращаем JSON-объект в текстовый документ QJsonDocument
     QJsonDocument doc(rootObj);
+
+    //создаем файл "data.json" в корне нашей временной папки
     QFile jsonFile(dir.filePath("data.json"));
+
+    //открываем файл для записи и записываем данные
     if (jsonFile.open(QIODevice::WriteOnly)) {
         jsonFile.write(doc.toJson());
         jsonFile.close();
-    } else {
+    }
+    else {
         return false;
     }
 
+    //если по указанному пути уже есть файл, удаляем его, чтобы перезаписать
     if (QFile::exists(filePath)) {
         QFile::remove(filePath);
     }
 
+    //сжимаем всю временную папку (с data.json и папкой images) в один ZIP-архив с помощью сторонней библиотеки JlCompress и сохраняем по пути filePath
     bool success = JlCompress::compressDir(filePath, tempDir.path());
 
     if (!success) {
         return false;
     }
 
+    //обновляем текущий путь к файлу в памяти приложения
     m_currentFilePath = filePath;
     emit filePathChanged();
     emit boardSaved();

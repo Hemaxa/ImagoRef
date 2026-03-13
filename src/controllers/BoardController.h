@@ -19,7 +19,7 @@ class BoardController : public QObject {
     QML_ELEMENT //макрос, который позволяет использовать этот класс напрямую в QML
 
     //свойство Q_PROPERTY делает переменные C++ доступными в QML как обычные свойства
-    Q_PROPERTY(ImageItemModel* model READ getModel CONSTANT) //модель данных
+    Q_PROPERTY(ImagoImageModel* model READ getModel CONSTANT) //модель данных
     
     //остальные контроллеры
     Q_PROPERTY(FileController* fileController READ getFileController CONSTANT)
@@ -45,7 +45,7 @@ public:
     ~BoardController();
 
     //геттеры для свойств
-    ImageItemModel* getModel() const;
+    ImagoImageModel* getModel() const;
     FileController* getFileController() const;
     SelectionController* getSelectionController() const;
     ClipboardController* getClipboardController() const;
@@ -76,7 +76,7 @@ public:
     Q_INVOKABLE void beginResize(int index);
     Q_INVOKABLE void endResize(int index, qreal newX, qreal newY, qreal newWidth, qreal newHeight);
 
-    // Отслеживание перемещения нескольких элементов (выделения)
+    //отслеживание перемещения нескольких элементов (выделения)
     Q_INVOKABLE void beginMoveSelection();
     Q_INVOKABLE void updateMoveSelection(qreal deltaX, qreal deltaY);
     Q_INVOKABLE void endMoveSelection();
@@ -93,7 +93,7 @@ private:
     void connectSignals();
 
     //внутренние переменные класса
-    ImageItemModel *m_model;
+    ImagoImageModel *m_model;
     QUndoStack *m_undoStack;
     int m_gridSize;
     qreal m_cameraX;
@@ -107,12 +107,12 @@ private:
     ToolController *m_toolController;
     UpscaleController *m_upscaleController;
 
-    //переменные для хранения начального состояния объекта, когда пользователь только начинает его редактировать (изменения размера, перемещение)
+    //переменные для хранения начального состояния объекта, когда пользователь только начинает его перетаскивать или менять размер
     QPointF m_moveStartPos;
     QRectF m_resizeStartRect;
     QPointF m_resizeStartPos;
 
-    // Переменные для хранения начального состояния группы элементов при перетаскивании выделения
+    //переменные для хранения начального состояния группы элементов при перетаскивании выделения
     QVector<int> m_moveSelectionIndices;
     QVector<QPointF> m_moveSelectionStartPos;
 };
