@@ -142,6 +142,7 @@ bool FileController::openBoard(const QUrl &fileUrl)
                 data.cropY = itemObj["cropY"].toDouble();
                 data.cropWidth = itemObj["cropWidth"].toDouble();
                 data.cropHeight = itemObj["cropHeight"].toDouble();
+                data.opacity = itemObj.contains("opacity") ? itemObj["opacity"].toDouble() : 1.0;
                 
                 m_model->addImage(data);
             }
@@ -215,6 +216,7 @@ bool FileController::saveBoardAs(const QUrl &fileUrl)
         itemObj["cropY"] = item.cropY;
         itemObj["cropWidth"] = item.cropWidth;
         itemObj["cropHeight"] = item.cropHeight;
+        itemObj["opacity"] = item.opacity;
 
         //относительный путь до картинки
         QString imageRelPath = QString("images/%1.png").arg(item.id);

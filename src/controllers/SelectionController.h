@@ -37,6 +37,7 @@ public:
     Q_INVOKABLE qreal getItemY(int index) const;
     Q_INVOKABLE qreal getItemWidth(int index) const;
     Q_INVOKABLE qreal getItemHeight(int index) const;
+    Q_INVOKABLE qreal getItemOpacity(int index) const;
     Q_INVOKABLE bool getIsItemSelected(int index) const;
 
 signals:

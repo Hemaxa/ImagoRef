@@ -206,6 +206,41 @@ void SetLabelCommand::redo()
     m_model->setLabel(m_index, m_newLabel);
 }
 
+SetOpacityCommand::SetOpacityCommand(ImagoImageModel *model, const QVector<int> &indices, const QVector<qreal> &oldOpacities, qreal newOpacity, QUndoCommand *parent) : QUndoCommand("Изменение непрозрачности", parent)
+    , m_model(model)
+    , m_indices(indices)
+    , m_oldOpacities(oldOpacities)
+    , m_newOpacity(newOpacity)
+{
+}
+
+void SetOpacityCommand::undo()
+{
+    for (int i = 0; i < m_indices.count(); ++i) {
+        m_model->setOpacity(m_indices[i], m_oldOpacities[i]);
+    }
+}
+
+void SetOpacityCommand::redo()
+{
+    for (int i = 0; i < m_indices.count(); ++i) {
+        m_model->setOpacity(m_indices[i], m_newOpacity);
+    }
+}
+
+bool SetOpacityCommand::mergeWith(const QUndoCommand *other)
+{
+    if (other->id() != id())
+        return false;
+
+    const SetOpacityCommand *cmd = static_cast<const SetOpacityCommand*>(other);
+    if (cmd->m_indices != m_indices) // Must be exactly the same subset of indices
+        return false;
+
+    m_newOpacity = cmd->m_newOpacity;
+    return true;
+}
+
 ArrangeCommand::ArrangeCommand(ImagoImageModel *model, const QVector<int> &indices, const QVector<QPointF> &oldPositions, const QVector<QPointF> &newPositions, QUndoCommand *parent) : QUndoCommand("Расположить изображения", parent)
     , m_model(model)
     , m_indices(indices)

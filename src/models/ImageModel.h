@@ -30,6 +30,8 @@ struct ImagoImageData {
     qreal cropWidth = 0; //ширина обрезки
     qreal cropHeight = 0; //высота обрезки
     
+    qreal opacity = 1.0; //непрозрачность изображения (от 0.0 до 1.0)
+    
     qint64 version = 0; //версия изображения для обновления кэша QML
 };
 
@@ -56,7 +58,8 @@ public:
         CropXRole,
         CropYRole,
         CropWidthRole,
-        CropHeightRole
+        CropHeightRole,
+        OpacityRole
     };
 
     //конструктор
@@ -91,6 +94,7 @@ public:
     Q_INVOKABLE void setSelected(int index, bool selected);
     Q_INVOKABLE void clearSelection();
     Q_INVOKABLE QVariantList getSelectedIndices() const;
+    Q_INVOKABLE void setOpacity(int index, qreal opacity);
 
     void setPixmap(int index, const QPixmap &pixmap);
 

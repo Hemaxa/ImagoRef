@@ -40,6 +40,7 @@ QVariant ImagoImageModel::data(const QModelIndex &index, int role) const
     case CropYRole: return item.cropY;
     case CropWidthRole: return item.cropWidth;
     case CropHeightRole: return item.cropHeight;
+    case OpacityRole: return item.opacity;
     default: return QVariant();
     }
 }
@@ -91,6 +92,9 @@ bool ImagoImageModel::setData(const QModelIndex &index, const QVariant &value, i
     case CropHeightRole:
         if (item.cropHeight != value.toReal()) { item.cropHeight = value.toReal(); changed = true; }
         break;
+    case OpacityRole:
+        if (item.opacity != value.toReal()) { item.opacity = value.toReal(); changed = true; }
+        break;
     default:
         return false;
     }
@@ -119,7 +123,8 @@ QHash<int, QByteArray> ImagoImageModel::roleNames() const
         {CropXRole, "modelCropX"},
         {CropYRole, "modelCropY"},
         {CropWidthRole, "modelCropWidth"},
-        {CropHeightRole, "modelCropHeight"}
+        {CropHeightRole, "modelCropHeight"},
+        {OpacityRole, "modelOpacity"}
     };
 }
 
@@ -309,6 +314,18 @@ void ImagoImageModel::setLabel(int index, const QString &label)
         m_items[index].label = label;
         QModelIndex modelIndex = createIndex(index, 0);
         emit dataChanged(modelIndex, modelIndex, {LabelRole});
+    }
+}
+
+void ImagoImageModel::setOpacity(int index, qreal opacity)
+{
+    if (index < 0 || index >= m_items.count())
+        return;
+
+    if (m_items[index].opacity != opacity) {
+        m_items[index].opacity = opacity;
+        QModelIndex modelIndex = createIndex(index, 0);
+        emit dataChanged(modelIndex, modelIndex, {OpacityRole});
     }
 }
 

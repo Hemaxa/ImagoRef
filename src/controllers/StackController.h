@@ -124,6 +124,22 @@ private:
     QString m_oldLabel, m_newLabel;
 };
 
+//SetOpacityCommand - команда установки непрозрачности изображений
+class SetOpacityCommand : public QUndoCommand {
+public:
+    SetOpacityCommand(ImagoImageModel *model, const QVector<int> &indices, const QVector<qreal> &oldOpacities, qreal newOpacity, QUndoCommand *parent = nullptr);
+    void undo() override;
+    void redo() override;
+    int id() const override { return 1003; }
+    bool mergeWith(const QUndoCommand *other) override;
+
+private:
+    ImagoImageModel *m_model;
+    QVector<int> m_indices;
+    QVector<qreal> m_oldOpacities;
+    qreal m_newOpacity;
+};
+
 //ArrangeCommand - команда автоматического расположения изображений. Сохраняет старые и новые позиции для undo/redo
 class ArrangeCommand : public QUndoCommand {
 public:

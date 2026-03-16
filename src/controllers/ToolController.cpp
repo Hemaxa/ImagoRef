@@ -175,6 +175,31 @@ void ToolController::setLabelForSelected(const QString &label)
     m_undoStack->endMacro();
 }
 
+void ToolController::setOpacityForSelected(qreal opacity)
+{
+    QVariantList indices = m_model->getSelectedIndices();
+    if (indices.isEmpty()) return;
+
+    QVector<int> intIndices;
+    QVector<qreal> oldOpacities;
+    bool needsChange = false;
+    
+    for (const QVariant &v : indices) {
+        int idx = v.toInt();
+        qreal oldOp = m_model->getItem(idx).opacity;
+        intIndices.append(idx);
+        oldOpacities.append(oldOp);
+        
+        if (!qFuzzyCompare(oldOp, opacity)) {
+            needsChange = true;
+        }
+    }
+
+    if (!needsChange) return;
+
+    m_undoStack->push(new SetOpacityCommand(m_model, intIndices, oldOpacities, opacity));
+}
+
 void ToolController::arrangeAll(qreal centerX, qreal centerY)
 {
     int count = m_model->getCount();

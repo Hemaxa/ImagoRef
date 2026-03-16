@@ -17,12 +17,12 @@ Dialog {
     signal openBoardRequested(url fileUrl)
     
     // Цвета темы Welcome Window
-    property color bgColor: ThemeManager.welcomeBgColor
-    property color btnNewGradientStart: ThemeManager.welcomeBtnNewGradientStart
-    property color btnNewGradientEnd: ThemeManager.welcomeBtnNewGradientEnd
-    property color btnOpenColor: ThemeManager.welcomeBtnOpenColor
-    property color textDark: ThemeManager.welcomeTextDark
-    property color accentYellow: ThemeManager.welcomeAccentYellow
+    property color bgColor: ThemeManager.colors.welcomeBgColor
+    property color btnNewGradientStart: ThemeManager.colors.welcomeBtnNewGradientStart
+    property color btnNewGradientEnd: ThemeManager.colors.welcomeBtnNewGradientEnd
+    property color btnOpenColor: ThemeManager.colors.welcomeBtnOpenColor
+    property color textDark: ThemeManager.colors.welcomeTextDark
+    property color accentYellow: ThemeManager.colors.welcomeAccentYellow
     
     // ========================================
     // BACKGROUND
@@ -32,7 +32,7 @@ Dialog {
         
         // Декоративные элементы фона
         Image {
-            source: ThemeManager.welcomeDecoTrianglePath
+            source: ThemeManager.icons.welcomeDecoTriangle
             x: 50; y: 80
             width: 40; height: 40
             rotation: -15
@@ -40,42 +40,42 @@ Dialog {
         
         // Зигзаг справа
         Image {
-            source: ThemeManager.welcomeDecoZigzagPath
+            source: ThemeManager.icons.welcomeDecoZigzag
             x: parent.width - 100; y: 150
             width: 60; height: 25
         }
         
         // Звезда слева
         Image {
-            source: ThemeManager.welcomeDecoStarPath
+            source: ThemeManager.icons.welcomeDecoStar
             x: 30; y: 250
             width: 25; height: 25
         }
         
         // Точки справа вверху
         Image {
-            source: ThemeManager.welcomeDecoDotsPath
+            source: ThemeManager.icons.welcomeDecoDots
             x: parent.width - 80; y: 60
             width: 50; height: 50
         }
         
         // Еще элементы для заполнения
         Image {
-            source: ThemeManager.welcomeDecoTrianglePath
+            source: ThemeManager.icons.welcomeDecoTriangle
             x: parent.width - 150; y: 400
             width: 35; height: 35
             rotation: 45
         }
         
         Image {
-            source: ThemeManager.welcomeDecoZigzagPath
+            source: ThemeManager.icons.welcomeDecoZigzag
             x: 80; y: parent.height - 150
             width: 50; height: 20
             rotation: -30
         }
         
         Image {
-            source: ThemeManager.welcomeDecoStarPath
+            source: ThemeManager.icons.welcomeDecoStar
             x: parent.width - 60; y: parent.height - 200
             width: 20; height: 20
         }
@@ -90,7 +90,7 @@ Dialog {
         // Логотип вверху по центру
         Image {
             id: logoImage
-            source: ThemeManager.logoPath
+            source: ThemeManager.icons.logo
             anchors.horizontalCenter: parent.horizontalCenter
             y: 40
             width: 550
@@ -147,7 +147,7 @@ Dialog {
                     Image {
                         id: frameImage
                         anchors.fill: parent
-                        source: ThemeManager.projectFramePath
+                        source: ThemeManager.icons.projectFrame
                         fillMode: Image.Stretch
                     }
                     
@@ -156,12 +156,12 @@ Dialog {
                         anchors.centerIn: parent
                         width: parent.width - 20
                         height: parent.height - 20
-                        color: ThemeManager.controlBackground
+                        color: ThemeManager.colors.controlBackground
                         
                         Text {
                             anchors.centerIn: parent
                             text: "Project " + (index + 1)
-                            color: ThemeManager.textColor
+                            color: ThemeManager.colors.textColor
                             font.pixelSize: 12
                         }
                     }
@@ -183,12 +183,13 @@ Dialog {
         // ========================================
         Image {
             id: mascotImage
-            source: ThemeManager.mascotPath
+            source: ThemeManager.icons.mascot
             anchors.left: parent.left
             anchors.bottom: parent.bottom
             width: 280
             height: 380
             fillMode: Image.PreserveAspectFit
+            verticalAlignment: Image.AlignBottom
         }
         
         // ========================================

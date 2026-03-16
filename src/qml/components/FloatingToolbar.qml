@@ -19,10 +19,12 @@ Rectangle {
     signal labelClicked()
     signal pasteClicked()
     signal arrangeClicked()
+    signal opacityModeClicked()
     
     //cостояние активных инструментов
     property bool resizeModeActive: false
     property bool cropModeActive: false
+    property bool opacityModeActive: false
     
     // Оставляем только нужные свойства
     property int columns: SettingsManager.toolbarColumns
@@ -33,8 +35,8 @@ Rectangle {
     width: toolbarLayout.implicitWidth + (paddingVal * 2)
     height: toolbarLayout.implicitHeight + (paddingVal * 2)
 
-    color: Qt.rgba(ThemeManager.panelColor.r, ThemeManager.panelColor.g, ThemeManager.panelColor.b, 1.0)
-    border.color: ThemeManager.borderColor
+    color: Qt.rgba(ThemeManager.colors.panelColor.r, ThemeManager.colors.panelColor.g, ThemeManager.colors.panelColor.b, 1.0)
+    border.color: ThemeManager.colors.borderColor
     border.width: 1
     radius: 3
     
@@ -79,7 +81,7 @@ Rectangle {
         
         // Вставить
         ToolbarButton {
-            iconSource: ThemeManager.pasteIconPath
+            iconSource: ThemeManager.icons.pasteIcon
             tooltip: "Вставить"
             shortcutText: "Ctrl+V"
             onClicked: root.pasteClicked()
@@ -87,7 +89,7 @@ Rectangle {
         
         // Удалить
         ToolbarButton {
-            iconSource: ThemeManager.deleteIconPath
+            iconSource: ThemeManager.icons.deleteIcon
             tooltip: "Удалить"
             shortcutText: "Delete"
             enabled: controller.selectionController.hasSelection
@@ -96,7 +98,7 @@ Rectangle {
         
         // Привязать к сетке
         ToolbarButton {
-            iconSource: ThemeManager.gridSnapIconPath
+            iconSource: ThemeManager.icons.gridSnapIcon
             tooltip: "Привязать к сетке"
             shortcutText: "G"
             enabled: controller.selectionController.hasSelection
@@ -105,7 +107,7 @@ Rectangle {
         
         // Увеличить разрешение
         ToolbarButton {
-            iconSource: ThemeManager.upscaleIconPath
+            iconSource: ThemeManager.icons.upscaleIcon
             tooltip: "Увеличить разрешение"
             shortcutText: "U"
             visible: ModelsManager.isModelDownloaded
@@ -120,7 +122,7 @@ Rectangle {
         
         // Изменить размер
         ToolbarButton {
-            iconSource: ThemeManager.scaleIconPath
+            iconSource: ThemeManager.icons.scaleIcon
             tooltip: "Изменить размер"
             shortcutText: "S"
             active: root.resizeModeActive
@@ -130,7 +132,7 @@ Rectangle {
         
         // Обрезать
         ToolbarButton {
-            iconSource: ThemeManager.cropIconPath
+            iconSource: ThemeManager.icons.cropIcon
             tooltip: "Обрезать"
             shortcutText: "C"
             active: root.cropModeActive
@@ -138,9 +140,19 @@ Rectangle {
             onClicked: root.cropModeClicked()
         }
         
+        // Непрозрачность
+        ToolbarButton {
+            iconSource: ThemeManager.icons.opacityIcon
+            tooltip: "Непрозрачность"
+            shortcutText: "O"
+            active: root.opacityModeActive
+            enabled: controller.selectionController.hasSelection
+            onClicked: root.opacityModeClicked()
+        }
+        
         // Подписать
         ToolbarButton {
-            iconSource: ThemeManager.labelIconPath
+            iconSource: ThemeManager.icons.labelIcon
             tooltip: "Подписать"
             shortcutText: "L"
             enabled: controller.selectionController.hasSelection
@@ -149,7 +161,7 @@ Rectangle {
         
         // Расположить
         ToolbarButton {
-            iconSource: ThemeManager.arrangeIconPath
+            iconSource: ThemeManager.icons.arrangeIcon
             tooltip: "Расположить"
             shortcutText: "A"
             enabled: controller.model.count > 0
@@ -158,7 +170,7 @@ Rectangle {
         
         // Вращать против часовой
         ToolbarButton {
-            iconSource: ThemeManager.rotateLeftIconPath
+            iconSource: ThemeManager.icons.rotateLeftIcon
             tooltip: "Вращать против часовой"
             shortcutText: "Shift+R"
             enabled: controller.selectionController.hasSelection
@@ -167,7 +179,7 @@ Rectangle {
         
         // Вращать по часовой
         ToolbarButton {
-            iconSource: ThemeManager.rotateRightIconPath
+            iconSource: ThemeManager.icons.rotateRightIcon
             tooltip: "Вращать по часовой"
             shortcutText: "R"
             enabled: controller.selectionController.hasSelection
@@ -176,7 +188,7 @@ Rectangle {
         
         // Приблизить
         ToolbarButton {
-            iconSource: ThemeManager.zoomInIconPath
+            iconSource: ThemeManager.icons.zoomInIcon
             tooltip: "Приблизить"
             shortcutText: "Ctrl++"
             onClicked: root.zoomInClicked()
@@ -184,7 +196,7 @@ Rectangle {
         
         // Отдалить
         ToolbarButton {
-            iconSource: ThemeManager.zoomOutIconPath
+            iconSource: ThemeManager.icons.zoomOutIcon
             tooltip: "Отдалить"
             shortcutText: "Ctrl+-"
             onClicked: root.zoomOutClicked()
@@ -192,7 +204,7 @@ Rectangle {
         
         // Отменить
         ToolbarButton {
-            iconSource: ThemeManager.undoIconPath
+            iconSource: ThemeManager.icons.undoIcon
             tooltip: "Отменить"
             shortcutText: "Ctrl+Z"
             enabled: controller.canUndo
@@ -201,7 +213,7 @@ Rectangle {
         
         // Повторить
         ToolbarButton {
-            iconSource: ThemeManager.redoIconPath
+            iconSource: ThemeManager.icons.redoIcon
             tooltip: "Повторить"
             shortcutText: "Ctrl+Shift+Z"
             enabled: controller.canRedo
@@ -210,7 +222,7 @@ Rectangle {
 
         // Закрепить поверх окон
         ToolbarButton {
-            iconSource: ThemeManager.pinIconPath
+            iconSource: ThemeManager.icons.pinIcon
             tooltip: "Закрепить поверх всех окон"
             active: controller.toolController.isPinned
             onClicked: controller.toolController.togglePin()
@@ -218,7 +230,7 @@ Rectangle {
         
         // Настройки
         ToolbarButton {
-            iconSource: ThemeManager.settingsIconPath
+            iconSource: ThemeManager.icons.settingsIcon
             tooltip: "Настройки"
             shortcutText: "Ctrl+,"
             onClicked: root.settingsClicked()

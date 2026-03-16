@@ -141,7 +141,7 @@ Item {
             width: handleSize
             height: handleSize
             color: "white"
-            border.color: ThemeManager.accentColor
+            border.color: ThemeManager.colors.accentColor
             border.width: 2 / zoomLevel
             
             x: (corner === 0 || corner === 3) ? cropX - handleSize/2 : cropX + cropW - handleSize/2
@@ -214,7 +214,7 @@ Item {
             width: (side === 0 || side === 2) ? handleSize * 2 : handleSize / 2
             height: (side === 0 || side === 2) ? handleSize / 2 : handleSize * 2
             color: "white"
-            border.color: ThemeManager.accentColor
+            border.color: ThemeManager.colors.accentColor
             border.width: 1 / zoomLevel
             
             x: {

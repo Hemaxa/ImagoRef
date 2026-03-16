@@ -26,6 +26,9 @@ Item {
     property bool isPinned: controller.toolController.isPinned
     property bool isPinnedAndInactive: isPinned && !Qt.application.active
 
+    // Свойство блокировки рабочей области (из MainWindow)
+    property bool isWorkspaceLocked: false
+
     //размер сцены
     readonly property real sceneSize: 30000 //30000x30000
 
@@ -102,7 +105,7 @@ Item {
     Rectangle {
         id: background
         anchors.fill: parent
-        color: root.isPinnedAndInactive ? "transparent" : ThemeManager.backgroundColor
+        color: root.isPinnedAndInactive ? "transparent" : ThemeManager.colors.backgroundColor
     }
 
     //прокручиваемая область
@@ -185,7 +188,7 @@ Item {
                 height: gSize
 
                 property bool ready: false
-                property color dotColor: ThemeManager.gridColor
+                property color dotColor: ThemeManager.colors.gridColor
                 property string pattern: root.canvasPattern
                 property int gSize: Math.max(SettingsManager.gridSize, 5)
 
@@ -231,7 +234,7 @@ Item {
                 id: sceneBorder
                 anchors.fill: parent
                 color: "transparent"
-                border.color: Qt.rgba(ThemeManager.accentColor.r, ThemeManager.accentColor.g, ThemeManager.accentColor.b, 0.4)
+                border.color: Qt.rgba(ThemeManager.colors.accentColor.r, ThemeManager.colors.accentColor.g, ThemeManager.colors.accentColor.b, 0.4)
                 border.width: 3 / zoomLevel
                 z: 2
                 visible: !root.isPinnedAndInactive
@@ -274,8 +277,9 @@ Item {
                     controller: root.controller
                     zoomLevel: root.zoomLevel
 
-                    // Перемещение только через drag, отключаем в режимах инструментов
-                    enableDrag: !root.resizeMode && !root.cropMode
+                    // Перемещение только через drag, отключаем в режимах инструментов и при блокировке
+                    enableDrag: !root.resizeMode && !root.cropMode && !root.isWorkspaceLocked
+                    isWorkspaceLocked: root.isWorkspaceLocked
 
                     onExitCropMode: root.cropMode = false
                 }
@@ -287,9 +291,9 @@ Item {
         id: selectionRect
         visible: false
         color: Qt.rgba(
-            ThemeManager.accentColor.r, ThemeManager.accentColor.g, ThemeManager.accentColor.b, 0.15
+            ThemeManager.colors.accentColor.r, ThemeManager.colors.accentColor.g, ThemeManager.colors.accentColor.b, 0.15
         )
-        border.color: ThemeManager.accentColor
+        border.color: ThemeManager.colors.accentColor
         border.width: 1
         z: 1000
     }
@@ -316,6 +320,11 @@ Item {
                 isPanning = true
                 lastPos = Qt.point(mouse.x, mouse.y)
                 cursorShape = Qt.ClosedHandCursor
+                return
+            }
+
+            // Если рабочая область заблокирована, игнорируем действия ЛКМ
+            if (root.isWorkspaceLocked) {
                 return
             }
 
@@ -473,6 +482,8 @@ Item {
         anchors.fill: parent
 
         onDropped: function(drop) {
+            if (root.isWorkspaceLocked) return;
+
             if (drop.hasUrls) {
                 for (var i = 0; i < drop.urls.length; i++) {
                     var scenePos = mapToScene(Qt.point(drop.x, drop.y))

@@ -17,6 +17,7 @@ Item {
     required property real modelCropWidth
     required property real modelCropHeight
     required property string modelLabel
+    required property real modelOpacity
     
     property int itemIndex: index
     property url imageSource: source
@@ -28,6 +29,7 @@ Item {
     signal exitCropMode()
     property bool enableDrag: true
     property real zoomLevel: 1.0
+    property bool isWorkspaceLocked: false
 
     required property BoardController controller
 
@@ -42,6 +44,7 @@ Item {
         fillMode: Image.Stretch
         smooth: true
         mipmap: true
+        opacity: root.modelOpacity
         
         // Custom ImageProviders don't support sourceClipRect, so we pass crop params via URL
         // and the provider crops it. To prevent double-cropping bugs if Qt ever changes behavior,
@@ -110,8 +113,8 @@ Item {
         anchors.fill: parent
         color: "transparent"
         border.color: Qt.rgba(1, 1, 1, 0.5)
-        border.width: (!root.selected && hoverArea.containsMouse) ? Math.max(2 / zoomLevel, 1) : 0
-        visible: !root.selected && hoverArea.containsMouse
+        border.width: (!root.selected && hoverArea.containsMouse && !root.isWorkspaceLocked) ? Math.max(2 / zoomLevel, 1) : 0
+        visible: !root.selected && hoverArea.containsMouse && !root.isWorkspaceLocked
     }
 
     //рамка выделения (яркий акцентный цвет)
@@ -120,9 +123,9 @@ Item {
         anchors.fill: parent
         anchors.margins: -2 / zoomLevel
         color: "transparent"
-        border.color: ThemeManager.accentColor
-        border.width: root.selected ? Math.max(3 / zoomLevel, 2) : 0
-        visible: root.selected
+        border.color: ThemeManager.colors.accentColor
+        border.width: (root.selected && !root.isWorkspaceLocked) ? Math.max(3 / zoomLevel, 2) : 0
+        visible: root.selected && !root.isWorkspaceLocked
         radius: 2 / zoomLevel
     }
 
@@ -132,8 +135,8 @@ Item {
         anchors.fill: parent
         color: "transparent"
         border.color: "white"
-        border.width: root.selected ? Math.max(1 / zoomLevel, 1) : 0
-        visible: root.selected
+        border.width: (root.selected && !root.isWorkspaceLocked) ? Math.max(1 / zoomLevel, 1) : 0
+        visible: root.selected && !root.isWorkspaceLocked
     }
 
     //оверлей изменения размера

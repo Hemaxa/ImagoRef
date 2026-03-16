@@ -30,6 +30,15 @@ ThemeManager& ThemeManager::instance()
 
 ThemeManager::ThemeManager(QObject *parent) : QObject(parent)
 {
+    resetToDefaults();
+    scanAvailableThemes();
+}
+
+void ThemeManager::resetToDefaults()
+{
+    m_themeColors.clear();
+    m_themeIcons.clear();
+    
     // Значения по умолчанию
     m_themeColors["backgroundColor"] = QColor("#141414");
     m_themeColors["textColor"] = QColor("#e0e0e0");
@@ -49,7 +58,35 @@ ThemeManager::ThemeManager(QObject *parent) : QObject(parent)
     m_themeColors["welcomeTextDark"] = QColor("#141414");
     m_themeColors["welcomeAccentYellow"] = QColor("#FFE135");
 
-    scanAvailableThemes();
+    QString themesPath = QCoreApplication::applicationDirPath() + "/themes";
+    QString defaultThemeDir = themesPath + "/dark"; // fallback path for icons
+    
+    // Default Icons fallback (using the "dark" theme paths for relative resolution safety)
+    m_themeIcons["logo"] = "file://" + defaultThemeDir + "/WelcomeWindow/logo/logo.svg";
+    m_themeIcons["mascot"] = "file://" + defaultThemeDir + "/WelcomeWindow/mascot/mascot.svg";
+    m_themeIcons["welcomeDecoDots"] = "file://" + defaultThemeDir + "/WelcomeWindow/background/deco-dots.svg";
+    m_themeIcons["welcomeDecoTriangle"] = "file://" + defaultThemeDir + "/WelcomeWindow/background/deco-triangle.svg";
+    m_themeIcons["welcomeDecoZigzag"] = "file://" + defaultThemeDir + "/WelcomeWindow/background/deco-zigzag.svg";
+    m_themeIcons["welcomeDecoStar"] = "file://" + defaultThemeDir + "/WelcomeWindow/background/deco-star.svg";
+    m_themeIcons["projectFrame"] = "file://" + defaultThemeDir + "/WelcomeWindow/background/project-frame.svg";
+    
+    m_themeIcons["pasteIcon"] = "file://" + defaultThemeDir + "/MainWindow/tools/paste.svg";
+    m_themeIcons["deleteIcon"] = "file://" + defaultThemeDir + "/MainWindow/tools/delete.svg";
+    m_themeIcons["gridSnapIcon"] = "file://" + defaultThemeDir + "/MainWindow/tools/grid_snap.svg";
+    m_themeIcons["scaleIcon"] = "file://" + defaultThemeDir + "/MainWindow/tools/scale.svg";
+    m_themeIcons["upscaleIcon"] = "file://" + defaultThemeDir + "/MainWindow/tools/upscale.svg";
+    m_themeIcons["cropIcon"] = "file://" + defaultThemeDir + "/MainWindow/tools/crop.svg";
+    m_themeIcons["labelIcon"] = "file://" + defaultThemeDir + "/MainWindow/tools/label.svg";
+    m_themeIcons["arrangeIcon"] = "file://" + defaultThemeDir + "/MainWindow/tools/arrange.svg";
+    m_themeIcons["rotateLeftIcon"] = "file://" + defaultThemeDir + "/MainWindow/tools/rotate_left.svg";
+    m_themeIcons["rotateRightIcon"] = "file://" + defaultThemeDir + "/MainWindow/tools/rotate_right.svg";
+    m_themeIcons["zoomInIcon"] = "file://" + defaultThemeDir + "/MainWindow/tools/zoom_in.svg";
+    m_themeIcons["zoomOutIcon"] = "file://" + defaultThemeDir + "/MainWindow/tools/zoom_out.svg";
+    m_themeIcons["undoIcon"] = "file://" + defaultThemeDir + "/MainWindow/tools/undo.svg";
+    m_themeIcons["redoIcon"] = "file://" + defaultThemeDir + "/MainWindow/tools/redo.svg";
+    m_themeIcons["pinIcon"] = "file://" + defaultThemeDir + "/MainWindow/tools/pin.svg";
+    m_themeIcons["settingsIcon"] = "file://" + defaultThemeDir + "/MainWindow/tools/settings.svg";
+    m_themeIcons["opacityIcon"] = "file://" + defaultThemeDir + "/MainWindow/tools/settings.svg";
 }
 
 void ThemeManager::scanAvailableThemes()
@@ -79,6 +116,8 @@ void ThemeManager::applyTheme(const QString& themeName)
 
 void ThemeManager::loadThemeFromFile(const QString& themeName)
 {
+    resetToDefaults();
+    
     QString themesPath = QCoreApplication::applicationDirPath() + "/themes";
     QString themeDir = themesPath + "/" + themeName;
     QString jsonPath = themeDir + "/theme.json";
@@ -155,45 +194,5 @@ QPixmap ThemeManager::colorizeSvg(const QString& path, const QColor& color, cons
 QString ThemeManager::getCurrentTheme() const { return m_currentTheme; }
 QStringList ThemeManager::getAvailableThemes() const { return m_availableThemes; }
 
-QColor ThemeManager::getBackgroundColor() const { return m_themeColors.value("backgroundColor"); }
-QColor ThemeManager::getTextColor() const { return m_themeColors.value("textColor"); }
-QColor ThemeManager::getAccentColor() const { return m_themeColors.value("accentColor"); }
-QColor ThemeManager::getAccentHoverColor() const { return m_themeColors.value("accentHoverColor"); }
-QColor ThemeManager::getAccentPressedColor() const { return m_themeColors.value("accentPressedColor"); }
-QColor ThemeManager::getIconColor() const { return m_themeColors.value("iconColor"); }
-QColor ThemeManager::getGridColor() const { return m_themeColors.value("gridColor"); }
-QColor ThemeManager::getBorderColor() const { return m_themeColors.value("borderColor"); }
-QColor ThemeManager::getPanelColor() const { return m_themeColors.value("panelColor"); }
-QColor ThemeManager::getControlBackground() const { return m_themeColors.value("controlBackground"); }
-
-QColor ThemeManager::getWelcomeBgColor() const { return m_themeColors.value("welcomeBgColor"); }
-QColor ThemeManager::getWelcomeBtnNewGradientStart() const { return m_themeColors.value("welcomeBtnNewGradientStart"); }
-QColor ThemeManager::getWelcomeBtnNewGradientEnd() const { return m_themeColors.value("welcomeBtnNewGradientEnd"); }
-QColor ThemeManager::getWelcomeBtnOpenColor() const { return m_themeColors.value("welcomeBtnOpenColor"); }
-QColor ThemeManager::getWelcomeTextDark() const { return m_themeColors.value("welcomeTextDark"); }
-QColor ThemeManager::getWelcomeAccentYellow() const { return m_themeColors.value("welcomeAccentYellow"); }
-
-QString ThemeManager::getLogoPath() const { return m_themeIcons.value("logo"); }
-QString ThemeManager::getMascotPath() const { return m_themeIcons.value("mascot"); }
-QString ThemeManager::getWelcomeDecoDotsPath() const { return m_themeIcons.value("welcomeDecoDots"); }
-QString ThemeManager::getWelcomeDecoTrianglePath() const { return m_themeIcons.value("welcomeDecoTriangle"); }
-QString ThemeManager::getWelcomeDecoZigzagPath() const { return m_themeIcons.value("welcomeDecoZigzag"); }
-QString ThemeManager::getWelcomeDecoStarPath() const { return m_themeIcons.value("welcomeDecoStar"); }
-QString ThemeManager::getProjectFramePath() const { return m_themeIcons.value("projectFrame"); }
-
-QString ThemeManager::getPasteIconPath() const { return m_themeIcons.value("pasteIcon"); }
-QString ThemeManager::getDeleteIconPath() const { return m_themeIcons.value("deleteIcon"); }
-QString ThemeManager::getGridSnapIconPath() const { return m_themeIcons.value("gridSnapIcon"); }
-QString ThemeManager::getScaleIconPath() const { return m_themeIcons.value("scaleIcon"); }
-QString ThemeManager::getUpscaleIconPath() const { return m_themeIcons.value("upscaleIcon", m_themeIcons.value("upscaleIcon")); }
-QString ThemeManager::getCropIconPath() const { return m_themeIcons.value("cropIcon"); }
-QString ThemeManager::getLabelIconPath() const { return m_themeIcons.value("labelIcon"); }
-QString ThemeManager::getArrangeIconPath() const { return m_themeIcons.value("arrangeIcon"); }
-QString ThemeManager::getRotateLeftIconPath() const { return m_themeIcons.value("rotateLeftIcon"); }
-QString ThemeManager::getRotateRightIconPath() const { return m_themeIcons.value("rotateRightIcon"); }
-QString ThemeManager::getZoomInIconPath() const { return m_themeIcons.value("zoomInIcon"); }
-QString ThemeManager::getZoomOutIconPath() const { return m_themeIcons.value("zoomOutIcon"); }
-QString ThemeManager::getUndoIconPath() const { return m_themeIcons.value("undoIcon"); }
-QString ThemeManager::getRedoIconPath() const { return m_themeIcons.value("redoIcon"); }
-QString ThemeManager::getPinIconPath() const { return m_themeIcons.value("pinIcon"); }
-QString ThemeManager::getSettingsIconPath() const { return m_themeIcons.value("settingsIcon"); }
+QVariantMap ThemeManager::getColors() const { return m_themeColors; }
+QVariantMap ThemeManager::getIcons() const { return m_themeIcons; }

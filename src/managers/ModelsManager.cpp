@@ -7,9 +7,9 @@
 #include <QQmlEngine>
 #include <quazip/JlCompress.h>
 
-const QString C_MODEL_URL = "https://github.com/Hemaxa/ImagoRef/releases/download/model/upscale-model.zip";
-const QString C_MODEL_BIN = "models-DF2K.bin";
-const QString C_MODEL_PARAM = "models-DK2K.param";
+const QString C_MODEL_URL = "https://imagoref.ru/models/upscale-model.zip";
+const QString C_MODEL_BIN = "model-DF2K.bin";
+const QString C_MODEL_PARAM = "model-DF2K.param";
 
 ModelsManager* ModelsManager::create(QQmlEngine *qmlEngine, QJSEngine *jsEngine)
 {

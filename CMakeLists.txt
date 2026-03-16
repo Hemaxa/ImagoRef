@@ -68,8 +68,6 @@ qt_add_qml_module(ImagoRef
         src/qml/components/ToolbarButton.qml
         src/qml/components/ResizeOverlay.qml
         src/qml/components/CropOverlay.qml
-    RESOURCES
-        res/resources.qrc
 )
 
 # Копирование папки с темами в директорию сборки

@@ -24,7 +24,7 @@ ApplicationWindow {
     color: "transparent" // Задаем всегда прозрачный цвет окна, чтобы у macOS был включен альфа-канал
 
     background: Rectangle {
-        color: root.isPinnedAndInactive ? "transparent" : ThemeManager.backgroundColor
+        color: root.isPinnedAndInactive ? "transparent" : ThemeManager.colors.backgroundColor
     }
 
     flags: {

@@ -129,6 +129,13 @@ qreal SelectionController::getItemHeight(int index) const
     return 0;
 }
 
+qreal SelectionController::getItemOpacity(int index) const
+{
+    if (index >= 0 && index < m_model->getCount())
+        return m_model->getItem(index).opacity;
+    return 1.0;
+}
+
 bool SelectionController::getIsItemSelected(int index) const
 {
     if (index >= 0 && index < m_model->getCount())
