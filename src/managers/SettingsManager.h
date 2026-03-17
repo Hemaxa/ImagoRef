@@ -21,6 +21,8 @@ class SettingsManager : public QObject {
     Q_PROPERTY(int arrangeSpacing READ getArrangeSpacing WRITE setArrangeSpacing NOTIFY arrangeSpacingChanged)
     Q_PROPERTY(bool hasPromptedUpscale READ getHasPromptedUpscale WRITE setHasPromptedUpscale NOTIFY hasPromptedUpscaleChanged)
     Q_PROPERTY(int toolbarColumns READ getToolbarColumns WRITE setToolbarColumns NOTIFY toolbarColumnsChanged)
+    Q_PROPERTY(int colorCopyMode READ getColorCopyMode WRITE setColorCopyMode NOTIFY colorCopyModeChanged)
+    Q_PROPERTY(QStringList colorHistory READ getColorHistory WRITE setColorHistory NOTIFY colorHistoryChanged)
 
 public:
     static SettingsManager* create(QQmlEngine *qmlEngine, QJSEngine *jsEngine);
@@ -50,6 +52,13 @@ public:
     int getToolbarColumns() const;
     void setToolbarColumns(int columns);
 
+    int getColorCopyMode() const;
+    void setColorCopyMode(int mode);
+
+    QStringList getColorHistory() const;
+    void setColorHistory(const QStringList& history);
+    Q_INVOKABLE void addColorToHistory(const QString& hexColor);
+
 signals:
     void themeNameChanged();
     void gridSizeChanged();
@@ -58,6 +67,8 @@ signals:
     void arrangeSpacingChanged();
     void hasPromptedUpscaleChanged();
     void toolbarColumnsChanged();
+    void colorCopyModeChanged();
+    void colorHistoryChanged();
 
 private:
     explicit SettingsManager(QObject* parent = nullptr);
@@ -72,4 +83,6 @@ private:
     int m_arrangeSpacing;
     bool m_hasPromptedUpscale;
     int m_toolbarColumns;
+    int m_colorCopyMode;
+    QStringList m_colorHistory;
 };

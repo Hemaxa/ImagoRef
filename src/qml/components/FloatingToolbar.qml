@@ -139,6 +139,15 @@ Rectangle {
             enabled: controller.selectionController.hasSelection
             onClicked: root.cropModeClicked()
         }
+
+        // Пипетка
+        ToolbarButton {
+            iconSource: "" // Иконку добавит пользователь
+            tooltip: "Пипетка"
+            shortcutText: "I"
+            active: controller.toolController.isEyedropperActive
+            onClicked: controller.toolController.toggleEyedropper()
+        }
         
         // Непрозрачность
         ToolbarButton {

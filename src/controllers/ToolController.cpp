@@ -4,12 +4,18 @@
 #include "SettingsManager.h"
 
 #include <cmath>
+#include <QGuiApplication>
+#include <QScreen>
+#include <QPixmap>
+#include <QClipboard>
+#include <QColor>
 
 ToolController::ToolController(ImagoImageModel *model, QUndoStack *undoStack, QObject *parent)
     : QObject(parent)
     , m_model(model)
     , m_undoStack(undoStack)
     , m_isPinned(false)
+    , m_isEyedropperActive(false)
 {
 }
 
@@ -22,6 +28,50 @@ void ToolController::togglePin()
 {
     m_isPinned = !m_isPinned;
     emit isPinnedChanged();
+}
+
+bool ToolController::getIsEyedropperActive() const
+{
+    return m_isEyedropperActive;
+}
+
+void ToolController::toggleEyedropper()
+{
+    m_isEyedropperActive = !m_isEyedropperActive;
+    emit isEyedropperActiveChanged();
+}
+
+QColor ToolController::getColorAtPoint(int globalX, int globalY)
+{
+    QScreen *screen = QGuiApplication::screenAt(QPoint(globalX, globalY));
+    if (!screen) screen = QGuiApplication::primaryScreen();
+    if (!screen) return Qt::black;
+
+    // Снимок экрана 1x1 пиксель
+    QPixmap pixmap = screen->grabWindow(0, globalX, globalY, 1, 1);
+    QImage image = pixmap.toImage();
+    if (image.isNull()) return Qt::black;
+    return image.pixelColor(0, 0);
+}
+
+void ToolController::copyColorToClipboard(const QColor &color)
+{
+    if (!color.isValid()) return;
+    
+    int mode = SettingsManager::instance().getColorCopyMode();
+    QString colorText;
+    
+    if (mode == 0) { // HEX
+        colorText = color.name(QColor::HexRgb).toUpper();
+    } else { // RGB
+        colorText = QString("rgb(%1, %2, %3)").arg(color.red()).arg(color.green()).arg(color.blue());
+    }
+    
+    QClipboard *clipboard = QGuiApplication::clipboard();
+    clipboard->setText(colorText);
+    
+    // Сохраняем в историю
+    SettingsManager::instance().addColorToHistory(color.name(QColor::HexRgb).toUpper());
 }
 
 void ToolController::deleteSelected()

@@ -23,6 +23,9 @@ Item {
     
     // Режим регулирования прозрачности
     property bool opacityModeActive: false
+
+    // Панель истории цветов
+    property bool colorPaletteActive: false
     
     //создает экземпляр холста
     CanvasView {
@@ -85,6 +88,21 @@ Item {
                 easing.type: Easing.InOutCubic
             }
         }
+    }
+    
+    // Панель истории цветов
+    ColorPalettePanel {
+        id: colorPalette
+        controller: root.controller
+        isPanelVisible: root.colorPaletteActive && !root.isPinnedAndInactive
+        z: 100
+    }
+    
+    // Оверлей пипетки
+    EyedropperOverlay {
+        id: eyedropperOverlay
+        controller: root.controller
+        z: 9999
     }
     
     //горячие клавиши
@@ -223,6 +241,20 @@ Item {
             var scenePos = canvasView.mapToScene(center)
             controller.toolController.arrangeAll(scenePos.x, scenePos.y)
         }
+    }
+    
+    // Пипетка
+    Shortcut {
+        sequence: "I"
+        enabled: !root.isWorkspaceLocked
+        onActivated: controller.toolController.toggleEyedropper()
+    }
+    
+    // Панель истории цветов
+    Shortcut {
+        sequence: "P"
+        enabled: !root.isPinnedAndInactive
+        onActivated: root.colorPaletteActive = !root.colorPaletteActive
     }
     
     //диалог ввода подписи

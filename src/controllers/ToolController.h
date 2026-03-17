@@ -14,11 +14,13 @@ class ToolController : public QObject {
 
     //свойство включенного режима фиксации
     Q_PROPERTY(bool isPinned READ getIsPinned NOTIFY isPinnedChanged)
+    Q_PROPERTY(bool isEyedropperActive READ getIsEyedropperActive NOTIFY isEyedropperActiveChanged)
 
 public:
     explicit ToolController(ImagoImageModel *model, QUndoStack *undoStack, QObject *parent = nullptr);
 
     bool getIsPinned() const;
+    bool getIsEyedropperActive() const;
 
     //методы активации соответствующих инструментов
     Q_INVOKABLE void deleteSelected();
@@ -29,13 +31,19 @@ public:
     Q_INVOKABLE void setOpacityForSelected(qreal opacity);
     Q_INVOKABLE void arrangeAll(qreal centerX = 10000.0, qreal centerY = 10000.0);
     Q_INVOKABLE void togglePin();
+    
+    Q_INVOKABLE void toggleEyedropper();
+    Q_INVOKABLE QColor getColorAtPoint(int globalX, int globalY);
+    Q_INVOKABLE void copyColorToClipboard(const QColor &color);
 
 signals:
     void selectionChanged();
     void isPinnedChanged();
+    void isEyedropperActiveChanged();
 
 private:
     ImagoImageModel *m_model;
     QUndoStack *m_undoStack;
     bool m_isPinned = false;
+    bool m_isEyedropperActive = false;
 };

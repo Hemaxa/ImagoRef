@@ -32,6 +32,8 @@ void SettingsManager::loadSettings()
     m_arrangeSpacing = m_settings.value("arrange/spacing", 20).toInt();
     m_hasPromptedUpscale = m_settings.value("models/hasPromptedUpscale", false).toBool();
     m_toolbarColumns = m_settings.value("toolbar/columns", 1).toInt();
+    m_colorCopyMode = m_settings.value("colorCopyMode", 0).toInt();
+    m_colorHistory = m_settings.value("colorHistory", QStringList()).toStringList();
 }
 
 void SettingsManager::saveSettings()
@@ -43,6 +45,8 @@ void SettingsManager::saveSettings()
     m_settings.setValue("arrange/spacing", m_arrangeSpacing);
     m_settings.setValue("models/hasPromptedUpscale", m_hasPromptedUpscale);
     m_settings.setValue("toolbar/columns", m_toolbarColumns);
+    m_settings.setValue("colorCopyMode", m_colorCopyMode);
+    m_settings.setValue("colorHistory", m_colorHistory);
 }
 
 QString SettingsManager::getThemeName() const
@@ -135,4 +139,49 @@ void SettingsManager::setToolbarColumns(int columns)
         saveSettings();
         emit toolbarColumnsChanged();
     }
+}
+
+int SettingsManager::getColorCopyMode() const
+{
+    return m_colorCopyMode;
+}
+
+void SettingsManager::setColorCopyMode(int mode)
+{
+    if (m_colorCopyMode != mode) {
+        m_colorCopyMode = mode;
+        saveSettings();
+        emit colorCopyModeChanged();
+    }
+}
+
+QStringList SettingsManager::getColorHistory() const
+{
+    return m_colorHistory;
+}
+
+void SettingsManager::setColorHistory(const QStringList& history)
+{
+    if (m_colorHistory != history) {
+        m_colorHistory = history;
+        saveSettings();
+        emit colorHistoryChanged();
+    }
+}
+
+void SettingsManager::addColorToHistory(const QString& hexColor)
+{
+    // Remove if exists to move to front
+    m_colorHistory.removeAll(hexColor);
+    
+    // Add to front
+    m_colorHistory.prepend(hexColor);
+    
+    // Keep only 6 elements
+    while (m_colorHistory.size() > 6) {
+        m_colorHistory.removeLast();
+    }
+    
+    saveSettings();
+    emit colorHistoryChanged();
 }

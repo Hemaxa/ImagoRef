@@ -58,6 +58,7 @@ Dialog {
         SettingsManager.canvasPattern = patternComboBox.currentValue
         SettingsManager.labelFontSize = labelFontSizeSpinBox.value
         SettingsManager.arrangeSpacing = arrangeSpacingSpinBox.value
+        SettingsManager.colorCopyMode = colorCopyModeComboBox.currentIndex
         ThemeManager.applyTheme(themeComboBox.currentValue)
     }
     
@@ -347,6 +348,49 @@ Dialog {
                                 readOnly: !arrangeSpacingSpinBox.editable
                                 validator: arrangeSpacingSpinBox.validator
                                 inputMethodHints: Qt.ImhFormattedNumbersOnly
+                            }
+                        }
+                    }
+                    
+                    // Режим копирования цвета (HEX / RGB)
+                    RowLayout {
+                        spacing: 0
+                        
+                        Label {
+                            text: "Формат цвета пипетки"
+                            color: ThemeManager.colors.textColor
+                            Layout.preferredWidth: 160
+                        }
+                        
+                        ComboBox {
+                            id: colorCopyModeComboBox
+                            Layout.preferredWidth: 180
+                            
+                            model: ListModel {
+                                ListElement { text: "HEX (#RRGGBB)"; value: 0 }
+                                ListElement { text: "RGB (r, g, b)"; value: 1 }
+                            }
+                            
+                            textRole: "text"
+                            valueRole: "value"
+                            
+                            background: Rectangle {
+                                color: ThemeManager.colors.controlBackground
+                                border.color: ThemeManager.colors.borderColor
+                                border.width: 1
+                                radius: 6
+                            }
+                            
+                            contentItem: Text {
+                                text: colorCopyModeComboBox.displayText
+                                font.pixelSize: 13
+                                color: ThemeManager.colors.textColor
+                                verticalAlignment: Text.AlignVCenter
+                                leftPadding: 10
+                            }
+                            
+                            Component.onCompleted: {
+                                currentIndex = SettingsManager.colorCopyMode
                             }
                         }
                     }
