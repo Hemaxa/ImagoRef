@@ -58,6 +58,9 @@ public:
     QStringList getColorHistory() const;
     void setColorHistory(const QStringList& history);
     Q_INVOKABLE void addColorToHistory(const QString& hexColor);
+    
+    Q_INVOKABLE bool isToolEnabled(const QString &toolName) const;
+    Q_INVOKABLE void setToolEnabled(const QString &toolName, bool enabled);
 
 signals:
     void themeNameChanged();
@@ -69,6 +72,8 @@ signals:
     void toolbarColumnsChanged();
     void colorCopyModeChanged();
     void colorHistoryChanged();
+    
+    void toolEnablementChanged(QString toolName, bool enabled);
 
 private:
     explicit SettingsManager(QObject* parent = nullptr);
@@ -85,4 +90,5 @@ private:
     int m_toolbarColumns;
     int m_colorCopyMode;
     QStringList m_colorHistory;
+    QHash<QString, bool> m_toolsEnablement;
 };

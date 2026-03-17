@@ -27,6 +27,68 @@ Item {
     // Панель истории цветов
     property bool colorPaletteActive: false
     
+    // Состояния включения инструментов (так как SettingsManager.isToolEnabled не имеет NOTIFY сигнала)
+    property bool toolZoomInEnabled: SettingsManager.isToolEnabled("ZoomIn")
+    property bool toolZoomOutEnabled: SettingsManager.isToolEnabled("ZoomOut")
+    property bool toolResizeEnabled: SettingsManager.isToolEnabled("Resize")
+    property bool toolCropEnabled: SettingsManager.isToolEnabled("Crop")
+    property bool toolLabelEnabled: SettingsManager.isToolEnabled("Label")
+    property bool toolOpacityEnabled: SettingsManager.isToolEnabled("Opacity")
+    property bool toolArrangeEnabled: SettingsManager.isToolEnabled("Arrange")
+    property bool toolEyedropperEnabled: SettingsManager.isToolEnabled("Eyedropper")
+    property bool toolPasteEnabled: SettingsManager.isToolEnabled("Paste")
+    property bool toolDeleteEnabled: SettingsManager.isToolEnabled("Delete")
+    property bool toolGridSnapEnabled: SettingsManager.isToolEnabled("GridSnap")
+    property bool toolUpscaleEnabled: SettingsManager.isToolEnabled("Upscale")
+    property bool toolRotateEnabled: SettingsManager.isToolEnabled("Rotate")
+    property bool toolUndoRedoEnabled: SettingsManager.isToolEnabled("UndoRedo")
+    property bool toolPinEnabled: SettingsManager.isToolEnabled("Pin")
+    property bool toolSettingsBtnEnabled: SettingsManager.isToolEnabled("SettingsBtn")
+    
+    Connections {
+        target: SettingsManager
+        function onToolEnablementChanged(toolName, enabled) {
+            if (toolName === "ZoomIn") root.toolZoomInEnabled = enabled
+            else if (toolName === "ZoomOut") root.toolZoomOutEnabled = enabled
+            else if (toolName === "Resize") root.toolResizeEnabled = enabled
+            else if (toolName === "Crop") root.toolCropEnabled = enabled
+            else if (toolName === "Label") root.toolLabelEnabled = enabled
+            else if (toolName === "Opacity") root.toolOpacityEnabled = enabled
+            else if (toolName === "Arrange") root.toolArrangeEnabled = enabled
+            else if (toolName === "Eyedropper") root.toolEyedropperEnabled = enabled
+            else if (toolName === "Paste") root.toolPasteEnabled = enabled
+            else if (toolName === "Delete") root.toolDeleteEnabled = enabled
+            else if (toolName === "GridSnap") root.toolGridSnapEnabled = enabled
+            else if (toolName === "Upscale") root.toolUpscaleEnabled = enabled
+            else if (toolName === "Rotate") root.toolRotateEnabled = enabled
+            else if (toolName === "UndoRedo") root.toolUndoRedoEnabled = enabled
+            else if (toolName === "Pin") root.toolPinEnabled = enabled
+            else if (toolName === "SettingsBtn") root.toolSettingsBtnEnabled = enabled
+        }
+    }
+    
+    // Взаимоисключение для нижних выезжающих панелей
+    onColorPaletteActiveChanged: {
+        if (root.colorPaletteActive) {
+            root.opacityModeActive = false
+            root.labelDialogVisilble = false
+        }
+    }
+    
+    onOpacityModeActiveChanged: {
+        if (root.opacityModeActive) {
+            root.colorPaletteActive = false
+            root.labelDialogVisilble = false
+        }
+    }
+    
+    onLabelDialogVisilbleChanged: {
+        if (root.labelDialogVisilble) {
+            root.colorPaletteActive = false
+            root.opacityModeActive = false
+        }
+    }
+    
     //создает экземпляр холста
     CanvasView {
         id: canvasView
@@ -44,6 +106,23 @@ Item {
         z: 100
         x: 15
         y: 15
+        
+        btnZoomInVisible: root.toolZoomInEnabled
+        btnZoomOutVisible: root.toolZoomOutEnabled
+        btnResizeVisible: root.toolResizeEnabled
+        btnCropVisible: root.toolCropEnabled
+        btnLabelVisible: root.toolLabelEnabled
+        btnOpacityVisible: root.toolOpacityEnabled
+        btnArrangeVisible: root.toolArrangeEnabled
+        btnEyedropperVisible: root.toolEyedropperEnabled
+        btnPasteVisible: root.toolPasteEnabled
+        btnDeleteVisible: root.toolDeleteEnabled
+        btnGridSnapVisible: root.toolGridSnapEnabled
+        btnUpscaleVisible: root.toolUpscaleEnabled
+        btnRotateVisible: root.toolRotateEnabled
+        btnUndoRedoVisible: root.toolUndoRedoEnabled
+        btnPinVisible: root.toolPinEnabled
+        btnSettingsBtnVisible: root.toolSettingsBtnEnabled
         
         //подключаем сигналы нажатия кнопок на панели и активации режимов редактирования
         onSettingsClicked: root.settingsRequested()
@@ -67,6 +146,7 @@ Item {
         resizeModeActive: canvasView.resizeMode
         cropModeActive: canvasView.cropMode
         opacityModeActive: root.opacityModeActive
+        labelModeActive: root.labelDialogVisilble
         
         //состояния видимости панели для анимации
         state: "visible"
@@ -127,7 +207,7 @@ Item {
     //вставить из буфера
     Shortcut {
         sequences: [StandardKey.Paste]
-        enabled: !root.isWorkspaceLocked
+        enabled: !root.isWorkspaceLocked && root.toolPasteEnabled
         onActivated: {
             //вычисляется центр экрана для вставки ровно по центру
             var center = Qt.point(canvasView.width / 2, canvasView.height / 2)
@@ -174,12 +254,14 @@ Item {
     //приблизить
     Shortcut {
         sequences: ["Ctrl+=", "Ctrl++", "Meta+=", "Meta++"]
+        enabled: root.toolZoomInEnabled
         onActivated: canvasView.zoomIn()
     }
     
     //отдалить
     Shortcut {
         sequences: ["Ctrl+-", "Meta+-"]
+        enabled: root.toolZoomOutEnabled
         onActivated: canvasView.zoomOut()
     }
     
@@ -190,27 +272,37 @@ Item {
             canvasView.exitResizeMode()
             canvasView.exitCropMode()
             controller.selectionController.clearSelection()
+            
+            if (controller.toolController.isEyedropperActive) {
+                controller.toolController.toggleEyedropper()
+            }
+            if (root.labelDialogVisilble) {
+                labelDialog.closeDialog()
+            }
+            if (root.opacityModeActive) {
+                root.opacityModeActive = false
+            }
         }
     }
     
     //режим изменения размера
     Shortcut {
         sequence: "S"
-        enabled: !root.isWorkspaceLocked
+        enabled: !root.isWorkspaceLocked && root.toolResizeEnabled
         onActivated: canvasView.toggleResizeMode()
     }
     
     //режим обрезки
     Shortcut {
         sequence: "C"
-        enabled: !root.isWorkspaceLocked
+        enabled: !root.isWorkspaceLocked && root.toolCropEnabled
         onActivated: canvasView.toggleCropMode()
     }
     
     //режим непрозрачности
     Shortcut {
         sequence: "O"
-        enabled: !root.isWorkspaceLocked && controller.selectionController.hasSelection
+        enabled: !root.isWorkspaceLocked && controller.selectionController.hasSelection && root.toolOpacityEnabled
         onActivated: root.opacityModeActive = !root.opacityModeActive
     }
     
@@ -224,7 +316,7 @@ Item {
     //надпись
     Shortcut {
         sequence: "L"
-        enabled: !root.isWorkspaceLocked
+        enabled: !root.isWorkspaceLocked && root.toolLabelEnabled
         onActivated: {
             if (controller.selectionController.hasSelection) {
                 labelDialog.openDialog()
@@ -235,7 +327,7 @@ Item {
     //расположить
     Shortcut {
         sequence: "A"
-        enabled: !root.isWorkspaceLocked
+        enabled: !root.isWorkspaceLocked && root.toolArrangeEnabled
         onActivated: {
             var center = Qt.point(canvasView.width / 2, canvasView.height / 2)
             var scenePos = canvasView.mapToScene(center)
@@ -246,7 +338,7 @@ Item {
     // Пипетка
     Shortcut {
         sequence: "I"
-        enabled: !root.isWorkspaceLocked
+        enabled: !root.isWorkspaceLocked && root.toolEyedropperEnabled
         onActivated: controller.toolController.toggleEyedropper()
     }
     
@@ -257,135 +349,150 @@ Item {
         onActivated: root.colorPaletteActive = !root.colorPaletteActive
     }
     
-    //диалог ввода подписи
-    Dialog {
+    // Диалог ввода подписи
+    property bool labelDialogVisilble: false
+    Rectangle {
         id: labelDialog
-        title: ""
         width: 380
-        height: 170
-        modal: true
-        anchors.centerIn: parent
-        standardButtons: Dialog.NoButton
+        height: 140
+        
+        // Позиционируем снизу по центру
+        x: (parent.width - width) / 2
+        y: root.labelDialogVisilble ? parent.height - height - 20 : parent.height + 20
+        
+        // Скрываем если панель за границами
+        visible: y < parent.height
+        
+        color: ThemeManager.colors.backgroundColor
+        border.color: ThemeManager.colors.accentColor
+        border.width: 2
+        radius: 12
+        z: 200
+        
+        Behavior on y {
+            NumberAnimation {
+                duration: 300
+                easing.type: Easing.InOutCubic
+            }
+        }
         
         function openDialog() {
             labelInput.text = ""
-            labelDialog.open()
+            root.labelDialogVisilble = true
             labelInput.forceActiveFocus()
         }
         
-        background: Rectangle {
-            color: ThemeManager.colors.backgroundColor
-            border.color: ThemeManager.colors.accentColor
-            border.width: 2
-            radius: 12
+        function closeDialog() {
+            root.labelDialogVisilble = false
+            canvasView.forceActiveFocus()
         }
         
-        header: Item {
-            height: 40
+        ColumnLayout {
+            anchors.fill: parent
+            anchors.margins: 15
+            spacing: 12
             
-            Rectangle {
-                anchors.fill: parent
-                color: Qt.rgba(ThemeManager.colors.accentColor.r, ThemeManager.colors.accentColor.g, ThemeManager.colors.accentColor.b, 0.15)
-                radius: 12
-                Rectangle {
-                    anchors.bottom: parent.bottom
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    height: 12
-                    color: parent.color
+            TextField {
+                id: labelInput
+                Layout.fillWidth: true
+                placeholderText: "Введите подпись..."
+                font.pixelSize: 14
+                color: ThemeManager.colors.textColor
+                
+                background: Rectangle {
+                    color: ThemeManager.colors.controlBackground
+                    border.color: labelInput.activeFocus ? ThemeManager.colors.accentColor : ThemeManager.colors.borderColor
+                    border.width: 1
+                    radius: 6
+                }
+                
+                Keys.onReturnPressed: {
+                    controller.toolController.setLabelForSelected(labelInput.text)
+                    labelDialog.closeDialog()
+                }
+                Keys.onEnterPressed: {
+                    controller.toolController.setLabelForSelected(labelInput.text)
+                    labelDialog.closeDialog()
+                }
+                Keys.onEscapePressed: {
+                    labelDialog.closeDialog()
                 }
             }
             
-            Text {
-                anchors.centerIn: parent
-                text: "Подпись"
-                font.pixelSize: 14
-                font.bold: true
-                color: ThemeManager.colors.accentColor
-            }
-        }
-        
-        contentItem: Item {
-            Column {
-                anchors.fill: parent
-                anchors.margins: 15
-                spacing: 12
+            RowLayout {
+                spacing: 10
+                Layout.alignment: Qt.AlignRight
                 
-                TextField {
-                    id: labelInput
-                    width: parent.width
-                    placeholderText: "Введите подпись..."
-                    font.pixelSize: 14
-                    color: ThemeManager.colors.textColor
+                AbstractButton {
+                    Layout.preferredWidth: 90
+                    Layout.preferredHeight: 32
                     
                     background: Rectangle {
-                        color: ThemeManager.colors.controlBackground
-                        border.color: labelInput.activeFocus ? ThemeManager.colors.accentColor : ThemeManager.colors.borderColor
+                        color: "transparent"
+                        border.color: ThemeManager.colors.borderColor
                         border.width: 1
                         radius: 6
                     }
                     
-                    Keys.onReturnPressed: {
-                        controller.toolController.setLabelForSelected(labelInput.text)
-                        labelDialog.close()
+                    contentItem: Text {
+                        text: "Очистить"
+                        color: ThemeManager.colors.textColor
+                        font.pixelSize: 13
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
                     }
-                    Keys.onEnterPressed: {
-                        controller.toolController.setLabelForSelected(labelInput.text)
-                        labelDialog.close()
+                    
+                    onClicked: {
+                        controller.toolController.setLabelForSelected("")
+                        labelDialog.closeDialog()
                     }
                 }
                 
-                Row {
-                    spacing: 10
-                    anchors.right: parent.right
+                AbstractButton {
+                    Layout.preferredWidth: 90
+                    Layout.preferredHeight: 32
                     
-                    AbstractButton {
-                        width: 90
-                        height: 32
-                        
-                        background: Rectangle {
-                            color: "transparent"
-                            border.color: ThemeManager.colors.borderColor
-                            border.width: 1
-                            radius: 6
-                        }
-                        
-                        contentItem: Text {
-                            text: "Очистить"
-                            color: ThemeManager.colors.textColor
-                            font.pixelSize: 13
-                            horizontalAlignment: Text.AlignHCenter
-                            verticalAlignment: Text.AlignVCenter
-                        }
-                        
-                        onClicked: {
-                            controller.toolController.setLabelForSelected("")
-                            labelDialog.close()
-                        }
+                    background: Rectangle {
+                        color: ThemeManager.colors.accentColor
+                        radius: 6
                     }
                     
-                    AbstractButton {
-                        width: 90
-                        height: 32
-                        
-                        background: Rectangle {
-                            color: ThemeManager.colors.accentColor
-                            radius: 6
-                        }
-                        
-                        contentItem: Text {
-                            text: "Применить"
-                            color: ThemeManager.colors.backgroundColor
-                            font.pixelSize: 13
-                            font.bold: true
-                            horizontalAlignment: Text.AlignHCenter
-                            verticalAlignment: Text.AlignVCenter
-                        }
-                        
-                        onClicked: {
-                            controller.toolController.setLabelForSelected(labelInput.text)
-                            labelDialog.close()
-                        }
+                    contentItem: Text {
+                        text: "Применить"
+                        color: ThemeManager.colors.backgroundColor
+                        font.pixelSize: 13
+                        font.bold: true
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                    }
+                    
+                    onClicked: {
+                        controller.toolController.setLabelForSelected(labelInput.text)
+                        labelDialog.closeDialog()
+                    }
+                }
+                
+                AbstractButton {
+                    Layout.preferredWidth: 80
+                    Layout.preferredHeight: 32
+                    
+                    background: Rectangle {
+                        color: "transparent"
+                        border.color: ThemeManager.colors.borderColor
+                        border.width: 1
+                        radius: 6
+                    }
+                    
+                    contentItem: Text {
+                        text: "Отмена"
+                        color: ThemeManager.colors.textColor
+                        font.pixelSize: 13
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                    }
+                    
+                    onClicked: {
+                        labelDialog.closeDialog()
                     }
                 }
             }
@@ -395,17 +502,31 @@ Item {
     // Слайдер непрозрачности
     Rectangle {
         id: opacitySliderContainer
-        visible: root.opacityModeActive && controller.selectionController.hasSelection && !root.isWorkspaceLocked
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: 20
-        anchors.horizontalCenter: parent.horizontalCenter
+        
+        property bool isOpacityVisible: root.opacityModeActive && controller.selectionController.hasSelection && !root.isWorkspaceLocked
+        
         width: 180
         height: 36
+        
+        // Позиционируем снизу по центру
+        x: (parent.width - width) / 2
+        y: isOpacityVisible ? parent.height - height - 20 : parent.height + 20
+        
+        // Скрываем если панель за границами
+        visible: y < parent.height
+        
         color: Qt.rgba(ThemeManager.colors.panelColor.r, ThemeManager.colors.panelColor.g, ThemeManager.colors.panelColor.b, 0.95)
         border.color: ThemeManager.colors.borderColor
         border.width: 1
-        radius: 8
+        radius: 18 // Округляем до состояния пилюли
         z: 100
+        
+        Behavior on y {
+            NumberAnimation {
+                duration: 300
+                easing.type: Easing.InOutCubic
+            }
+        }
 
         Slider {
             id: opacitySlider

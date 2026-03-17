@@ -25,6 +25,25 @@ Rectangle {
     property bool resizeModeActive: false
     property bool cropModeActive: false
     property bool opacityModeActive: false
+    property bool labelModeActive: false
+    
+    // Cвойства для отслеживания состояния кнопок
+    property bool btnZoomInVisible: true
+    property bool btnZoomOutVisible: true
+    property bool btnResizeVisible: true
+    property bool btnCropVisible: true
+    property bool btnLabelVisible: true
+    property bool btnOpacityVisible: true
+    property bool btnArrangeVisible: true
+    property bool btnEyedropperVisible: true
+    property bool btnPasteVisible: true
+    property bool btnDeleteVisible: true
+    property bool btnGridSnapVisible: true
+    property bool btnUpscaleVisible: true
+    property bool btnRotateVisible: true
+    property bool btnUndoRedoVisible: true
+    property bool btnPinVisible: true
+    property bool btnSettingsBtnVisible: true
     
     // Оставляем только нужные свойства
     property int columns: SettingsManager.toolbarColumns
@@ -39,7 +58,7 @@ Rectangle {
     border.color: ThemeManager.colors.borderColor
     border.width: 1
     radius: 3
-    
+
     // Drag handle for resizing horizontally
     MouseArea {
         id: rightResizeHandle
@@ -84,6 +103,7 @@ Rectangle {
             iconSource: ThemeManager.icons.pasteIcon
             tooltip: "Вставить"
             shortcutText: "Ctrl+V"
+            visible: root.btnPasteVisible
             onClicked: root.pasteClicked()
         }
         
@@ -93,6 +113,7 @@ Rectangle {
             tooltip: "Удалить"
             shortcutText: "Delete"
             enabled: controller.selectionController.hasSelection
+            visible: root.btnDeleteVisible
             onClicked: controller.toolController.deleteSelected()
         }
         
@@ -102,6 +123,7 @@ Rectangle {
             tooltip: "Привязать к сетке"
             shortcutText: "G"
             enabled: controller.selectionController.hasSelection
+            visible: root.btnGridSnapVisible
             onClicked: controller.toolController.snapToGrid()
         }
         
@@ -110,7 +132,7 @@ Rectangle {
             iconSource: ThemeManager.icons.upscaleIcon
             tooltip: "Увеличить разрешение"
             shortcutText: "U"
-            visible: ModelsManager.isModelDownloaded
+            visible: ModelsManager.isModelDownloaded && root.btnUpscaleVisible
             enabled: controller.selectionController.hasSelection
             onClicked: {
                 var selectedIndices = controller.model.getSelectedIndices()
@@ -126,6 +148,7 @@ Rectangle {
             tooltip: "Изменить размер"
             shortcutText: "S"
             active: root.resizeModeActive
+            visible: root.btnResizeVisible
             enabled: controller.selectionController.hasSelection
             onClicked: root.resizeModeClicked()
         }
@@ -165,6 +188,8 @@ Rectangle {
             tooltip: "Подписать"
             shortcutText: "L"
             enabled: controller.selectionController.hasSelection
+            active: root.labelModeActive
+            visible: root.btnLabelVisible
             onClicked: root.labelClicked()
         }
         
@@ -183,6 +208,7 @@ Rectangle {
             tooltip: "Вращать против часовой"
             shortcutText: "Shift+R"
             enabled: controller.selectionController.hasSelection
+            visible: root.btnRotateVisible
             onClicked: controller.toolController.rotateSelected(-90)
         }
         
@@ -192,6 +218,7 @@ Rectangle {
             tooltip: "Вращать по часовой"
             shortcutText: "R"
             enabled: controller.selectionController.hasSelection
+            visible: root.btnRotateVisible
             onClicked: controller.toolController.rotateSelected(90)
         }
         
@@ -200,6 +227,7 @@ Rectangle {
             iconSource: ThemeManager.icons.zoomInIcon
             tooltip: "Приблизить"
             shortcutText: "Ctrl++"
+            visible: root.btnZoomInVisible
             onClicked: root.zoomInClicked()
         }
         
@@ -208,6 +236,7 @@ Rectangle {
             iconSource: ThemeManager.icons.zoomOutIcon
             tooltip: "Отдалить"
             shortcutText: "Ctrl+-"
+            visible: root.btnZoomOutVisible
             onClicked: root.zoomOutClicked()
         }
         
@@ -217,6 +246,7 @@ Rectangle {
             tooltip: "Отменить"
             shortcutText: "Ctrl+Z"
             enabled: controller.canUndo
+            visible: root.btnUndoRedoVisible
             onClicked: controller.undo()
         }
         
@@ -226,6 +256,7 @@ Rectangle {
             tooltip: "Повторить"
             shortcutText: "Ctrl+Shift+Z"
             enabled: controller.canRedo
+            visible: root.btnUndoRedoVisible
             onClicked: controller.redo()
         }
 
@@ -234,6 +265,7 @@ Rectangle {
             iconSource: ThemeManager.icons.pinIcon
             tooltip: "Закрепить поверх всех окон"
             active: controller.toolController.isPinned
+            visible: root.btnPinVisible
             onClicked: controller.toolController.togglePin()
         }
         
@@ -242,6 +274,7 @@ Rectangle {
             iconSource: ThemeManager.icons.settingsIcon
             tooltip: "Настройки"
             shortcutText: "Ctrl+,"
+            visible: root.btnSettingsBtnVisible
             onClicked: root.settingsClicked()
         }
     }

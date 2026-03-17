@@ -85,6 +85,110 @@ ApplicationWindow {
                 }
             }
         }
+        
+        Menu {
+            title: "Инструменты"
+            
+            Action {
+                text: "Приблизить"
+                checkable: true
+                checked: SettingsManager.isToolEnabled("ZoomIn")
+                onCheckedChanged: SettingsManager.setToolEnabled("ZoomIn", checked)
+            }
+            Action {
+                text: "Отдалить"
+                checkable: true
+                checked: SettingsManager.isToolEnabled("ZoomOut")
+                onCheckedChanged: SettingsManager.setToolEnabled("ZoomOut", checked)
+            }
+            Action {
+                text: "Изменить размер"
+                checkable: true
+                checked: SettingsManager.isToolEnabled("Resize")
+                onCheckedChanged: SettingsManager.setToolEnabled("Resize", checked)
+            }
+            Action {
+                text: "Обрезать"
+                checkable: true
+                checked: SettingsManager.isToolEnabled("Crop")
+                onCheckedChanged: SettingsManager.setToolEnabled("Crop", checked)
+            }
+            Action {
+                text: "Надпись"
+                checkable: true
+                checked: SettingsManager.isToolEnabled("Label")
+                onCheckedChanged: SettingsManager.setToolEnabled("Label", checked)
+            }
+            Action {
+                text: "Непрозрачность"
+                checkable: true
+                checked: SettingsManager.isToolEnabled("Opacity")
+                onCheckedChanged: SettingsManager.setToolEnabled("Opacity", checked)
+            }
+            Action {
+                text: "Расположить"
+                checkable: true
+                checked: SettingsManager.isToolEnabled("Arrange")
+                onCheckedChanged: SettingsManager.setToolEnabled("Arrange", checked)
+            }
+            Action {
+                text: "Пипетка"
+                checkable: true
+                checked: SettingsManager.isToolEnabled("Eyedropper")
+                onCheckedChanged: SettingsManager.setToolEnabled("Eyedropper", checked)
+            }
+            
+            MenuSeparator {}
+            
+            Action {
+                text: "Вставить из буфера"
+                checkable: true
+                checked: SettingsManager.isToolEnabled("Paste")
+                onCheckedChanged: SettingsManager.setToolEnabled("Paste", checked)
+            }
+            Action {
+                text: "Удалить"
+                checkable: true
+                checked: SettingsManager.isToolEnabled("Delete")
+                onCheckedChanged: SettingsManager.setToolEnabled("Delete", checked)
+            }
+            Action {
+                text: "Привязать к сетке"
+                checkable: true
+                checked: SettingsManager.isToolEnabled("GridSnap")
+                onCheckedChanged: SettingsManager.setToolEnabled("GridSnap", checked)
+            }
+            Action {
+                text: "Увеличить разрешение"
+                checkable: true
+                checked: SettingsManager.isToolEnabled("Upscale")
+                onCheckedChanged: SettingsManager.setToolEnabled("Upscale", checked)
+            }
+            Action {
+                text: "Повернуть"
+                checkable: true
+                checked: SettingsManager.isToolEnabled("Rotate")
+                onCheckedChanged: SettingsManager.setToolEnabled("Rotate", checked)
+            }
+            Action {
+                text: "Отменить/Повторить"
+                checkable: true
+                checked: SettingsManager.isToolEnabled("UndoRedo")
+                onCheckedChanged: SettingsManager.setToolEnabled("UndoRedo", checked)
+            }
+            Action {
+                text: "Закрепить окно"
+                checkable: true
+                checked: SettingsManager.isToolEnabled("Pin")
+                onCheckedChanged: SettingsManager.setToolEnabled("Pin", checked)
+            }
+            Action {
+                text: "Настройки"
+                checkable: true
+                checked: SettingsManager.isToolEnabled("SettingsBtn")
+                onCheckedChanged: SettingsManager.setToolEnabled("SettingsBtn", checked)
+            }
+        }
     }
     
     //загрузчик главного окна

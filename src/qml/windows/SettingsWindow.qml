@@ -13,7 +13,44 @@ Dialog {
     title: ""
     width: 700
     height: 420
+    
+    // Центрируем диалог вручную для корректной работы анимации
+    x: (parent.width - width) / 2
+    y: (parent.height - height) / 2
+    
     modal: true
+    
+    enter: Transition {
+        NumberAnimation {
+            property: "y"
+            from: root.parent.height
+            to: (root.parent.height - root.height) / 2
+            duration: 300
+            easing.type: Easing.OutCubic
+        }
+        NumberAnimation {
+            property: "opacity"
+            from: 0.0
+            to: 1.0
+            duration: 300
+        }
+    }
+
+    exit: Transition {
+        NumberAnimation {
+            property: "y"
+            from: (root.parent.height - root.height) / 2
+            to: root.parent.height
+            duration: 300
+            easing.type: Easing.InCubic
+        }
+        NumberAnimation {
+            property: "opacity"
+            from: 1.0
+            to: 0.0
+            duration: 300
+        }
+    }
     
     standardButtons: Dialog.NoButton
     

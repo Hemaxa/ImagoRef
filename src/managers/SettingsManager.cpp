@@ -34,6 +34,15 @@ void SettingsManager::loadSettings()
     m_toolbarColumns = m_settings.value("toolbar/columns", 1).toInt();
     m_colorCopyMode = m_settings.value("colorCopyMode", 0).toInt();
     m_colorHistory = m_settings.value("colorHistory", QStringList()).toStringList();
+    
+    // Tools enablement
+    m_toolsEnablement.clear();
+    m_settings.beginGroup("tools");
+    QStringList toolKeys = m_settings.childKeys();
+    for (const QString& key : toolKeys) {
+        m_toolsEnablement[key] = m_settings.value(key).toBool();
+    }
+    m_settings.endGroup();
 }
 
 void SettingsManager::saveSettings()
@@ -47,6 +56,12 @@ void SettingsManager::saveSettings()
     m_settings.setValue("toolbar/columns", m_toolbarColumns);
     m_settings.setValue("colorCopyMode", m_colorCopyMode);
     m_settings.setValue("colorHistory", m_colorHistory);
+    
+    m_settings.beginGroup("tools");
+    for (auto it = m_toolsEnablement.constBegin(); it != m_toolsEnablement.constEnd(); ++it) {
+        m_settings.setValue(it.key(), it.value());
+    }
+    m_settings.endGroup();
 }
 
 QString SettingsManager::getThemeName() const
@@ -184,4 +199,19 @@ void SettingsManager::addColorToHistory(const QString& hexColor)
     
     saveSettings();
     emit colorHistoryChanged();
+}
+
+bool SettingsManager::isToolEnabled(const QString &toolName) const
+{
+    // По умолчанию все инструменты включены
+    return m_toolsEnablement.value(toolName, true);
+}
+
+void SettingsManager::setToolEnabled(const QString &toolName, bool enabled)
+{
+    if (m_toolsEnablement.value(toolName, true) != enabled) {
+        m_toolsEnablement[toolName] = enabled;
+        saveSettings();
+        emit toolEnablementChanged(toolName, enabled);
+    }
 }
