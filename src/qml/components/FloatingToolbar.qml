@@ -159,16 +159,18 @@ Rectangle {
             tooltip: "Обрезать"
             shortcutText: "C"
             active: root.cropModeActive
+            visible: root.btnCropVisible
             enabled: controller.selectionController.hasSelection
             onClicked: root.cropModeClicked()
         }
 
         // Пипетка
         ToolbarButton {
-            iconSource: "" // Иконку добавит пользователь
+            iconSource: ThemeManager.icons.eyedropperIcon
             tooltip: "Пипетка"
             shortcutText: "I"
             active: controller.toolController.isEyedropperActive
+            visible: root.btnEyedropperVisible
             onClicked: controller.toolController.toggleEyedropper()
         }
         
@@ -178,6 +180,7 @@ Rectangle {
             tooltip: "Непрозрачность"
             shortcutText: "O"
             active: root.opacityModeActive
+            visible: root.btnOpacityVisible
             enabled: controller.selectionController.hasSelection
             onClicked: root.opacityModeClicked()
         }
@@ -198,6 +201,7 @@ Rectangle {
             iconSource: ThemeManager.icons.arrangeIcon
             tooltip: "Расположить"
             shortcutText: "A"
+            visible: root.btnArrangeVisible
             enabled: controller.model.count > 0
             onClicked: root.arrangeClicked()
         }

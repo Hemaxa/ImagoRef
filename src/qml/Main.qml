@@ -90,103 +90,119 @@ ApplicationWindow {
             title: "Инструменты"
             
             Action {
+                id: actionZoomIn
                 text: "Приблизить"
                 checkable: true
                 checked: SettingsManager.isToolEnabled("ZoomIn")
-                onCheckedChanged: SettingsManager.setToolEnabled("ZoomIn", checked)
+                onCheckedChanged: SettingsManager.setToolEnabled("ZoomIn", actionZoomIn.checked)
             }
             Action {
+                id: actionZoomOut
                 text: "Отдалить"
                 checkable: true
                 checked: SettingsManager.isToolEnabled("ZoomOut")
-                onCheckedChanged: SettingsManager.setToolEnabled("ZoomOut", checked)
+                onCheckedChanged: SettingsManager.setToolEnabled("ZoomOut", actionZoomOut.checked)
             }
             Action {
+                id: actionResize
                 text: "Изменить размер"
                 checkable: true
                 checked: SettingsManager.isToolEnabled("Resize")
-                onCheckedChanged: SettingsManager.setToolEnabled("Resize", checked)
+                onCheckedChanged: SettingsManager.setToolEnabled("Resize", actionResize.checked)
             }
             Action {
+                id: actionCrop
                 text: "Обрезать"
                 checkable: true
                 checked: SettingsManager.isToolEnabled("Crop")
-                onCheckedChanged: SettingsManager.setToolEnabled("Crop", checked)
+                onCheckedChanged: SettingsManager.setToolEnabled("Crop", actionCrop.checked)
             }
             Action {
+                id: actionLabel
                 text: "Надпись"
                 checkable: true
                 checked: SettingsManager.isToolEnabled("Label")
-                onCheckedChanged: SettingsManager.setToolEnabled("Label", checked)
+                onCheckedChanged: SettingsManager.setToolEnabled("Label", actionLabel.checked)
             }
             Action {
+                id: actionOpacity
                 text: "Непрозрачность"
                 checkable: true
                 checked: SettingsManager.isToolEnabled("Opacity")
-                onCheckedChanged: SettingsManager.setToolEnabled("Opacity", checked)
+                onCheckedChanged: SettingsManager.setToolEnabled("Opacity", actionOpacity.checked)
             }
             Action {
+                id: actionArrange
                 text: "Расположить"
                 checkable: true
                 checked: SettingsManager.isToolEnabled("Arrange")
-                onCheckedChanged: SettingsManager.setToolEnabled("Arrange", checked)
+                onCheckedChanged: SettingsManager.setToolEnabled("Arrange", actionArrange.checked)
             }
             Action {
+                id: actionEyedropper
                 text: "Пипетка"
                 checkable: true
                 checked: SettingsManager.isToolEnabled("Eyedropper")
-                onCheckedChanged: SettingsManager.setToolEnabled("Eyedropper", checked)
+                onCheckedChanged: SettingsManager.setToolEnabled("Eyedropper", actionEyedropper.checked)
             }
             
             MenuSeparator {}
             
             Action {
+                id: actionPaste
                 text: "Вставить из буфера"
                 checkable: true
                 checked: SettingsManager.isToolEnabled("Paste")
-                onCheckedChanged: SettingsManager.setToolEnabled("Paste", checked)
+                onCheckedChanged: SettingsManager.setToolEnabled("Paste", actionPaste.checked)
             }
             Action {
+                id: actionDelete
                 text: "Удалить"
                 checkable: true
                 checked: SettingsManager.isToolEnabled("Delete")
-                onCheckedChanged: SettingsManager.setToolEnabled("Delete", checked)
+                onCheckedChanged: SettingsManager.setToolEnabled("Delete", actionDelete.checked)
             }
             Action {
+                id: actionGridSnap
                 text: "Привязать к сетке"
                 checkable: true
                 checked: SettingsManager.isToolEnabled("GridSnap")
-                onCheckedChanged: SettingsManager.setToolEnabled("GridSnap", checked)
+                onCheckedChanged: SettingsManager.setToolEnabled("GridSnap", actionGridSnap.checked)
             }
             Action {
+                id: actionUpscale
                 text: "Увеличить разрешение"
                 checkable: true
                 checked: SettingsManager.isToolEnabled("Upscale")
-                onCheckedChanged: SettingsManager.setToolEnabled("Upscale", checked)
+                onCheckedChanged: SettingsManager.setToolEnabled("Upscale", actionUpscale.checked)
             }
             Action {
+                id: actionRotate
                 text: "Повернуть"
                 checkable: true
                 checked: SettingsManager.isToolEnabled("Rotate")
-                onCheckedChanged: SettingsManager.setToolEnabled("Rotate", checked)
+                onCheckedChanged: SettingsManager.setToolEnabled("Rotate", actionRotate.checked)
             }
             Action {
+                id: actionUndoRedo
                 text: "Отменить/Повторить"
                 checkable: true
                 checked: SettingsManager.isToolEnabled("UndoRedo")
-                onCheckedChanged: SettingsManager.setToolEnabled("UndoRedo", checked)
+                onCheckedChanged: SettingsManager.setToolEnabled("UndoRedo", actionUndoRedo.checked)
             }
             Action {
+                id: actionPin
                 text: "Закрепить окно"
                 checkable: true
                 checked: SettingsManager.isToolEnabled("Pin")
-                onCheckedChanged: SettingsManager.setToolEnabled("Pin", checked)
+                onCheckedChanged: SettingsManager.setToolEnabled("Pin", actionPin.checked)
             }
             Action {
-                text: "Настройки"
+                id: actionSettingsBtn
+                text: "Кнопка настроек"
                 checkable: true
                 checked: SettingsManager.isToolEnabled("SettingsBtn")
-                onCheckedChanged: SettingsManager.setToolEnabled("SettingsBtn", checked)
+                onCheckedChanged: SettingsManager.setToolEnabled("SettingsBtn", actionSettingsBtn.checked)
             }
         }
     }

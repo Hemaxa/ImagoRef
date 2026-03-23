@@ -85,8 +85,9 @@ void ThemeManager::resetToDefaults()
     m_themeIcons["undoIcon"] = "file://" + defaultThemeDir + "/MainWindow/tools/undo.svg";
     m_themeIcons["redoIcon"] = "file://" + defaultThemeDir + "/MainWindow/tools/redo.svg";
     m_themeIcons["pinIcon"] = "file://" + defaultThemeDir + "/MainWindow/tools/pin.svg";
-    m_themeIcons["settingsIcon"] = "file://" + defaultThemeDir + "/MainWindow/tools/settings.svg";
-    m_themeIcons["opacityIcon"] = "file://" + defaultThemeDir + "/MainWindow/tools/settings.svg";
+    m_themeIcons["settingsIcon"] = "file://" + defaultThemeDir + "/MainWindow/tools/label.svg";
+    m_themeIcons["opacityIcon"] = "file://" + defaultThemeDir + "/MainWindow/tools/label.svg";
+    m_themeIcons["eyedropperIcon"] = "file://" + defaultThemeDir + "/MainWindow/tools/label.svg";
 }
 
 void ThemeManager::scanAvailableThemes()

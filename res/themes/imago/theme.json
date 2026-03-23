@@ -32,6 +32,8 @@
         "upscaleIcon": "MainWindow/tools/upscale.svg",
         "scaleIcon": "MainWindow/tools/scale.svg",
         "cropIcon": "MainWindow/tools/crop.svg",
+        "eyedropperIcon": "MainWindow/tools/eyedropper.svg",
+        "opacityIcon": "MainWindow/tools/opacity.svg",
         "labelIcon": "MainWindow/tools/label.svg",
         "arrangeIcon": "MainWindow/tools/arrange.svg",
         "rotateLeftIcon": "MainWindow/tools/rotate_left.svg",
