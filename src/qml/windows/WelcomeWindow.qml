@@ -15,6 +15,7 @@ Dialog {
     
     signal newBoardRequested()
     signal openBoardRequested(url fileUrl)
+    signal openCloudBoardRequested(string boardId)
     
     // Цвета темы Welcome Window
     property color bgColor: ThemeManager.colors.welcomeBgColor
@@ -291,6 +292,38 @@ Dialog {
                     NumberAnimation { duration: 100 }
                 }
             }
+
+            // Кнопка "Open from Cloud"
+            Rectangle {
+                id: openCloudBtn
+                width: 180
+                height: 50
+                radius: 25
+                color: ThemeManager.colors.controlBackground
+                
+                Text {
+                    anchors.centerIn: parent
+                    text: "Open from Cloud"
+                    font.pixelSize: 18
+                    font.bold: true
+                    color: root.textDark
+                }
+                
+                MouseArea {
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    hoverEnabled: true
+                    
+                    onClicked: welcomeCloudOpenDialog.open()
+                    
+                    onEntered: parent.scale = 1.05
+                    onExited: parent.scale = 1.0
+                }
+                
+                Behavior on scale {
+                    NumberAnimation { duration: 100 }
+                }
+            }
         }
     }
     
@@ -302,6 +335,30 @@ Dialog {
         title: "Открыть доску"
         nameFilters: ["ImagoRef доска (*.iref)", "Все файлы (*)"]
         onAccepted: root.openBoardRequested(selectedFile)
+    }
+
+    // ========================================
+    // CLOUD DIALOG
+    // ========================================
+    Dialog {
+        id: welcomeCloudOpenDialog
+        title: "Открыть из облака"
+        standardButtons: Dialog.Ok | Dialog.Cancel
+        anchors.centerIn: parent
+        
+        ColumnLayout {
+            Text { text: "ID Доски:" }
+            TextField {
+                id: welcomeCloudOpenIdInput
+                placeholderText: "Введите ID доски"
+            }
+        }
+        
+        onAccepted: {
+            if (welcomeCloudOpenIdInput.text.trim() !== "") {
+                root.openCloudBoardRequested(welcomeCloudOpenIdInput.text.trim())
+            }
+        }
     }
 
     // ========================================

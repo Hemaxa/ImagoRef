@@ -9,7 +9,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 #определение используемых пакетов (Qt Quick вместо Widgets)
-find_package(Qt6 REQUIRED COMPONENTS Core Gui Quick QuickControls2 Qml Svg)
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Quick QuickControls2 Qml Svg Network WebSockets)
 
 #включение Qt-автоматизаций
 set(CMAKE_AUTOMOC ON)
@@ -38,6 +38,10 @@ target_sources(ImagoRef PRIVATE
     ${SRC_DIR}/controllers/ToolController.cpp
     ${SRC_DIR}/controllers/UpscaleController.h
     ${SRC_DIR}/controllers/UpscaleController.cpp
+    ${SRC_DIR}/controllers/CloudController.h
+    ${SRC_DIR}/controllers/CloudController.cpp
+    ${SRC_DIR}/controllers/SyncController.h
+    ${SRC_DIR}/controllers/SyncController.cpp
 
     ${SRC_DIR}/managers/SettingsManager.h
     ${SRC_DIR}/managers/SettingsManager.cpp
@@ -45,6 +49,8 @@ target_sources(ImagoRef PRIVATE
     ${SRC_DIR}/managers/ThemesManager.cpp
     ${SRC_DIR}/managers/ModelsManager.h
     ${SRC_DIR}/managers/ModelsManager.cpp
+    ${SRC_DIR}/managers/CacheManager.h
+    ${SRC_DIR}/managers/CacheManager.cpp
 
     ${SRC_DIR}/models/ImageModel.h
     ${SRC_DIR}/models/ImageModel.cpp
@@ -146,6 +152,8 @@ if(APPLE)
         Qt6::Gui
         Qt6::GuiPrivate
         Qt6::Svg
+        Qt6::Network
+        Qt6::WebSockets
 
         OpenGL::GL
         ZLIB::ZLIB
@@ -225,6 +233,8 @@ if(WIN32)
         Qt6::Gui
         Qt6::GuiPrivate
         Qt6::Svg
+        Qt6::Network
+        Qt6::WebSockets
     )
 
     #задание свойств конечного файла
@@ -288,6 +298,8 @@ if(UNIX AND NOT APPLE)
         Qt6::Gui
         Qt6::GuiPrivate
         Qt6::Svg
+        Qt6::Network
+        Qt6::WebSockets
     )
 
     #регистрация приложения (Info.desktop.in)

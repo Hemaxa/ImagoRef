@@ -3,6 +3,8 @@
 #include "SettingsManager.h"
 #include "ImageProvider.h"
 #include "ModelsManager.h"
+#include "CloudController.h"
+#include "SyncController.h"
 
 BoardController::BoardController(QObject *parent) : QObject(parent)
     , m_model(new ImagoImageModel(this))
@@ -12,6 +14,8 @@ BoardController::BoardController(QObject *parent) : QObject(parent)
     , m_clipboardController(new ClipboardController(m_model, m_undoStack, this))
     , m_toolController(new ToolController(m_model, m_undoStack, this))
     , m_upscaleController(new UpscaleController(m_model, &ModelsManager::instance(), m_undoStack, this))
+    , m_cloudController(new CloudController(m_model, m_undoStack, this))
+    , m_syncController(new SyncController(m_model, this))
     , m_gridSize(SettingsManager::instance().getGridSize())
     , m_cameraX(-1)
     , m_cameraY(-1)
@@ -70,6 +74,8 @@ SelectionController* BoardController::getSelectionController() const { return m_
 ClipboardController* BoardController::getClipboardController() const { return m_clipboardController; }
 ToolController* BoardController::getToolController() const { return m_toolController; }
 UpscaleController* BoardController::getUpscaleController() const { return m_upscaleController; }
+CloudController* BoardController::getCloudController() const { return m_cloudController; }
+SyncController* BoardController::getSyncController() const { return m_syncController; }
 
 bool BoardController::getCanUndo() const { return m_undoStack->canUndo(); }
 bool BoardController::getCanRedo() const { return m_undoStack->canRedo(); }
@@ -136,6 +142,9 @@ void BoardController::endMove(int index, qreal newX, qreal newY)
             m_moveStartPos,
             QPointF(newX, newY)
         ));
+        
+        ImagoImageData item = m_model->getItem(index);
+        m_syncController->sendMoveEvent(item.id, newX, newY);
     }
 }
 
@@ -158,6 +167,9 @@ void BoardController::endResize(int index, qreal newX, qreal newY, qreal newWidt
             m_resizeStartRect, m_resizeStartPos,
             newRect, newPos
         ));
+        
+        ImagoImageData item = m_model->getItem(index);
+        m_syncController->sendResizeEvent(item.id, newX, newY, newWidth, newHeight);
     }
 }
 
@@ -194,6 +206,7 @@ void BoardController::updateMoveSelection(qreal deltaX, qreal deltaY)
         newY = qMax(0.0, qMin(30000.0 - itemH, newY));
         
         m_model->setPosition(index, newX, newY);
+        m_syncController->sendMoveEvent(item.id, newX, newY);
     }
 }
 

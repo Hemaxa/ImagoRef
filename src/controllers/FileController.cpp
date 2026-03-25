@@ -12,6 +12,8 @@
 #include <JlCompress.h>
 #include <QTemporaryDir>
 #include <QDir>
+#include <QCryptographicHash>
+#include "CacheManager.h"
 
 FileController::FileController(ImagoImageModel *model, QUndoStack *undoStack, QObject *parent) : QObject(parent)
     , m_model(model)
@@ -129,6 +131,9 @@ bool FileController::openBoard(const QUrl &fileUrl)
             if (image.loadFromData(imageData, "PNG")) {
                 ImagoImageData data;
                 data.id = itemObj["id"].toString();
+                data.imageHash = QString(QCryptographicHash::hash(imageData, QCryptographicHash::Sha256).toHex());
+                CacheManager::instance().saveToCache(data.imageHash, imageData);
+
                 data.source = QUrl();
                 data.pixmap = QPixmap::fromImage(image);
                 data.x = itemObj["pos_x"].toDouble();

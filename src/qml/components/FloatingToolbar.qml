@@ -21,6 +21,24 @@ Rectangle {
     signal arrangeClicked()
     signal opacityModeClicked()
     
+    //состояние синхронизации
+    property bool isCloudSyncing: false
+    property string syncProgressText: ""
+
+    Connections {
+        target: controller.cloudController
+        function onCloudSyncStarted() {
+            root.isCloudSyncing = true
+            root.syncProgressText = "Синхронизация..."
+        }
+        function onCloudSyncProgress(current, total) {
+            root.syncProgressText = current + " / " + total
+        }
+        function onCloudSyncFinished() {
+            root.isCloudSyncing = false
+        }
+    }
+    
     //cостояние активных инструментов
     property bool resizeModeActive: false
     property bool cropModeActive: false
@@ -280,6 +298,33 @@ Rectangle {
             shortcutText: "Ctrl+,"
             visible: root.btnSettingsBtnVisible
             onClicked: root.settingsClicked()
+        }
+    }
+
+    // Индикатор облачной загрузки поверх панели (только когда идет синхронизация)
+    Rectangle {
+        anchors.fill: parent
+        color: Qt.rgba(ThemeManager.colors.panelColor.r, ThemeManager.colors.panelColor.g, ThemeManager.colors.panelColor.b, 0.8)
+        radius: root.radius
+        visible: root.isCloudSyncing
+
+        ColumnLayout {
+            anchors.centerIn: parent
+            BusyIndicator {
+                Layout.alignment: Qt.AlignHCenter
+                running: root.isCloudSyncing
+            }
+            Text {
+                Layout.alignment: Qt.AlignHCenter
+                text: root.syncProgressText
+                color: ThemeManager.colors.textColor
+                font.pixelSize: 12
+            }
+        }
+        
+        // Перехватываем клики, чтобы пользователь не мог нажимать кнопки
+        MouseArea {
+            anchors.fill: parent
         }
     }
 }

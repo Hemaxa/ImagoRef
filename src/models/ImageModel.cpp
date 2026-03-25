@@ -1,4 +1,5 @@
 #include "ImageModel.h"
+#include "CacheManager.h"
 #include <QUuid>
 #include <QDateTime>
 
@@ -352,4 +353,18 @@ void ImagoImageModel::setPixmap(int index, const QPixmap &pixmap)
     //pixmap не привязан к роли в QML, но можно оповестить об изменении source
     QModelIndex modelIndex = createIndex(index, 0);
     emit dataChanged(modelIndex, modelIndex, {SourceRole});
+}
+
+void ImagoImageModel::loadPixmapFromCache(int index)
+{
+    if (index < 0 || index >= m_items.count())
+        return;
+
+    const ImagoImageData &item = m_items.at(index);
+    if (!item.imageHash.isEmpty()) {
+        QPixmap cached = CacheManager::instance().loadFromCache(item.imageHash);
+        if (!cached.isNull()) {
+            setPixmap(index, cached);
+        }
+    }
 }

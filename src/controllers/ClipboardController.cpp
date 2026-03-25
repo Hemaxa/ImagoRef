@@ -9,6 +9,9 @@
 #include <QBuffer>
 #include <QFileInfo>
 #include <QImageReader>
+#include <QCryptographicHash>
+#include <QFile>
+#include "CacheManager.h"
 
 ClipboardController::ClipboardController(ImagoImageModel *model, QUndoStack *undoStack, QObject *parent)
     : QObject(parent)
@@ -27,10 +30,27 @@ void ClipboardController::addImage(const QUrl &imageUrl, qreal x, qreal y)
         return;
     }
 
+    QByteArray fileData;
+    QFile file(filePath);
+    if (file.open(QIODevice::ReadOnly)) {
+        fileData = file.readAll();
+        file.close();
+    } else {
+        QBuffer buffer(&fileData);
+        buffer.open(QIODevice::WriteOnly);
+        pixmap.save(&buffer, "PNG");
+    }
+    QString hash = QString(QCryptographicHash::hash(fileData, QCryptographicHash::Sha256).toHex());
+
     //собираем структуру с данными новой картинки
     ImagoImageData data;
     data.source = imageUrl;
     data.pixmap = pixmap;
+    data.imageHash = hash;
+    
+    //сохраняем в кэш
+    CacheManager::instance().saveToCache(hash, fileData);
+
     data.x = x;
     data.y = y;
     data.width = pixmap.width();
@@ -57,9 +77,15 @@ void ClipboardController::addImageFromPixmap(const QByteArray &imageData, qreal 
     }
     
     QPixmap pixmap = QPixmap::fromImage(image);
+    QString hash = QString(QCryptographicHash::hash(imageData, QCryptographicHash::Sha256).toHex());
     
     ImagoImageData data;
     data.pixmap = pixmap;
+    data.imageHash = hash;
+    
+    //сохраняем в кэш
+    CacheManager::instance().saveToCache(hash, imageData);
+
     data.x = x;
     data.y = y;
     data.width = pixmap.width();

@@ -4,6 +4,7 @@ import QtQuick
 import QtQuick.Controls //добавляет базовые элементы UI
 import QtQuick.Window //работа с окнами и экраном
 import QtQuick.Dialogs //работа с нативными диалогами операционной системы
+import QtQuick.Layouts //работа с лэйаутами
 import ImagoRef //добавление виртуального модуля приложения
 
 import "windows" //подключает все .qml файлы из папки windows
@@ -82,6 +83,23 @@ ApplicationWindow {
                     if (mainLoader.active) {
                         fileSaveDialog.open()
                     }
+                }
+            }
+
+            MenuSeparator {} //разделитель
+
+            Action {
+                text: "Сохранить в облако"
+                onTriggered: {
+                    if (mainLoader.active) {
+                        cloudSaveDialog.open()
+                    }
+                }
+            }
+            Action {
+                text: "Открыть из облака"
+                onTriggered: {
+                    cloudOpenDialog.open()
                 }
             }
         }
@@ -245,6 +263,15 @@ ApplicationWindow {
                 welcomeDialog.close()
             }
         }
+
+        //открытие облачной доски
+        onOpenCloudBoardRequested: function(boardId) {
+            root.showMaximized()
+            mainLoader.active = true
+            welcomeDialog.close()
+            boardController.cloudController.syncDown(boardId)
+            boardController.syncController.connectToBoard(boardId)
+        }
     }
     
     //создание системных диалогов
@@ -265,6 +292,51 @@ ApplicationWindow {
         onAccepted: boardController.fileController.openBoard(selectedFile)
     }
     
+    // Диалоги для облака
+    Dialog {
+        id: cloudSaveDialog
+        title: "Сохранить в облако"
+        standardButtons: Dialog.Ok | Dialog.Cancel
+        
+        ColumnLayout {
+            Text { text: "ID Доски:" }
+            TextField {
+                id: cloudSaveIdInput
+                placeholderText: "Введите ID доски"
+            }
+        }
+        
+        onAccepted: {
+            if (cloudSaveIdInput.text.trim() !== "") {
+                boardController.cloudController.syncUp(cloudSaveIdInput.text.trim())
+            }
+        }
+    }
+
+    Dialog {
+        id: cloudOpenDialog
+        title: "Открыть из облака"
+        standardButtons: Dialog.Ok | Dialog.Cancel
+        
+        ColumnLayout {
+            Text { text: "ID Доски:" }
+            TextField {
+                id: cloudOpenIdInput
+                placeholderText: "Введите ID доски"
+            }
+        }
+        
+        onAccepted: {
+            if (cloudOpenIdInput.text.trim() !== "") {
+                root.showMaximized()
+                mainLoader.active = true
+                welcomeDialog.close()
+                boardController.cloudController.syncDown(cloudOpenIdInput.text.trim())
+                boardController.syncController.connectToBoard(cloudOpenIdInput.text.trim())
+            }
+        }
+    }
+
     //показать окно приветствия при запуске после исполнения всего файла
     Component.onCompleted: {
         welcomeDialog.open()

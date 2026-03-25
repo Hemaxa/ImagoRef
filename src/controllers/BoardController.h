@@ -13,6 +13,8 @@
 #include "ClipboardController.h"
 #include "ToolController.h"
 #include "UpscaleController.h"
+#include "CloudController.h"
+#include "SyncController.h"
 
 class BoardController : public QObject {
     Q_OBJECT //обязательный макрос для любого класса Qt, который использует сигналы, слоты или свойства (Q_PROPERTY)
@@ -27,6 +29,8 @@ class BoardController : public QObject {
     Q_PROPERTY(ClipboardController* clipboardController READ getClipboardController CONSTANT)
     Q_PROPERTY(ToolController* toolController READ getToolController CONSTANT)
     Q_PROPERTY(UpscaleController* upscaleController READ getUpscaleController CONSTANT)
+    Q_PROPERTY(CloudController* cloudController READ getCloudController CONSTANT)
+    Q_PROPERTY(SyncController* syncController READ getSyncController CONSTANT)
 
     //состояния для кнопок Undo/Redo
     Q_PROPERTY(bool canUndo READ getCanUndo NOTIFY undoStateChanged)
@@ -51,6 +55,8 @@ public:
     ClipboardController* getClipboardController() const;
     ToolController* getToolController() const;
     UpscaleController* getUpscaleController() const;
+    CloudController* getCloudController() const;
+    SyncController* getSyncController() const;
 
     bool getCanUndo() const;
     bool getCanRedo() const;
@@ -106,6 +112,8 @@ private:
     ClipboardController *m_clipboardController;
     ToolController *m_toolController;
     UpscaleController *m_upscaleController;
+    CloudController *m_cloudController;
+    SyncController *m_syncController;
 
     //переменные для хранения начального состояния объекта, когда пользователь только начинает его перетаскивать или менять размер
     QPointF m_moveStartPos;

@@ -23,6 +23,7 @@ struct ImagoImageData {
     qreal zValue = 0; //уровень изображения по высоте
     bool selected = false; //флаг выбора изображения
     QString label; //подпись изображения
+    QString imageHash; //хэш изображения
     
     //параметры обрезки (в координатах исходного изображения)
     qreal cropX = 0; //координата x обрезанной части
@@ -95,6 +96,7 @@ public:
     Q_INVOKABLE void clearSelection();
     Q_INVOKABLE QVariantList getSelectedIndices() const;
     Q_INVOKABLE void setOpacity(int index, qreal opacity);
+    Q_INVOKABLE void loadPixmapFromCache(int index);
 
     void setPixmap(int index, const QPixmap &pixmap);
 
