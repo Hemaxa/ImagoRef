@@ -34,6 +34,9 @@ void SettingsManager::loadSettings()
     m_toolbarColumns = m_settings.value("toolbar/columns", 1).toInt();
     m_colorCopyMode = m_settings.value("colorCopyMode", 0).toInt();
     m_colorHistory = m_settings.value("colorHistory", QStringList()).toStringList();
+    m_jwtToken = m_settings.value("auth/jwtToken", "").toString();
+    m_userEmail = m_settings.value("auth/userEmail", "").toString();
+    m_recentBoards = m_settings.value("history/recentBoards", QVariantList()).toList();
     
     // Tools enablement
     m_toolsEnablement.clear();
@@ -56,6 +59,9 @@ void SettingsManager::saveSettings()
     m_settings.setValue("toolbar/columns", m_toolbarColumns);
     m_settings.setValue("colorCopyMode", m_colorCopyMode);
     m_settings.setValue("colorHistory", m_colorHistory);
+    m_settings.setValue("auth/jwtToken", m_jwtToken);
+    m_settings.setValue("auth/userEmail", m_userEmail);
+    m_settings.setValue("history/recentBoards", m_recentBoards);
     
     m_settings.beginGroup("tools");
     for (auto it = m_toolsEnablement.constBegin(); it != m_toolsEnablement.constEnd(); ++it) {
@@ -199,6 +205,79 @@ void SettingsManager::addColorToHistory(const QString& hexColor)
     
     saveSettings();
     emit colorHistoryChanged();
+}
+
+QString SettingsManager::getJwtToken() const
+{
+    return m_jwtToken;
+}
+
+void SettingsManager::setJwtToken(const QString& token)
+{
+    if (m_jwtToken != token) {
+        m_jwtToken = token;
+        saveSettings();
+        emit jwtTokenChanged();
+    }
+}
+
+QString SettingsManager::getUserEmail() const
+{
+    return m_userEmail;
+}
+
+void SettingsManager::setUserEmail(const QString& email)
+{
+    if (m_userEmail != email) {
+        m_userEmail = email;
+        saveSettings();
+        emit userEmailChanged();
+    }
+}
+
+QVariantList SettingsManager::getRecentBoards() const
+{
+    return m_recentBoards;
+}
+
+void SettingsManager::setRecentBoards(const QVariantList& boards)
+{
+    if (m_recentBoards != boards) {
+        m_recentBoards = boards;
+        saveSettings();
+        emit recentBoardsChanged();
+    }
+}
+
+void SettingsManager::addRecentBoard(const QVariantMap& board)
+{
+    // Check if board with same ID or path already exists, and remove it to push to top
+    QString boardIdOrPath = board.value("id").toString();
+    if (boardIdOrPath.isEmpty()) {
+        boardIdOrPath = board.value("path").toString();
+    }
+
+    for (int i = 0; i < m_recentBoards.size(); ++i) {
+        QVariantMap existing = m_recentBoards[i].toMap();
+        QString existingIdOrPath = existing.value("id").toString();
+        if (existingIdOrPath.isEmpty()) {
+            existingIdOrPath = existing.value("path").toString();
+        }
+        
+        if (existingIdOrPath == boardIdOrPath && !boardIdOrPath.isEmpty()) {
+            m_recentBoards.removeAt(i);
+            break;
+        }
+    }
+
+    m_recentBoards.prepend(board);
+
+    while (m_recentBoards.size() > 6) {
+        m_recentBoards.removeLast();
+    }
+
+    saveSettings();
+    emit recentBoardsChanged();
 }
 
 bool SettingsManager::isToolEnabled(const QString &toolName) const

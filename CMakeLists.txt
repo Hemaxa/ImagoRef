@@ -42,6 +42,10 @@ target_sources(ImagoRef PRIVATE
     ${SRC_DIR}/controllers/CloudController.cpp
     ${SRC_DIR}/controllers/SyncController.h
     ${SRC_DIR}/controllers/SyncController.cpp
+    ${SRC_DIR}/controllers/AuthController.h
+    ${SRC_DIR}/controllers/AuthController.cpp
+    ${SRC_DIR}/controllers/CloudBoardsManager.h
+    ${SRC_DIR}/controllers/CloudBoardsManager.cpp
 
     ${SRC_DIR}/managers/SettingsManager.h
     ${SRC_DIR}/managers/SettingsManager.cpp

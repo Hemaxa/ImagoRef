@@ -22,6 +22,8 @@ ApplicationWindow {
     property bool isPinned: boardController.toolController.isPinned
     property bool isPinnedAndInactive: isPinned && !Qt.application.active
     
+    property string currentCloudBoardId: ""
+    
     color: "transparent" // Задаем всегда прозрачный цвет окна, чтобы у macOS был включен альфа-канал
 
     background: Rectangle {
@@ -67,10 +69,11 @@ ApplicationWindow {
                 shortcut: StandardKey.Save
                 onTriggered: {
                     if (mainLoader.active) {
-                        if (boardController.fileController.currentFilePath !== "") {
+                        if (AuthController.isLoggedIn && root.currentCloudBoardId !== "") {
+                            boardController.cloudController.syncUp(root.currentCloudBoardId)
+                        } else if (boardController.fileController.currentFilePath !== "") {
                             boardController.fileController.saveBoard()
-                        }
-                        else {
+                        } else {
                             fileSaveDialog.open()
                         }
                     }
@@ -249,6 +252,7 @@ ApplicationWindow {
         
         //создание новой доски
         onNewBoardRequested: {
+            root.currentCloudBoardId = ""
             root.showMaximized()
             boardController.fileController.newBoard()
             mainLoader.active = true
@@ -257,7 +261,9 @@ ApplicationWindow {
         
         //открытие существующей доски
         onOpenBoardRequested: function(fileUrl) {
+            root.currentCloudBoardId = ""
             if (boardController.fileController.openBoard(fileUrl)) {
+                root.addLocalToHistory(fileUrl)
                 root.showMaximized()
                 mainLoader.active = true
                 welcomeDialog.close()
@@ -266,6 +272,8 @@ ApplicationWindow {
 
         //открытие облачной доски
         onOpenCloudBoardRequested: function(boardId) {
+            root.currentCloudBoardId = boardId
+            root.addCloudToHistory(boardId)
             root.showMaximized()
             mainLoader.active = true
             welcomeDialog.close()
@@ -281,7 +289,10 @@ ApplicationWindow {
         title: "Сохранить доску"
         fileMode: FileDialog.SaveFile
         nameFilters: ["ImagoRef доска (*.iref)", "Все файлы (*)"]
-        onAccepted: boardController.fileController.saveBoardAs(selectedFile)
+        onAccepted: {
+            boardController.fileController.saveBoardAs(selectedFile)
+            root.addLocalToHistory(selectedFile)
+        }
     }
     
     //диалог открытия файла
@@ -289,7 +300,11 @@ ApplicationWindow {
         id: fileOpenDialog
         title: "Открыть доску"
         nameFilters: ["ImagoRef доска (*.iref)", "Все файлы (*)"]
-        onAccepted: boardController.fileController.openBoard(selectedFile)
+        onAccepted: {
+            if (boardController.fileController.openBoard(selectedFile)) {
+                root.addLocalToHistory(selectedFile)
+            }
+        }
     }
     
     // Диалоги для облака
@@ -328,13 +343,47 @@ ApplicationWindow {
         
         onAccepted: {
             if (cloudOpenIdInput.text.trim() !== "") {
+                var boardId = cloudOpenIdInput.text.trim()
+                root.currentCloudBoardId = boardId
+                root.addCloudToHistory(boardId)
                 root.showMaximized()
                 mainLoader.active = true
                 welcomeDialog.close()
-                boardController.cloudController.syncDown(cloudOpenIdInput.text.trim())
-                boardController.syncController.connectToBoard(cloudOpenIdInput.text.trim())
+                boardController.cloudController.syncDown(boardId)
+                boardController.syncController.connectToBoard(boardId)
             }
         }
+    }
+
+    function addLocalToHistory(fileUrl) {
+        var str = fileUrl.toString()
+        var name = str
+        var idx = str.lastIndexOf("/")
+        if (idx >= 0) name = str.substring(idx + 1)
+        name = name.replace(".iref", "") // убираем расширение
+        
+        SettingsManager.addRecentBoard({
+            "id": "",
+            "path": str,
+            "name": name,
+            "type": "local"
+        })
+    }
+
+    function addCloudToHistory(boardId) {
+        var name = "Cloud Board"
+        for (var i = 0; i < CloudBoardsManager.cloudBoards.length; i++) {
+            if (CloudBoardsManager.cloudBoards[i].id === boardId) {
+                name = CloudBoardsManager.cloudBoards[i].name
+                break
+            }
+        }
+        SettingsManager.addRecentBoard({
+            "id": boardId,
+            "path": "",
+            "name": name,
+            "type": "cloud"
+        })
     }
 
     //показать окно приветствия при запуске после исполнения всего файла

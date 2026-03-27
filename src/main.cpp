@@ -12,6 +12,8 @@
 #include "ThemesManager.h"
 #include "ImageProvider.h"
 #include "ModelsManager.h"
+#include "AuthController.h"
+#include "CloudBoardsManager.h"
 
 int main(int argc, char *argv[])
 {
@@ -36,6 +38,8 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("ThemeManager", &ThemeManager::instance());
     engine.rootContext()->setContextProperty("SettingsManager", &SettingsManager::instance());
     engine.rootContext()->setContextProperty("ModelsManager", &ModelsManager::instance());
+    engine.rootContext()->setContextProperty("AuthController", &AuthController::instance());
+    engine.rootContext()->setContextProperty("CloudBoardsManager", &CloudBoardsManager::instance());
     ThemeManager::instance().applyTheme(SettingsManager::instance().getThemeName());
 
     //загрузка главного QML файла из модуля Qt6

@@ -2,6 +2,7 @@
 #include "ImageModel.h"
 #include "CacheManager.h"
 #include "BoardController.h"
+#include "SettingsManager.h"
 #include <QUndoStack>
 
 #include <QNetworkReply>
@@ -37,6 +38,10 @@ void CloudController::syncUp(const QString &boardId)
 
     QNetworkRequest request(QUrl(API_BASE_URL + "/boards/" + boardId + "/sync_hashes"));
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+    QString token = SettingsManager::instance().getJwtToken();
+    if (!token.isEmpty()) {
+        request.setRawHeader("Authorization", ("Bearer " + token).toUtf8());
+    }
 
     QNetworkReply *reply = m_networkManager->post(request, QJsonDocument(reqObj).toJson());
     connect(reply, &QNetworkReply::finished, this, &CloudController::onSyncHashesFinished);
@@ -142,6 +147,10 @@ void CloudController::uploadMetadata(const QString &boardId)
 
     QNetworkRequest request(QUrl(API_BASE_URL + "/boards/" + boardId + "/metadata"));
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+    QString token = SettingsManager::instance().getJwtToken();
+    if (!token.isEmpty()) {
+        request.setRawHeader("Authorization", ("Bearer " + token).toUtf8());
+    }
 
     QNetworkReply *reply = m_networkManager->post(request, QJsonDocument(rootObj).toJson());
     connect(reply, &QNetworkReply::finished, this, &CloudController::onMetadataUploadFinished);
@@ -160,6 +169,10 @@ void CloudController::syncDown(const QString &boardId)
     m_currentDownloadBoardId = boardId;
 
     QNetworkRequest request(QUrl(API_BASE_URL + "/boards/" + boardId + "/metadata"));
+    QString token = SettingsManager::instance().getJwtToken();
+    if (!token.isEmpty()) {
+        request.setRawHeader("Authorization", ("Bearer " + token).toUtf8());
+    }
     QNetworkReply *reply = m_networkManager->get(request);
     connect(reply, &QNetworkReply::finished, this, &CloudController::onMetadataDownloadFinished);
 }

@@ -23,6 +23,9 @@ class SettingsManager : public QObject {
     Q_PROPERTY(int toolbarColumns READ getToolbarColumns WRITE setToolbarColumns NOTIFY toolbarColumnsChanged)
     Q_PROPERTY(int colorCopyMode READ getColorCopyMode WRITE setColorCopyMode NOTIFY colorCopyModeChanged)
     Q_PROPERTY(QStringList colorHistory READ getColorHistory WRITE setColorHistory NOTIFY colorHistoryChanged)
+    Q_PROPERTY(QString jwtToken READ getJwtToken WRITE setJwtToken NOTIFY jwtTokenChanged)
+    Q_PROPERTY(QString userEmail READ getUserEmail WRITE setUserEmail NOTIFY userEmailChanged)
+    Q_PROPERTY(QVariantList recentBoards READ getRecentBoards WRITE setRecentBoards NOTIFY recentBoardsChanged)
 
 public:
     static SettingsManager* create(QQmlEngine *qmlEngine, QJSEngine *jsEngine);
@@ -58,6 +61,16 @@ public:
     QStringList getColorHistory() const;
     void setColorHistory(const QStringList& history);
     Q_INVOKABLE void addColorToHistory(const QString& hexColor);
+
+    QString getJwtToken() const;
+    void setJwtToken(const QString& token);
+
+    QString getUserEmail() const;
+    void setUserEmail(const QString& email);
+
+    QVariantList getRecentBoards() const;
+    void setRecentBoards(const QVariantList& boards);
+    Q_INVOKABLE void addRecentBoard(const QVariantMap& board);
     
     Q_INVOKABLE bool isToolEnabled(const QString &toolName) const;
     Q_INVOKABLE void setToolEnabled(const QString &toolName, bool enabled);
@@ -72,6 +85,9 @@ signals:
     void toolbarColumnsChanged();
     void colorCopyModeChanged();
     void colorHistoryChanged();
+    void jwtTokenChanged();
+    void userEmailChanged();
+    void recentBoardsChanged();
     
     void toolEnablementChanged(QString toolName, bool enabled);
 
@@ -90,5 +106,8 @@ private:
     int m_toolbarColumns;
     int m_colorCopyMode;
     QStringList m_colorHistory;
+    QString m_jwtToken;
+    QString m_userEmail;
+    QVariantList m_recentBoards;
     QHash<QString, bool> m_toolsEnablement;
 };
