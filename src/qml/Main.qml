@@ -22,8 +22,6 @@ ApplicationWindow {
     property bool isPinned: boardController.toolController.isPinned
     property bool isPinnedAndInactive: isPinned && !Qt.application.active
     
-    property string currentCloudBoardId: ""
-    
     color: "transparent" // Задаем всегда прозрачный цвет окна, чтобы у macOS был включен альфа-канал
 
     background: Rectangle {
@@ -69,8 +67,8 @@ ApplicationWindow {
                 shortcut: StandardKey.Save
                 onTriggered: {
                     if (mainLoader.active) {
-                        if (AuthController.isLoggedIn && root.currentCloudBoardId !== "") {
-                            boardController.cloudController.syncUp(root.currentCloudBoardId)
+                        if (AuthController.isLoggedIn && boardController.currentBoardId !== "") {
+                            boardController.cloudController.syncUp(boardController.currentBoardId)
                         } else if (boardController.fileController.currentFilePath !== "") {
                             boardController.fileController.saveBoard()
                         } else {
@@ -95,14 +93,19 @@ ApplicationWindow {
                 text: "Сохранить в облако"
                 onTriggered: {
                     if (mainLoader.active) {
-                        cloudSaveDialog.open()
+                        if (boardController.currentBoardId !== "") {
+                            boardController.cloudController.syncUp(boardController.currentBoardId)
+                        } else if (AuthController.isLoggedIn) {
+                            CloudBoardsManager.createBoard("New Board")
+                        }
                     }
                 }
             }
             Action {
                 text: "Открыть из облака"
                 onTriggered: {
-                    cloudOpenDialog.open()
+                    CloudBoardsManager.fetchBoards()
+                    mainCloudDashboard.open()
                 }
             }
         }
@@ -252,7 +255,7 @@ ApplicationWindow {
         
         //создание новой доски
         onNewBoardRequested: {
-            root.currentCloudBoardId = ""
+            boardController.currentBoardId = ""
             root.showMaximized()
             boardController.fileController.newBoard()
             mainLoader.active = true
@@ -261,7 +264,7 @@ ApplicationWindow {
         
         //открытие существующей доски
         onOpenBoardRequested: function(fileUrl) {
-            root.currentCloudBoardId = ""
+            boardController.currentBoardId = ""
             if (boardController.fileController.openBoard(fileUrl)) {
                 root.addLocalToHistory(fileUrl)
                 root.showMaximized()
@@ -272,7 +275,7 @@ ApplicationWindow {
 
         //открытие облачной доски
         onOpenCloudBoardRequested: function(boardId) {
-            root.currentCloudBoardId = boardId
+            boardController.currentBoardId = boardId
             root.addCloudToHistory(boardId)
             root.showMaximized()
             mainLoader.active = true
@@ -307,50 +310,71 @@ ApplicationWindow {
         }
     }
     
-    // Диалоги для облака
+    // Диалог списка облачных досок (из меню)
     Dialog {
-        id: cloudSaveDialog
-        title: "Сохранить в облако"
-        standardButtons: Dialog.Ok | Dialog.Cancel
+        id: mainCloudDashboard
+        title: "Облачные доски"
+        width: 500
+        height: 400
+        anchors.centerIn: parent
+        modal: true
         
-        ColumnLayout {
-            Text { text: "ID Доски:" }
-            TextField {
-                id: cloudSaveIdInput
-                placeholderText: "Введите ID доски"
+        ListView {
+            anchors.fill: parent
+            model: CloudBoardsManager.cloudBoards
+            clip: true
+            spacing: 10
+            
+            delegate: Rectangle {
+                width: parent ? parent.width : 0
+                height: 50
+                color: ThemeManager.colors.controlBackground
+                radius: 5
+                
+                RowLayout {
+                    anchors.fill: parent
+                    anchors.margins: 10
+                    
+                    Text {
+                        text: modelData.name
+                        color: ThemeManager.colors.textColor
+                        font.pixelSize: 16
+                        Layout.fillWidth: true
+                    }
+                    
+                    Button {
+                        text: "Открыть"
+                        onClicked: {
+                            boardController.currentBoardId = modelData.id
+                            root.addCloudToHistory(modelData.id)
+                            root.showMaximized()
+                            mainLoader.active = true
+                            mainCloudDashboard.close()
+                            boardController.cloudController.syncDown(modelData.id)
+                            boardController.syncController.connectToBoard(modelData.id)
+                        }
+                    }
+                }
             }
-        }
-        
-        onAccepted: {
-            if (cloudSaveIdInput.text.trim() !== "") {
-                boardController.cloudController.syncUp(cloudSaveIdInput.text.trim())
+            
+            Text {
+                anchors.centerIn: parent
+                text: "Нет досок"
+                color: ThemeManager.colors.textColor
+                visible: CloudBoardsManager.cloudBoards.length === 0
             }
         }
     }
 
-    Dialog {
-        id: cloudOpenDialog
-        title: "Открыть из облака"
-        standardButtons: Dialog.Ok | Dialog.Cancel
-        
-        ColumnLayout {
-            Text { text: "ID Доски:" }
-            TextField {
-                id: cloudOpenIdInput
-                placeholderText: "Введите ID доски"
-            }
-        }
-        
-        onAccepted: {
-            if (cloudOpenIdInput.text.trim() !== "") {
-                var boardId = cloudOpenIdInput.text.trim()
-                root.currentCloudBoardId = boardId
-                root.addCloudToHistory(boardId)
-                root.showMaximized()
-                mainLoader.active = true
-                welcomeDialog.close()
-                boardController.cloudController.syncDown(boardId)
-                boardController.syncController.connectToBoard(boardId)
+    // Обработка создания доски из меню "Сохранить в облако"
+    Connections {
+        target: CloudBoardsManager
+        function onBoardCreated(id, success) {
+            if (success && mainLoader.active && boardController.currentBoardId === "") {
+                boardController.currentBoardId = id
+                root.addCloudToHistory(id)
+                boardController.cloudController.syncUp(id)
+                boardController.syncController.connectToBoard(id)
             }
         }
     }

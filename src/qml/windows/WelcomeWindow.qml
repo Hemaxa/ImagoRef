@@ -255,7 +255,7 @@ Dialog {
                             if (modelData.type === "cloud") {
                                 root.openCloudBoardRequested(modelData.id)
                             } else {
-                                root.openBoardRequested(modelData.path)
+                                root.openBoardRequested(Qt.url(modelData.path))
                             }
                         }
                     }

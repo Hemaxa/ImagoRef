@@ -27,5 +27,5 @@ private:
     QWebSocket *m_webSocket;
     QString m_boardId;
 
-    const QString WS_BASE_URL = "wss://server/ws/boards/";
+    const QString WS_BASE_URL = "ws://imagoref.ru/ws/boards/";
 };

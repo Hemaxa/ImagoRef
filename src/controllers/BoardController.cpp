@@ -16,6 +16,7 @@ BoardController::BoardController(QObject *parent) : QObject(parent)
     , m_upscaleController(new UpscaleController(m_model, &ModelsManager::instance(), m_undoStack, this))
     , m_cloudController(new CloudController(m_model, m_undoStack, this))
     , m_syncController(new SyncController(m_model, this))
+    , m_metadataDebounceTimer(new QTimer(this))
     , m_gridSize(SettingsManager::instance().getGridSize())
     , m_cameraX(-1)
     , m_cameraY(-1)
@@ -26,6 +27,15 @@ BoardController::BoardController(QObject *parent) : QObject(parent)
     
     //синхронизировать начальное значение
     m_fileController->setGridSize(m_gridSize);
+    
+    //настройка таймера для дебаунса метаданных
+    m_metadataDebounceTimer->setSingleShot(true);
+    m_metadataDebounceTimer->setInterval(2000); // 2 секунды
+    connect(m_metadataDebounceTimer, &QTimer::timeout, this, [this]() {
+        if (!m_currentBoardId.isEmpty()) {
+            m_cloudController->uploadMetadata(m_currentBoardId);
+        }
+    });
     
     //регистрация модели в глобальном провайдере изображений ImagoImageProvider
     if (ImagoImageProvider::instance()) {
@@ -65,6 +75,13 @@ void BoardController::connectSignals()
         m_cameraZoom = zoom;
         emit cameraChanged();
     });
+
+    // Автоматическая загрузка новых картинок в S3 при добавлении их на холст
+    connect(m_model, &QAbstractItemModel::rowsInserted, this, [this]() {
+        if (!m_currentBoardId.isEmpty()) {
+            m_cloudController->syncUp(m_currentBoardId);
+        }
+    });
 }
 
 //геттеры
@@ -83,6 +100,7 @@ int BoardController::getGridSize() const { return m_gridSize; }
 qreal BoardController::getCameraX() const { return m_cameraX; }
 qreal BoardController::getCameraY() const { return m_cameraY; }
 qreal BoardController::getCameraZoom() const { return m_cameraZoom; }
+QString BoardController::getCurrentBoardId() const { return m_currentBoardId; }
 
 //сеттеры
 void BoardController::setGridSize(int size)
@@ -116,6 +134,13 @@ void BoardController::setCameraZoom(qreal zoom) {
     }
 }
 
+void BoardController::setCurrentBoardId(const QString &id) {
+    if (m_currentBoardId != id) {
+        m_currentBoardId = id;
+        emit currentBoardIdChanged();
+    }
+}
+
 //Undo/Redo
 void BoardController::undo()
 {
@@ -145,6 +170,7 @@ void BoardController::endMove(int index, qreal newX, qreal newY)
         
         ImagoImageData item = m_model->getItem(index);
         m_syncController->sendMoveEvent(item.id, newX, newY);
+        scheduleMetadataUpload();
     }
 }
 
@@ -170,6 +196,7 @@ void BoardController::endResize(int index, qreal newX, qreal newY, qreal newWidt
         
         ImagoImageData item = m_model->getItem(index);
         m_syncController->sendResizeEvent(item.id, newX, newY, newWidth, newHeight);
+        scheduleMetadataUpload();
     }
 }
 
@@ -234,8 +261,29 @@ void BoardController::endMoveSelection()
             m_model, m_moveSelectionIndices,
             m_moveSelectionStartPos, newPositions
         ));
+        scheduleMetadataUpload();
     }
     
     m_moveSelectionIndices.clear();
     m_moveSelectionStartPos.clear();
+}
+
+void BoardController::scheduleMetadataUpload()
+{
+    if (!m_currentBoardId.isEmpty()) {
+        m_metadataDebounceTimer->start(); // (re)start the timer
+    }
+}
+
+void BoardController::openCloudBoard(const QString &boardId)
+{
+    setCurrentBoardId(boardId);
+    m_cloudController->syncDown(boardId);
+    m_syncController->connectToBoard(boardId);
+}
+
+void BoardController::openLocalFile(const QUrl &fileUrl)
+{
+    setCurrentBoardId("");
+    m_fileController->openBoard(fileUrl);
 }

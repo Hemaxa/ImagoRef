@@ -17,6 +17,7 @@ public:
 
     Q_INVOKABLE void syncUp(const QString &boardId);
     Q_INVOKABLE void syncDown(const QString &boardId);
+    void uploadMetadata(const QString &boardId);
 
 signals:
     void cloudSyncStarted();
@@ -32,7 +33,6 @@ private slots:
     void onS3DownloadFinished();
 
 private:
-    void uploadMetadata(const QString &boardId);
     void finalizeSyncDown();
 
     ImagoImageModel *m_model;
@@ -50,5 +50,5 @@ private:
     int m_downloadTotal;
     QJsonObject m_downloadedMetadata;
 
-    const QString API_BASE_URL = "http://localhost:8000/api";
+    const QString API_BASE_URL = "https://imagoref.ru/api";
 };

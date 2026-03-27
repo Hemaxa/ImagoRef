@@ -1,5 +1,8 @@
 #include "SettingsManager.h"
 #include <QJSEngine>
+#include <QJsonDocument>
+#include <QJsonArray>
+#include <QJsonObject>
 
 SettingsManager* SettingsManager::create(QQmlEngine *qmlEngine, QJSEngine *jsEngine)
 {
@@ -36,7 +39,25 @@ void SettingsManager::loadSettings()
     m_colorHistory = m_settings.value("colorHistory", QStringList()).toStringList();
     m_jwtToken = m_settings.value("auth/jwtToken", "").toString();
     m_userEmail = m_settings.value("auth/userEmail", "").toString();
-    m_recentBoards = m_settings.value("history/recentBoards", QVariantList()).toList();
+    
+    // Загрузка recentBoards из JSON строки
+    m_recentBoards.clear();
+    QString recentJson = m_settings.value("history/recentBoardsJson", "").toString();
+    if (!recentJson.isEmpty()) {
+        QJsonDocument doc = QJsonDocument::fromJson(recentJson.toUtf8());
+        if (doc.isArray()) {
+            QJsonArray arr = doc.array();
+            for (const QJsonValue &val : arr) {
+                QJsonObject obj = val.toObject();
+                QVariantMap board;
+                board["id"] = obj["id"].toString();
+                board["path"] = obj["path"].toString();
+                board["name"] = obj["name"].toString();
+                board["type"] = obj["type"].toString();
+                m_recentBoards.append(board);
+            }
+        }
+    }
     
     // Tools enablement
     m_toolsEnablement.clear();
@@ -61,7 +82,19 @@ void SettingsManager::saveSettings()
     m_settings.setValue("colorHistory", m_colorHistory);
     m_settings.setValue("auth/jwtToken", m_jwtToken);
     m_settings.setValue("auth/userEmail", m_userEmail);
-    m_settings.setValue("history/recentBoards", m_recentBoards);
+    
+    // Сохранение recentBoards как JSON строка
+    QJsonArray arr;
+    for (const QVariant &v : m_recentBoards) {
+        QVariantMap map = v.toMap();
+        QJsonObject obj;
+        obj["id"] = map.value("id").toString();
+        obj["path"] = map.value("path").toString();
+        obj["name"] = map.value("name").toString();
+        obj["type"] = map.value("type").toString();
+        arr.append(obj);
+    }
+    m_settings.setValue("history/recentBoardsJson", QString::fromUtf8(QJsonDocument(arr).toJson(QJsonDocument::Compact)));
     
     m_settings.beginGroup("tools");
     for (auto it = m_toolsEnablement.constBegin(); it != m_toolsEnablement.constEnd(); ++it) {

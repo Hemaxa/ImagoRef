@@ -11,6 +11,7 @@
 #include <QBuffer>
 #include <QFile>
 #include <QImage>
+#include <QDebug>
 
 CloudController::CloudController(ImagoImageModel *model, QUndoStack *undoStack, QObject *parent)
     : QObject(parent), m_model(model), m_undoStack(undoStack), m_networkManager(new QNetworkAccessManager(this))
@@ -78,6 +79,8 @@ void CloudController::onSyncHashesFinished()
         
         QPixmap cachedPix = CacheManager::instance().loadFromCache(hash);
         if (cachedPix.isNull()) {
+            // ДОБАВЛЕН ЛОГ:
+            qDebug() << "ВНИМАНИЕ: Картинка" << hash << "не найдена в кэше! Пропуск.";
             m_uploadCount++;
             continue; // Если почему-то нет в кэше, пропускаем
         }
@@ -99,6 +102,16 @@ void CloudController::onS3UploadFinished()
     QNetworkReply *reply = qobject_cast<QNetworkReply*>(sender());
     if (!reply) return;
     reply->deleteLater();
+
+    if (reply->error() != QNetworkReply::NoError) {
+        qDebug() << "\n!!! ОШИБКА ЗАГРУЗКИ В S3 !!!";
+        qDebug() << "Код ошибки:" << reply->error();
+        qDebug() << "Текст:" << reply->errorString();
+        qDebug() << "Ответ от TimeWeb:" << reply->readAll();
+        qDebug() << "============================\n";
+    } else {
+        qDebug() << "Успешная загрузка картинки в S3!";
+    }
 
     m_uploadCount++;
     emit cloudSyncProgress(m_uploadCount, m_uploadTotal);

@@ -111,6 +111,7 @@ FetchContent_Declare(
     GIT_REPOSITORY https://github.com/stachenov/quazip.git
     GIT_TAG        v1.4
     GIT_SHALLOW    ON
+    GIT_PROGRESS   ON
 )
 FetchContent_MakeAvailable(quazip)
 
@@ -133,6 +134,7 @@ FetchContent_Declare(
     GIT_REPOSITORY https://github.com/Tencent/ncnn.git
     GIT_TAG        20260113
     GIT_SHALLOW    ON
+    GIT_PROGRESS   ON
 )
 FetchContent_MakeAvailable(ncnn)
 

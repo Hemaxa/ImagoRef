@@ -5,6 +5,7 @@
 #include <QObject>
 #include <QUrl>
 #include <QUndoStack>
+#include <QTimer>
 #include <QtQml/qqml.h>
 
 #include "ImageModel.h"
@@ -43,6 +44,8 @@ class BoardController : public QObject {
     Q_PROPERTY(qreal cameraY READ getCameraY WRITE setCameraY NOTIFY cameraChanged)
     Q_PROPERTY(qreal cameraZoom READ getCameraZoom WRITE setCameraZoom NOTIFY cameraChanged)
 
+    Q_PROPERTY(QString currentBoardId READ getCurrentBoardId WRITE setCurrentBoardId NOTIFY currentBoardIdChanged)
+
 public:
     //конструктор принимает родительский QObject для автоматического управления памятью
     explicit BoardController(QObject *parent = nullptr);
@@ -64,12 +67,14 @@ public:
     qreal getCameraX() const;
     qreal getCameraY() const;
     qreal getCameraZoom() const;
+    QString getCurrentBoardId() const;
 
     //сеттеры для свойств
     void setGridSize(int size);
     void setCameraX(qreal x);
     void setCameraY(qreal y);
     void setCameraZoom(qreal zoom);
+    void setCurrentBoardId(const QString &id);
 
     //свойство Q_INVOKABLE позволяет вызывать эти C++ методы прямо из JavaScript/QML кода
     //Undo/Redo
@@ -87,16 +92,21 @@ public:
     Q_INVOKABLE void updateMoveSelection(qreal deltaX, qreal deltaY);
     Q_INVOKABLE void endMoveSelection();
 
+    Q_INVOKABLE void openCloudBoard(const QString &boardId);
+    Q_INVOKABLE void openLocalFile(const QUrl &fileUrl);
+
 signals:
     //сигналы, которые оповещают QML об изменениях (связаны с макросами NOTIFY в Q_PROPERTY)
     void undoStateChanged();
     void redoStateChanged();
     void gridSizeChanged();
+    void currentBoardIdChanged();
     void cameraChanged();
 
 private:
     //вспомогательный метод для настройки сигналов
     void connectSignals();
+    void scheduleMetadataUpload();
 
     //внутренние переменные класса
     ImagoImageModel *m_model;
@@ -114,6 +124,8 @@ private:
     UpscaleController *m_upscaleController;
     CloudController *m_cloudController;
     SyncController *m_syncController;
+    QString m_currentBoardId;
+    QTimer *m_metadataDebounceTimer;
 
     //переменные для хранения начального состояния объекта, когда пользователь только начинает его перетаскивать или менять размер
     QPointF m_moveStartPos;

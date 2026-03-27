@@ -1,9 +1,11 @@
 #include "SyncController.h"
 #include "ImageModel.h"
+#include "SettingsManager.h"
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonValue>
 #include <QUrl>
+#include <QUrlQuery>
 
 SyncController::SyncController(ImagoImageModel *model, QObject *parent)
     : QObject(parent), m_model(model), m_webSocket(new QWebSocket(QString(), QWebSocketProtocol::VersionLatest, this))
@@ -17,6 +19,14 @@ void SyncController::connectToBoard(const QString &boardId)
 {
     m_boardId = boardId;
     QUrl url(WS_BASE_URL + boardId);
+
+    QString token = SettingsManager::instance().getJwtToken();
+    if (!token.isEmpty()) {
+        QUrlQuery query;
+        query.addQueryItem("token", token);
+        url.setQuery(query);
+    }
+
     m_webSocket->open(url);
 }
 
