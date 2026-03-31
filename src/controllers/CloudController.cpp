@@ -61,13 +61,12 @@ void CloudController::onSyncHashesFinished()
 
     QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
     QJsonObject obj = doc.object();
-    QJsonObject urls = obj["urls"].toObject(); // ожидаем {"hash1": "https://s3...", "hash2": "https://s3..."}
+    QJsonObject urls = obj["urls"].toObject();
 
     m_uploadCount = 0;
     m_uploadTotal = urls.keys().size();
 
     if (m_uploadTotal == 0) {
-        // Все картинки уже есть на сервере
         uploadMetadata(m_currentUploadBoardId);
         return;
     }
@@ -79,10 +78,14 @@ void CloudController::onSyncHashesFinished()
         
         QPixmap cachedPix = CacheManager::instance().loadFromCache(hash);
         if (cachedPix.isNull()) {
-            // ДОБАВЛЕН ЛОГ:
             qDebug() << "ВНИМАНИЕ: Картинка" << hash << "не найдена в кэше! Пропуск.";
             m_uploadCount++;
-            continue; // Если почему-то нет в кэше, пропускаем
+            
+            // ИСПРАВЛЕНИЕ 1: Проверяем, не зависли ли мы на последней пустой картинке
+            if (m_uploadCount >= m_uploadTotal) {
+                uploadMetadata(m_currentUploadBoardId);
+            }
+            continue; 
         }
 
         QByteArray data;
@@ -90,8 +93,13 @@ void CloudController::onSyncHashesFinished()
         buffer.open(QIODevice::WriteOnly);
         cachedPix.save(&buffer, "PNG");
 
-        QNetworkRequest request((QUrl(presignedUrl)));
-        request.setHeader(QNetworkRequest::ContentTypeHeader, "image/png");
+        // ИСПРАВЛЕНИЕ 2: QUrl::StrictMode не дает Qt сломать подпись от S3
+        QNetworkRequest request(QUrl(presignedUrl, QUrl::StrictMode));
+        
+        // ИСПРАВЛЕНИЕ 3: Сырые заголовки вместо стандартных, чтобы избежать добавления "charset=utf-8"
+        request.setRawHeader("Content-Type", "image/png");
+        request.setRawHeader("Content-Length", QByteArray::number(data.size()));
+
         QNetworkReply *putReply = m_networkManager->put(request, data);
         connect(putReply, &QNetworkReply::finished, this, &CloudController::onS3UploadFinished);
     }
@@ -202,17 +210,22 @@ void CloudController::onMetadataDownloadFinished()
     }
 
     QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
-    m_downloadedMetadata = doc.object();
+    QJsonObject rootResp = doc.object();
 
+    // 1. ИСПРАВЛЕНИЕ: Вытаскиваем саму структуру доски (canvas, items) из ключа "data"
+    m_downloadedMetadata = rootResp["data"].toObject();
+
+    // 2. А вот ссылки на скачивание S3 лежат в корне ответа сервера
+    QJsonObject urlsObj = rootResp["download_urls"].toObject();
+
+    // 3. Теперь itemsArray корректно прочитает картинки
     QJsonArray itemsArray = m_downloadedMetadata["items"].toArray();
     QMap<QString, QString> missingUrls; // hash -> url
-
-    // Assuming the API provides a map of download URLs in "download_urls" 
-    QJsonObject urlsObj = m_downloadedMetadata["download_urls"].toObject();
 
     for (const QJsonValue &value : itemsArray) {
         QJsonObject itemObj = value.toObject();
         QString hash = itemObj["imageHash"].toString();
+        
         if (!hash.isEmpty() && !CacheManager::instance().isCached(hash)) {
             QString dlUrl = urlsObj[hash].toString();
             if (!dlUrl.isEmpty() && !missingUrls.contains(hash)) {
@@ -225,7 +238,7 @@ void CloudController::onMetadataDownloadFinished()
     m_downloadTotal = missingUrls.size();
 
     if (m_downloadTotal == 0) {
-        finalizeSyncDown();
+        finalizeSyncDown(); // Функция finalizeSyncDown теперь отработает идеально!
         return;
     }
 
