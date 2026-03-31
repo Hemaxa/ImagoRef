@@ -94,6 +94,8 @@ public:
 
     Q_INVOKABLE void openCloudBoard(const QString &boardId);
     Q_INVOKABLE void openLocalFile(const QUrl &fileUrl);
+    Q_INVOKABLE QString generateBoardPreview();
+
 
 signals:
     //сигналы, которые оповещают QML об изменениях (связаны с макросами NOTIFY в Q_PROPERTY)

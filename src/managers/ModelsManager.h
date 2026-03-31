@@ -42,8 +42,13 @@ private:
     ModelsManager(const ModelsManager&) = delete;
     ModelsManager& operator=(const ModelsManager&) = delete;
 
-    void extractArchive(const QString &zipPath);
+    void downloadNextFile();
     void checkModelExists();
+
+    QStringList m_downloadQueue;
+    QString m_currentFileName;
+    qreal m_totalProgress = 0.0;
+    int m_fileIndex = 0;
 
     bool m_isModelDownloaded = false;
     bool m_isDownloading = false;

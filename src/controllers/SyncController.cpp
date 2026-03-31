@@ -6,6 +6,7 @@
 #include <QJsonValue>
 #include <QUrl>
 #include <QUrlQuery>
+#include <QTimer>
 
 SyncController::SyncController(ImagoImageModel *model, QObject *parent)
     : QObject(parent), m_model(model), m_webSocket(new QWebSocket(QString(), QWebSocketProtocol::VersionLatest, this))
@@ -32,6 +33,7 @@ void SyncController::connectToBoard(const QString &boardId)
 
 void SyncController::disconnectFromBoard()
 {
+    m_boardId.clear();
     m_webSocket->close();
 }
 
@@ -69,6 +71,13 @@ void SyncController::onConnected()
 
 void SyncController::onDisconnected()
 {
+    if (!m_boardId.isEmpty()) {
+        QTimer::singleShot(5000, this, [this]() {
+            if (!m_boardId.isEmpty() && m_webSocket->state() == QAbstractSocket::UnconnectedState) {
+                connectToBoard(m_boardId);
+            }
+        });
+    }
 }
 
 void SyncController::onTextMessageReceived(const QString &message)

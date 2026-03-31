@@ -200,12 +200,14 @@ Dialog {
             columnSpacing: 20
             
             Repeater {
-                model: SettingsManager.recentBoards.length === 0 ? 0 : Math.min(6, SettingsManager.recentBoards.length)
+                model: 6
                 
                 // Карточка проекта
                 Item {
                     width: 160
                     height: 160
+                    
+                    property var projData: index < SettingsManager.recentBoards.length ? SettingsManager.recentBoards[index] : null
                     
                     // Рамка с полосками
                     Image {
@@ -213,6 +215,7 @@ Dialog {
                         anchors.fill: parent
                         source: ThemeManager.icons.projectFrame
                         fillMode: Image.Stretch
+                        visible: projData !== null
                     }
                     
                     // Превью проекта
@@ -221,24 +224,33 @@ Dialog {
                         width: parent.width - 20
                         height: parent.height - 20
                         color: ThemeManager.colors.controlBackground
+                        radius: 5
+                        clip: true
                         
-                        // Если есть превью, можно показать картинку. Пока текст + иконка типа
+                        Image {
+                            anchors.fill: parent
+                            source: projData === null ? (ThemeManager.icons.emptyBoardPlaceholder || "") : 
+                                    (projData.previewPath ? projData.previewPath : "")
+                            fillMode: projData === null ? Image.PreserveAspectFit : Image.PreserveAspectCrop
+                            visible: projData === null || (projData.previewPath && projData.previewPath !== "")
+                        }
+                        
+                        // Если нет превью, можно показать текст + иконка типа
                         ColumnLayout {
                             anchors.centerIn: parent
                             spacing: 10
+                            visible: projData !== null && (!projData.previewPath || projData.previewPath === "")
                             
                             Image {
                                 Layout.alignment: Qt.AlignHCenter
                                 Layout.preferredWidth: 32
                                 Layout.preferredHeight: 32
-                                source: modelData.type === "cloud" ? ThemeManager.icons.sidebarTabCloud : ThemeManager.icons.sidebarTabLocal
-                                // Замечание: используем иконки, нужно убедиться что они есть, или подставим плейсхолдеры.
-                                // Для облака используем что-то, для локалки что-то.
+                                source: projData ? (projData.type === "cloud" ? ThemeManager.icons.sidebarTabCloud : ThemeManager.icons.sidebarTabLocal) : ""
                             }
                             
                             Text {
                                 Layout.alignment: Qt.AlignHCenter
-                                text: modelData.name || "Untitled"
+                                text: projData ? (projData.name || "Untitled") : ""
                                 color: ThemeManager.colors.textColor
                                 font.pixelSize: 14
                                 width: 120
@@ -250,12 +262,14 @@ Dialog {
                     
                     MouseArea {
                         anchors.fill: parent
-                        cursorShape: Qt.PointingHandCursor
+                        cursorShape: projData !== null ? Qt.PointingHandCursor : Qt.ArrowCursor
                         onClicked: {
-                            if (modelData.type === "cloud") {
-                                root.openCloudBoardRequested(modelData.id)
-                            } else {
-                                root.openBoardRequested(Qt.url(modelData.path))
+                            if (projData !== null) {
+                                if (projData.type === "cloud") {
+                                    root.openCloudBoardRequested(projData.id)
+                                } else {
+                                    root.openBoardRequested(Qt.url(projData.path))
+                                }
                             }
                         }
                     }
@@ -339,24 +353,12 @@ Dialog {
                 radius: 25
                 color: root.btnOpenColor
                 
-                // Клетчатый паттерн (эффект)
-                Canvas {
+                // Статичная заглушка для эффекта
+                Image {
                     anchors.fill: parent
-                    onPaint: {
-                        var ctx = getContext("2d")
-                        ctx.clearRect(0, 0, width, height)
-                        
-                        // Рисуем клетки
-                        var cellSize = 10
-                        ctx.fillStyle = Qt.rgba(0, 0, 0, 0.15)
-                        
-                        for (var y = 0; y < height; y += cellSize * 2) {
-                            for (var x = 0; x < width; x += cellSize * 2) {
-                                ctx.fillRect(x, y, cellSize, cellSize)
-                                ctx.fillRect(x + cellSize, y + cellSize, cellSize, cellSize)
-                            }
-                        }
-                    }
+                    source: ThemeManager.icons.openExistingBgPlaceholder || ""
+                    fillMode: Image.Stretch
+                    opacity: 0.15
                 }
                 
                 Text {

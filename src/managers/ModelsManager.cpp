@@ -5,9 +5,8 @@
 #include <QDebug>
 #include <QJSEngine>
 #include <QQmlEngine>
-#include <quazip/JlCompress.h>
 
-const QString C_MODEL_URL = "https://imagoref.ru/models/upscale-model.zip";
+const QString C_BASE_MODEL_URL = "https://imagoref.ru/models/upscale-model-DF2K";
 const QString C_MODEL_BIN = "model-DF2K.bin";
 const QString C_MODEL_PARAM = "model-DF2K.param";
 
@@ -64,11 +63,30 @@ void ModelsManager::downloadModel() {
 
     m_isDownloading = true;
     m_downloadProgress = 0.0;
+    m_totalProgress = 0.0;
     emit downloadingChanged();
     emit progressChanged();
 
-    QNetworkRequest request{(QUrl(C_MODEL_URL))};
-    // Follow redirects
+    m_downloadQueue.clear();
+    m_downloadQueue << C_MODEL_BIN << C_MODEL_PARAM;
+    m_fileIndex = 0;
+
+    downloadNextFile();
+}
+
+void ModelsManager::downloadNextFile() {
+    if (m_downloadQueue.isEmpty()) {
+        m_isDownloading = false;
+        emit downloadingChanged();
+        checkModelExists();
+        emit downloadFinished(true, "");
+        return;
+    }
+
+    m_currentFileName = m_downloadQueue.takeFirst();
+    QString urlStr = C_BASE_MODEL_URL + m_currentFileName;
+    
+    QNetworkRequest request{(QUrl(urlStr))};
     request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
     
     m_networkReply = m_networkManager->get(request);
@@ -87,46 +105,41 @@ void ModelsManager::deleteModel() {
 
 void ModelsManager::onDownloadProgress(qint64 bytesReceived, qint64 bytesTotal) {
     if (bytesTotal > 0) {
-        m_downloadProgress = static_cast<qreal>(bytesReceived) / static_cast<qreal>(bytesTotal);
+        // Мы скачиваем 2 файла, поэтому каждый дает 50% прогресса
+        qreal currentFileProgress = static_cast<qreal>(bytesReceived) / static_cast<qreal>(bytesTotal);
+        m_downloadProgress = (m_fileIndex * 0.5) + (currentFileProgress * 0.5);
         emit progressChanged();
     }
 }
 
 void ModelsManager::onDownloadFinished() {
-    m_isDownloading = false;
-    emit downloadingChanged();
-
     if (m_networkReply->error() != QNetworkReply::NoError) {
         QString errorMsg = m_networkReply->errorString();
         m_networkReply->deleteLater();
         m_networkReply = nullptr;
+        m_isDownloading = false;
+        emit downloadingChanged();
         emit downloadFinished(false, errorMsg);
         return;
     }
 
-    // Save zip to a temporary file
-    QString zipPath = QDir(m_modelsDir).filePath("upscale-model.zip");
-    QFile zipFile(zipPath);
-    if (zipFile.open(QIODevice::WriteOnly)) {
-        zipFile.write(m_networkReply->readAll());
-        zipFile.close();
-        
-        extractArchive(zipPath);
-        QFile::remove(zipPath); // Clean up zip
-        
-        checkModelExists();
-        emit downloadFinished(true, "");
+    QString savePath = QDir(m_modelsDir).filePath(m_currentFileName);
+    QFile targetFile(savePath);
+    if (targetFile.open(QIODevice::WriteOnly)) {
+        targetFile.write(m_networkReply->readAll());
+        targetFile.close();
     } else {
-        emit downloadFinished(false, "Failed to save downloaded file.");
+        m_networkReply->deleteLater();
+        m_networkReply = nullptr;
+        m_isDownloading = false;
+        emit downloadingChanged();
+        emit downloadFinished(false, "Failed to save downloaded file " + m_currentFileName);
+        return;
     }
 
     m_networkReply->deleteLater();
     m_networkReply = nullptr;
-}
-
-void ModelsManager::extractArchive(const QString &zipPath) {
-    if (!QFile::exists(zipPath)) return;
     
-    // Extract using QuaZip
-    JlCompress::extractDir(zipPath, m_modelsDir);
+    m_fileIndex++;
+    downloadNextFile();
 }

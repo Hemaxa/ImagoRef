@@ -54,6 +54,7 @@ void SettingsManager::loadSettings()
                 board["path"] = obj["path"].toString();
                 board["name"] = obj["name"].toString();
                 board["type"] = obj["type"].toString();
+                board["previewPath"] = obj["previewPath"].toString();
                 m_recentBoards.append(board);
             }
         }
@@ -92,6 +93,7 @@ void SettingsManager::saveSettings()
         obj["path"] = map.value("path").toString();
         obj["name"] = map.value("name").toString();
         obj["type"] = map.value("type").toString();
+        obj["previewPath"] = map.value("previewPath").toString();
         arr.append(obj);
     }
     m_settings.setValue("history/recentBoardsJson", QString::fromUtf8(QJsonDocument(arr).toJson(QJsonDocument::Compact)));
@@ -290,6 +292,8 @@ void SettingsManager::addRecentBoard(const QVariantMap& board)
         boardIdOrPath = board.value("path").toString();
     }
 
+    QVariantMap newBoard = board;
+
     for (int i = 0; i < m_recentBoards.size(); ++i) {
         QVariantMap existing = m_recentBoards[i].toMap();
         QString existingIdOrPath = existing.value("id").toString();
@@ -298,12 +302,15 @@ void SettingsManager::addRecentBoard(const QVariantMap& board)
         }
         
         if (existingIdOrPath == boardIdOrPath && !boardIdOrPath.isEmpty()) {
+            if (!newBoard.contains("previewPath") && existing.contains("previewPath")) {
+                newBoard["previewPath"] = existing.value("previewPath");
+            }
             m_recentBoards.removeAt(i);
             break;
         }
     }
 
-    m_recentBoards.prepend(board);
+    m_recentBoards.prepend(newBoard);
 
     while (m_recentBoards.size() > 6) {
         m_recentBoards.removeLast();
@@ -311,6 +318,30 @@ void SettingsManager::addRecentBoard(const QVariantMap& board)
 
     saveSettings();
     emit recentBoardsChanged();
+}
+
+void SettingsManager::updateBoardPreview(const QString& idOrPath, const QString& previewPath)
+{
+    bool changed = false;
+    for (int i = 0; i < m_recentBoards.size(); ++i) {
+        QVariantMap existing = m_recentBoards[i].toMap();
+        QString existingIdOrPath = existing.value("id").toString();
+        if (existingIdOrPath.isEmpty()) {
+            existingIdOrPath = existing.value("path").toString();
+        }
+        
+        if (existingIdOrPath == idOrPath && !idOrPath.isEmpty()) {
+            existing["previewPath"] = previewPath;
+            m_recentBoards[i] = existing;
+            changed = true;
+            break;
+        }
+    }
+    
+    if (changed) {
+        saveSettings();
+        emit recentBoardsChanged();
+    }
 }
 
 bool SettingsManager::isToolEnabled(const QString &toolName) const

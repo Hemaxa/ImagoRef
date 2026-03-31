@@ -186,7 +186,6 @@ void CloudController::onMetadataUploadFinished()
 
 void CloudController::syncDown(const QString &boardId)
 {
-    emit cloudSyncStarted();
     m_currentDownloadBoardId = boardId;
 
     QNetworkRequest request(QUrl(API_BASE_URL + "/boards/" + boardId + "/metadata"));
@@ -242,6 +241,7 @@ void CloudController::onMetadataDownloadFinished()
         return;
     }
 
+    emit cloudSyncStarted();
     emit cloudSyncProgress(0, m_downloadTotal);
 
     for (auto it = missingUrls.begin(); it != missingUrls.end(); ++it) {

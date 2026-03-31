@@ -69,6 +69,10 @@ void ThemeManager::resetToDefaults()
     m_themeIcons["welcomeDecoZigzag"] = "file://" + defaultThemeDir + "/WelcomeWindow/background/deco-zigzag.svg";
     m_themeIcons["welcomeDecoStar"] = "file://" + defaultThemeDir + "/WelcomeWindow/background/deco-star.svg";
     m_themeIcons["projectFrame"] = "file://" + defaultThemeDir + "/WelcomeWindow/background/project-frame.svg";
+    m_themeIcons["emptyBoardPlaceholder"] = "file://" + defaultThemeDir + "/WelcomeWindow/background/empty-board.svg";
+    m_themeIcons["openExistingBgPlaceholder"] = "file://" + defaultThemeDir + "/WelcomeWindow/background/open-existing-bg.svg";
+    m_themeIcons["sidebarTabCloud"] = "file://" + defaultThemeDir + "/WelcomeWindow/background/sidebar-cloud.svg";
+    m_themeIcons["sidebarTabLocal"] = "file://" + defaultThemeDir + "/WelcomeWindow/background/sidebar-local.svg";
     
     m_themeIcons["pasteIcon"] = "file://" + defaultThemeDir + "/MainWindow/tools/paste.svg";
     m_themeIcons["deleteIcon"] = "file://" + defaultThemeDir + "/MainWindow/tools/delete.svg";

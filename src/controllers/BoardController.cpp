@@ -5,6 +5,11 @@
 #include "ModelsManager.h"
 #include "CloudController.h"
 #include "SyncController.h"
+#include <QPainter>
+#include <QImage>
+#include <QStandardPaths>
+#include <QDir>
+#include <QCryptographicHash>
 
 BoardController::BoardController(QObject *parent) : QObject(parent)
     , m_model(new ImagoImageModel(this))
@@ -44,6 +49,17 @@ BoardController::BoardController(QObject *parent) : QObject(parent)
 }
 
 BoardController::~BoardController() {
+    if (m_metadataDebounceTimer->isActive()) {
+        m_metadataDebounceTimer->stop();
+        if (!m_currentBoardId.isEmpty()) {
+            m_cloudController->uploadMetadata(m_currentBoardId);
+        }
+    }
+    
+    if (!m_model->getAllItems().isEmpty()) {
+        generateBoardPreview();
+    }
+
     if (ImagoImageProvider::instance()) {
         ImagoImageProvider::instance()->unregisterModel(m_model); //убираем модель из регистрации
     }
@@ -277,6 +293,9 @@ void BoardController::scheduleMetadataUpload()
 
 void BoardController::openCloudBoard(const QString &boardId)
 {
+    if (!m_model->getAllItems().isEmpty()) {
+        generateBoardPreview();
+    }
     setCurrentBoardId(boardId);
     m_cloudController->syncDown(boardId);
     m_syncController->connectToBoard(boardId);
@@ -284,6 +303,75 @@ void BoardController::openCloudBoard(const QString &boardId)
 
 void BoardController::openLocalFile(const QUrl &fileUrl)
 {
+    if (!m_model->getAllItems().isEmpty()) {
+        generateBoardPreview();
+    }
     setCurrentBoardId("");
     m_fileController->openBoard(fileUrl);
+}
+
+QString BoardController::generateBoardPreview()
+{
+    if (m_model->getAllItems().isEmpty()) return "";
+
+    QString identifier = m_currentBoardId.isEmpty() ? m_fileController->getCurrentFilePath() : m_currentBoardId;
+    if (identifier.isEmpty()) return "";
+    
+    QRectF bounds;
+    bool first = true;
+    for (const auto& item : m_model->getAllItems()) {
+        if (item.pixmap.isNull()) continue;
+        
+        QRectF rect(item.x, item.y, item.width, item.height);
+        if (first) {
+            bounds = rect;
+            first = false;
+        } else {
+            bounds = bounds.united(rect);
+        }
+    }
+    
+    if (first) return "";
+
+    double MARGIN = bounds.width() * 0.1;
+    bounds.adjust(-MARGIN, -MARGIN, MARGIN, MARGIN);
+
+    qreal side = qMax(bounds.width(), bounds.height());
+    bounds = QRectF(bounds.center().x() - side/2.0, bounds.center().y() - side/2.0, side, side);
+
+    QImage preview(512, 512, QImage::Format_ARGB32);
+    preview.fill(Qt::transparent);
+
+    QPainter p(&preview);
+    p.setRenderHint(QPainter::Antialiasing);
+    p.setRenderHint(QPainter::SmoothPixmapTransform);
+    
+    p.scale(512.0 / bounds.width(), 512.0 / bounds.height());
+    p.translate(-bounds.x(), -bounds.y());
+
+    for (const auto& item : m_model->getAllItems()) {
+        if (item.pixmap.isNull()) continue;
+        p.save();
+        p.translate(item.x + item.width/2.0, item.y + item.height/2.0);
+        p.rotate(item.rotation);
+        p.translate(-item.width/2.0, -item.height/2.0);
+        
+        p.setOpacity(item.opacity);
+        p.drawPixmap(0, 0, item.width, item.height, item.pixmap);
+        p.restore();
+    }
+    p.end();
+
+    QString cacheDir = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
+    QDir().mkpath(cacheDir);
+
+    QString hash = QString(QCryptographicHash::hash(identifier.toUtf8(), QCryptographicHash::Md5).toHex());
+    QString path = QDir(cacheDir).filePath("preview_" + hash + ".png");
+    
+    preview.save(path, "PNG");
+    
+    QString finalPath = "file://" + path;
+    SettingsManager::instance().updateBoardPreview(identifier, finalPath);
+    
+    return finalPath;
 }
