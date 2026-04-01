@@ -263,22 +263,26 @@ void ArrangeCommand::redo()
     }
 }
 
-UpscaleImageCommand::UpscaleImageCommand(ImagoImageModel *model, int index, const QPixmap &oldPixmap, const QRectF &oldCrop, const QPixmap &newPixmap, const QRectF &newCrop, QUndoCommand *parent) : QUndoCommand("Увеличение разрешения", parent)
+UpscaleImageCommand::UpscaleImageCommand(ImagoImageModel *model, int index, const QPixmap &oldPix, const QRectF &oldCrop, const QString &oldHash, const QPixmap &newPix, const QRectF &newCrop, const QString &newHash, QUndoCommand *parent) : QUndoCommand(parent)
     , m_model(model)
     , m_index(index)
-    , m_oldPixmap(oldPixmap), m_newPixmap(newPixmap)
-    , m_oldCrop(oldCrop), m_newCrop(newCrop)
+    , m_oldPix(oldPix)
+    , m_newPix(newPix)
+    , m_oldCrop(oldCrop)
+    , m_newCrop(newCrop)
+    , m_oldHash(oldHash)
+    , m_newHash(newHash)
 {
 }
 
-void UpscaleImageCommand::undo()
-{
-    m_model->setPixmap(m_index, m_oldPixmap);
+void UpscaleImageCommand::undo() {
+    m_model->setPixmap(m_index, m_oldPix);
+    m_model->setImageHash(m_index, m_oldHash); // Восстанавливаем старый хэш
     m_model->setCrop(m_index, m_oldCrop.x(), m_oldCrop.y(), m_oldCrop.width(), m_oldCrop.height());
 }
 
-void UpscaleImageCommand::redo()
-{
-    m_model->setPixmap(m_index, m_newPixmap);
+void UpscaleImageCommand::redo() {
+    m_model->setPixmap(m_index, m_newPix);
+    m_model->setImageHash(m_index, m_newHash); // Применяем новый хэш
     m_model->setCrop(m_index, m_newCrop.x(), m_newCrop.y(), m_newCrop.width(), m_newCrop.height());
 }

@@ -59,16 +59,41 @@ void ThemeManager::resetToDefaults()
     m_themeColors["welcomeAccentYellow"] = QColor("#FFE135");
 
     QString themesPath = QCoreApplication::applicationDirPath() + "/themes";
-    QString defaultThemeDir = themesPath + "/dark"; // fallback path for icons
+    QString defaultThemeDir = themesPath + "/imago"; // fallback path for icons
     
-    // Default Icons fallback (using the "dark" theme paths for relative resolution safety)
-    m_themeIcons["logo"] = "file://" + defaultThemeDir + "/WelcomeWindow/logo/logo.svg";
-    m_themeIcons["mascot"] = "file://" + defaultThemeDir + "/WelcomeWindow/mascot/mascot.svg";
-    m_themeIcons["welcomeDecoDots"] = "file://" + defaultThemeDir + "/WelcomeWindow/background/deco-dots.svg";
-    m_themeIcons["welcomeDecoTriangle"] = "file://" + defaultThemeDir + "/WelcomeWindow/background/deco-triangle.svg";
-    m_themeIcons["welcomeDecoZigzag"] = "file://" + defaultThemeDir + "/WelcomeWindow/background/deco-zigzag.svg";
-    m_themeIcons["welcomeDecoStar"] = "file://" + defaultThemeDir + "/WelcomeWindow/background/deco-star.svg";
-    m_themeIcons["projectFrame"] = "file://" + defaultThemeDir + "/WelcomeWindow/background/project-frame.svg";
+    // Default Icons fallback (using the "imago" theme paths for relative resolution safety)
+    m_themeIcons["logo"] = "file://" + defaultThemeDir + "/WelcomeWindow/background/logo.svg";
+    m_themeIcons["character"] = "file://" + defaultThemeDir + "/WelcomeWindow/background/character.svg";
+    m_themeIcons["button_1"] = "file://" + defaultThemeDir + "/WelcomeWindow/background/button_1.svg";
+    m_themeIcons["button_2"] = "file://" + defaultThemeDir + "/WelcomeWindow/background/button_2.svg";
+    m_themeIcons["circles_1"] = "file://" + defaultThemeDir + "/WelcomeWindow/background/circles_1.svg";
+    m_themeIcons["circles_2"] = "file://" + defaultThemeDir + "/WelcomeWindow/background/circles_2.svg";
+    m_themeIcons["circles_3"] = "file://" + defaultThemeDir + "/WelcomeWindow/background/circles_3.svg";
+    m_themeIcons["circles_4"] = "file://" + defaultThemeDir + "/WelcomeWindow/background/circles_4.svg";
+    m_themeIcons["dots"] = "file://" + defaultThemeDir + "/WelcomeWindow/background/dots.svg";
+    m_themeIcons["form_1"] = "file://" + defaultThemeDir + "/WelcomeWindow/background/form_1.svg";
+    m_themeIcons["form_2"] = "file://" + defaultThemeDir + "/WelcomeWindow/background/form_2.svg";
+    m_themeIcons["form_3"] = "file://" + defaultThemeDir + "/WelcomeWindow/background/form_3.svg";
+    m_themeIcons["form_4"] = "file://" + defaultThemeDir + "/WelcomeWindow/background/form_4.svg";
+    m_themeIcons["frame"] = "file://" + defaultThemeDir + "/WelcomeWindow/background/frame.svg";
+    m_themeIcons["line_1"] = "file://" + defaultThemeDir + "/WelcomeWindow/background/line_1.svg";
+    m_themeIcons["line_2"] = "file://" + defaultThemeDir + "/WelcomeWindow/background/line_2.svg";
+    m_themeIcons["line_3"] = "file://" + defaultThemeDir + "/WelcomeWindow/background/line_3.svg";
+    m_themeIcons["lines_star"] = "file://" + defaultThemeDir + "/WelcomeWindow/background/lines_star.svg";
+    m_themeIcons["path_1"] = "file://" + defaultThemeDir + "/WelcomeWindow/background/path_1.svg";
+    m_themeIcons["path_2"] = "file://" + defaultThemeDir + "/WelcomeWindow/background/path_2.svg";
+    m_themeIcons["path_3"] = "file://" + defaultThemeDir + "/WelcomeWindow/background/path_3.svg";
+    m_themeIcons["recent_projects"] = "file://" + defaultThemeDir + "/WelcomeWindow/background/recent_projects.svg";
+    m_themeIcons["rect_1"] = "file://" + defaultThemeDir + "/WelcomeWindow/background/rect_1.svg";
+    m_themeIcons["rect_2"] = "file://" + defaultThemeDir + "/WelcomeWindow/background/rect_2.svg";
+    m_themeIcons["rectangles_1"] = "file://" + defaultThemeDir + "/WelcomeWindow/background/rectangles_1.svg";
+    m_themeIcons["rectangles_2"] = "file://" + defaultThemeDir + "/WelcomeWindow/background/rectangles_2.svg";
+    m_themeIcons["star_1"] = "file://" + defaultThemeDir + "/WelcomeWindow/background/star_1.svg";
+    m_themeIcons["star_2"] = "file://" + defaultThemeDir + "/WelcomeWindow/background/star_2.svg";
+    m_themeIcons["star_3"] = "file://" + defaultThemeDir + "/WelcomeWindow/background/star_3.svg";
+    m_themeIcons["triangles_1"] = "file://" + defaultThemeDir + "/WelcomeWindow/background/triangles_1.svg";
+    m_themeIcons["triangles_2"] = "file://" + defaultThemeDir + "/WelcomeWindow/background/triangles_2.svg";
+    
     m_themeIcons["emptyBoardPlaceholder"] = "file://" + defaultThemeDir + "/WelcomeWindow/background/empty-board.svg";
     m_themeIcons["openExistingBgPlaceholder"] = "file://" + defaultThemeDir + "/WelcomeWindow/background/open-existing-bg.svg";
     m_themeIcons["sidebarTabCloud"] = "file://" + defaultThemeDir + "/WelcomeWindow/background/sidebar-cloud.svg";

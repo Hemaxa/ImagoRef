@@ -31,55 +31,205 @@ Dialog {
     // ========================================
     background: Rectangle {
         color: root.bgColor
+        border.color: "#181818"
+        border.width: 4
+        radius: 8
         
         // Декоративные элементы фона
-        Image {
-            source: ThemeManager.icons.welcomeDecoTriangle
-            x: 50; y: 80
-            width: 40; height: 40
-            rotation: -15
+        Image { 
+            source: ThemeManager.icons.dots
+            anchors.right: parent.right
+            anchors.rightMargin: 40
+            anchors.top: parent.top
+            anchors.topMargin: 20
         }
-        
-        // Зигзаг справа
-        Image {
-            source: ThemeManager.icons.welcomeDecoZigzag
-            x: parent.width - 100; y: 150
-            width: 60; height: 25
+        Image { 
+            source: ThemeManager.icons.dots
+            anchors.left: parent.left
+            anchors.leftMargin: 20
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: 40
         }
-        
-        // Звезда слева
-        Image {
-            source: ThemeManager.icons.welcomeDecoStar
-            x: 30; y: 250
-            width: 25; height: 25
+        Image { 
+            source: ThemeManager.icons.dots
+            anchors.right: parent.right
+            anchors.rightMargin: 40
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: 20
         }
-        
-        // Точки справа вверху
-        Image {
-            source: ThemeManager.icons.welcomeDecoDots
-            x: parent.width - 80; y: 60
-            width: 50; height: 50
+        Image { 
+            source: ThemeManager.icons.rectangles_1
+            anchors.left: parent.left
+            anchors.leftMargin: 10
+            anchors.top: parent.top
+            anchors.topMargin: 50
         }
-        
-        // Еще элементы для заполнения
-        Image {
-            source: ThemeManager.icons.welcomeDecoTriangle
-            x: parent.width - 150; y: 400
-            width: 35; height: 35
-            rotation: 45
+        Image { 
+            source: ThemeManager.icons.path_1
+            anchors.left: parent.left
+            anchors.leftMargin: 100
+            anchors.top: parent.top
+            anchors.topMargin: 20
         }
-        
-        Image {
-            source: ThemeManager.icons.welcomeDecoZigzag
-            x: 80; y: parent.height - 150
-            width: 50; height: 20
-            rotation: -30
+        Image { 
+            source: ThemeManager.icons.triangles_1
+            anchors.left: parent.left
+            anchors.leftMargin: 190
+            anchors.top: parent.top
+            anchors.topMargin: 20
         }
-        
-        Image {
-            source: ThemeManager.icons.welcomeDecoStar
-            x: parent.width - 60; y: parent.height - 200
-            width: 20; height: 20
+        Image { 
+            source: ThemeManager.icons.circles_1
+            anchors.right: parent.right
+            anchors.rightMargin: 160
+            anchors.top: parent.top
+            anchors.topMargin: 15
+        }
+
+        Image { 
+            source: ThemeManager.icons.star_1
+            anchors.left: parent.left
+            anchors.leftMargin: 70
+            anchors.top: parent.top
+            anchors.topMargin: 180
+        }
+        Image { 
+            source: ThemeManager.icons.line_1
+            anchors.left: parent.left
+            anchors.leftMargin: 160
+            anchors.top: parent.top
+            anchors.topMargin: 200
+        }
+        Image { 
+            source: ThemeManager.icons.circles_2
+            anchors.left: parent.left
+            anchors.leftMargin: 280
+            anchors.top: parent.top
+            anchors.topMargin: 220
+        }
+        Image { 
+            source: ThemeManager.icons.star_2
+            anchors.right: parent.right
+            anchors.rightMargin: 130
+            anchors.top: parent.top
+            anchors.topMargin: 210
+        }
+        Image { 
+            source: ThemeManager.icons.path_2
+            anchors.right: parent.right
+            anchors.rightMargin: 60
+            anchors.top: parent.top
+            anchors.topMargin: 230
+        }
+
+        Image { 
+            source: ThemeManager.icons.rect_1
+            anchors.left: parent.left
+            anchors.leftMargin: 20
+            anchors.top: parent.top
+            anchors.topMargin: 250
+        }
+        Image { 
+            source: ThemeManager.icons.star_3
+            anchors.right: parent.right
+            anchors.rightMargin: 30
+            anchors.top: parent.top
+            anchors.topMargin: 270
+        }
+
+        Image { 
+            source: ThemeManager.icons.path_3
+            anchors.left: parent.left
+            anchors.leftMargin: 20
+            anchors.top: parent.top
+            anchors.topMargin: 310
+        }
+        Image { 
+            source: ThemeManager.icons.line_2
+            anchors.right: parent.right
+            anchors.rightMargin: 90
+            anchors.top: parent.top
+            anchors.topMargin: 310
+        }
+
+        Image { 
+            source: ThemeManager.icons.form_1
+            anchors.left: parent.left
+            anchors.leftMargin: 10
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: 280
+        }
+        Image { 
+            source: ThemeManager.icons.circles_3
+            anchors.right: parent.right
+            anchors.rightMargin: 30
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: 250
+        }
+
+        Image { 
+            source: ThemeManager.icons.rect_2
+            anchors.left: parent.left
+            anchors.leftMargin: 25
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: 150
+        }
+        Image { 
+            source: ThemeManager.icons.circles_4
+            anchors.left: parent.left
+            anchors.leftMargin: 220
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: 140
+        }
+
+        Image { 
+            source: ThemeManager.icons.lines_star
+            anchors.right: parent.right
+            anchors.rightMargin: 180
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: 140
+        }
+        Image { 
+            source: ThemeManager.icons.form_2
+            anchors.right: parent.right
+            anchors.rightMargin: 20
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: 130
+        }
+        Image { 
+            source: ThemeManager.icons.line_3
+            anchors.right: parent.right
+            anchors.rightMargin: 50
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: 170
+        }
+        Image { 
+            source: ThemeManager.icons.form_3
+            anchors.right: parent.right
+            anchors.rightMargin: 200
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: 10
+        }
+        Image { 
+            source: ThemeManager.icons.form_4
+            anchors.left: parent.left
+            anchors.leftMargin: 280
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: 20
+        }
+        Image { 
+            source: ThemeManager.icons.triangles_2
+            anchors.left: parent.left
+            anchors.leftMargin: 90
+            anchors.top: parent.top
+            anchors.topMargin: 150
+        }
+        Image { 
+            source: ThemeManager.icons.rectangles_2
+            anchors.right: parent.right
+            anchors.rightMargin: 120
+            anchors.top: parent.top
+            anchors.topMargin: 120
         }
     }
     
@@ -94,50 +244,37 @@ Dialog {
             id: logoImage
             source: ThemeManager.icons.logo
             anchors.horizontalCenter: parent.horizontalCenter
-            y: 40
-            width: 550
-            height: 120
+            y: 70
+            width: 520
+            height: 140
             fillMode: Image.PreserveAspectFit
         }
         
         // Заголовок "Recent projects"
-        Item {
+        Image {
             id: sectionHeader
+            source: ThemeManager.icons.recent_projects
             anchors.top: logoImage.bottom
-            anchors.topMargin: 10
+            anchors.topMargin: 30
             anchors.left: parent.left
             anchors.leftMargin: 40
-            width: 200
-            height: 40
-            
-            // Желтая линия-подчеркивание
-            Rectangle {
-                anchors.bottom: parent.bottom
-                width: parent.width
-                height: 20
-                color: root.accentYellow
-            }
-
-            Text {
-                text: "Recent projects"
-                font.pixelSize: 30
-                font.bold: true
-                color: root.textDark
-            }
+            width: 380
+            height: 50
+            fillMode: Image.PreserveAspectFit
         }
 
         // Кнопка авторизации / Аватар пользователя (В правом верхнем углу)
         Item {
             anchors.top: parent.top
             anchors.right: parent.right
-            anchors.topMargin: 30
-            anchors.rightMargin: 30
-            width: AuthController.isLoggedIn ? 50 : 120
-            height: 50
+            anchors.topMargin: 20
+            anchors.rightMargin: 20
+            width: AuthController.isLoggedIn ? 40 : 80
+            height: 40
 
             Rectangle {
                 anchors.fill: parent
-                radius: 25
+                radius: 20
                 color: AuthController.isLoggedIn ? ThemeManager.colors.controlBackground : root.accentYellow
                 border.color: ThemeManager.colors.controlBorder
                 border.width: 1
@@ -146,7 +283,7 @@ Dialog {
                     id: authBtnText
                     anchors.centerIn: parent
                     text: AuthController.isLoggedIn ? AuthController.userEmail.charAt(0).toUpperCase() : "Войти"
-                    font.pixelSize: AuthController.isLoggedIn ? 24 : 18
+                    font.pixelSize: AuthController.isLoggedIn ? 18 : 14
                     font.bold: true
                     color: AuthController.isLoggedIn ? ThemeManager.colors.textColor : root.textDark
                 }
@@ -192,12 +329,12 @@ Dialog {
         GridLayout {
             id: projectGrid
             anchors.top: sectionHeader.bottom
-            anchors.topMargin: 30
+            anchors.topMargin: 20
             anchors.horizontalCenter: parent.horizontalCenter
             
             columns: 3
-            rowSpacing: 20
-            columnSpacing: 20
+            rowSpacing: 15
+            columnSpacing: 25
             
             Repeater {
                 model: 6
@@ -213,51 +350,28 @@ Dialog {
                     Image {
                         id: frameImage
                         anchors.fill: parent
-                        source: ThemeManager.icons.projectFrame
+                        source: ThemeManager.icons.frame || ""
                         fillMode: Image.Stretch
-                        visible: projData !== null
+                        visible: true
                     }
                     
-                    // Превью проекта
+                    // Превью проекта или "пустой" квадрат
                     Rectangle {
-                        anchors.centerIn: parent
-                        width: parent.width - 20
-                        height: parent.height - 20
-                        color: ThemeManager.colors.controlBackground
+                        anchors.fill: parent
+                        anchors.margins: 12 // Уменьшил отступ, чтобы больше покрывать белый фон внутри SVG
+                        color: root.bgColor // ОРАНЖЕВЫЙ, чтобы перекрыть белый пустой фон рамки
                         radius: 5
                         clip: true
                         
                         Image {
                             anchors.fill: parent
-                            source: projData === null ? (ThemeManager.icons.emptyBoardPlaceholder || "") : 
-                                    (projData.previewPath ? projData.previewPath : "")
-                            fillMode: projData === null ? Image.PreserveAspectFit : Image.PreserveAspectCrop
-                            visible: projData === null || (projData.previewPath && projData.previewPath !== "")
+                            source: projData ? (projData.previewPath ? projData.previewPath : "") : ""
+                            fillMode: Image.PreserveAspectCrop
+                            visible: projData !== null && projData.previewPath && projData.previewPath !== ""
                         }
                         
-                        // Если нет превью, можно показать текст + иконка типа
-                        ColumnLayout {
-                            anchors.centerIn: parent
-                            spacing: 10
-                            visible: projData !== null && (!projData.previewPath || projData.previewPath === "")
-                            
-                            Image {
-                                Layout.alignment: Qt.AlignHCenter
-                                Layout.preferredWidth: 32
-                                Layout.preferredHeight: 32
-                                source: projData ? (projData.type === "cloud" ? ThemeManager.icons.sidebarTabCloud : ThemeManager.icons.sidebarTabLocal) : ""
-                            }
-                            
-                            Text {
-                                Layout.alignment: Qt.AlignHCenter
-                                text: projData ? (projData.name || "Untitled") : ""
-                                color: ThemeManager.colors.textColor
-                                font.pixelSize: 14
-                                width: 120
-                                wrapMode: Text.Wrap
-                                horizontalAlignment: Text.AlignHCenter
-                            }
-                        }
+                        // Иконка типа
+                        // Удалили отсутствующие иконки для чистой консоли
                     }
                     
                     MouseArea {
@@ -278,50 +392,45 @@ Dialog {
         }
         
         // ========================================
-        // MASCOT (персонаж слева внизу)
+        // CHARACTER (персонаж слева внизу)
         // ========================================
         Image {
             id: mascotImage
-            source: ThemeManager.icons.mascot
+            source: ThemeManager.icons.character || ""
             anchors.left: parent.left
+            anchors.leftMargin: 40
             anchors.bottom: parent.bottom
-            width: 280
-            height: 380
+            anchors.bottomMargin: 10
+            width: 170
+            height: 230
             fillMode: Image.PreserveAspectFit
             verticalAlignment: Image.AlignBottom
         }
         
         // ========================================
-        // BUTTONS (справа внизу)
+        // BUTTONS (кнопки рядом с персонажем)
         // ========================================
         Row {
             id: buttonsRow
-            anchors.right: parent.right
+            anchors.left: mascotImage.right
+            anchors.leftMargin: 20
             anchors.bottom: parent.bottom
-            anchors.rightMargin: 50
-            anchors.bottomMargin: 50
+            anchors.bottomMargin: 40
             spacing: 20
             
             // Кнопка "New Board"
-            Rectangle {
+            Item {
                 id: newBoardBtn
                 width: 160
-                height: 50
-                radius: 25
+                height: 60
                 
-                gradient: Gradient {
-                    orientation: Gradient.Horizontal
-                    GradientStop { position: 0.0; color: root.btnNewGradientStart }
-                    GradientStop { position: 1.0; color: root.btnNewGradientEnd }
+                Image {
+                    anchors.fill: parent
+                    source: ThemeManager.icons.button_1 || ""
+                    fillMode: Image.Stretch
                 }
                 
-                Text {
-                    anchors.centerIn: parent
-                    text: "New Board"
-                    font.pixelSize: 18
-                    font.bold: true
-                    color: root.textDark
-                }
+                // Удалили QML Text, так как он зашит внутрь button_1.svg
                 
                 MouseArea {
                     anchors.fill: parent
@@ -346,28 +455,18 @@ Dialog {
             }
             
             // Кнопка "Open Existing"
-            Rectangle {
+            Item {
                 id: openExistingBtn
-                width: 180
-                height: 50
-                radius: 25
-                color: root.btnOpenColor
+                width: 160
+                height: 60
                 
-                // Статичная заглушка для эффекта
                 Image {
                     anchors.fill: parent
-                    source: ThemeManager.icons.openExistingBgPlaceholder || ""
+                    source: ThemeManager.icons.button_2 || ""
                     fillMode: Image.Stretch
-                    opacity: 0.15
                 }
                 
-                Text {
-                    anchors.centerIn: parent
-                    text: "Open Existing"
-                    font.pixelSize: 18
-                    font.bold: true
-                    color: root.textDark
-                }
+                // Удалили QML Text, так как он зашит внутрь button_2.svg!
                 
                 MouseArea {
                     anchors.fill: parent

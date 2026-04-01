@@ -99,6 +99,7 @@ public:
     Q_INVOKABLE void loadPixmapFromCache(int index);
 
     void setPixmap(int index, const QPixmap &pixmap);
+    void setImageHash(int index, const QString &hash);
 
 signals:
     //изменение количества объектов

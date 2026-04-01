@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_2" data-name="Layer 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 391.16 48.21">
+  <defs>
+    <style>
+      .cls-1 {
+        letter-spacing: 0em;
+      }
+
+      .cls-2 {
+        font-family: Montserrat-Bold, Montserrat;
+        font-size: 37px;
+        font-variation-settings: 'wght' 700;
+        font-weight: 700;
+      }
+
+      .cls-3 {
+        fill: #ffe100;
+      }
+    </style>
+  </defs>
+  <g id="Design">
+    <g>
+      <rect class="cls-3" y="25.76" width="391.16" height="20.9"/>
+      <text class="cls-2" transform="translate(3.52 31.45)"><tspan x="0" y="0">Н</tspan><tspan class="cls-1" x="30.23" y="0">е</tspan><tspan x="53.83" y="0">давние прое</tspan><tspan class="cls-1" x="310.35" y="0">к</tspan><tspan x="333.92" y="0">ты</tspan></text>
+    </g>
+  </g>
+</svg>

@@ -156,13 +156,14 @@ private:
 //UpscaleImageCommand - команда применения/отмены увеличения разрешения
 class UpscaleImageCommand : public QUndoCommand {
 public:
-    UpscaleImageCommand(ImagoImageModel *model, int index, const QPixmap &oldPixmap, const QRectF &oldCrop, const QPixmap &newPixmap, const QRectF &newCrop, QUndoCommand *parent = nullptr);
+    UpscaleImageCommand(ImagoImageModel *model, int index, const QPixmap &oldPix, const QRectF &oldCrop, const QString &oldHash, const QPixmap &newPix, const QRectF &newCrop, const QString &newHash, QUndoCommand *parent = nullptr);
     void undo() override;
     void redo() override;
-
+    
 private:
     ImagoImageModel *m_model;
     int m_index;
-    QPixmap m_oldPixmap, m_newPixmap;
+    QPixmap m_oldPix, m_newPix;
     QRectF m_oldCrop, m_newCrop;
+    QString m_oldHash, m_newHash; // Добавили хранение хэшей
 };

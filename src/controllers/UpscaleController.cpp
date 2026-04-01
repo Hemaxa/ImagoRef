@@ -2,10 +2,13 @@
 #include "ImageModel.h"
 #include "ModelsManager.h"
 #include "StackController.h" // Added for QUndoCommand
+#include "CacheManager.h"
 
 #include <QThreadPool>
 #include <QPainter>
 #include <QDebug>
+#include <QCryptographicHash>
+#include <QBuffer>
 #include "net.h"
 #include "cpu.h"
 #include "mat.h"
@@ -144,20 +147,33 @@ void UpscaleController::onUpscaleFinished(int index, QImage result) {
         ImagoImageData data = m_model->getItem(index);
         
         QPixmap oldPixmap = data.pixmap;
+        QString oldHash = data.imageHash; // Запоминаем старый хэш
         QRectF oldCrop(data.cropX, data.cropY, data.cropWidth, data.cropHeight);
-        QPixmap newPixmap = QPixmap::fromImage(result);
-        QRectF newCrop(0, 0, 0, 0); // No crop initially for the upscaled version
         
-        // Push to undo stack
+        QPixmap newPixmap = QPixmap::fromImage(result);
+        QRectF newCrop(0, 0, 0, 0); 
+        
+        // 1. Генерируем новый хэш для улучшенной картинки
+        QByteArray ba;
+        QBuffer buffer(&ba);
+        buffer.open(QIODevice::WriteOnly);
+        newPixmap.save(&buffer, "PNG");
+        QString newHash = QString(QCryptographicHash::hash(ba, QCryptographicHash::Md5).toHex());
+        
+        // 2. Обязательно сохраняем новые байты в кэш! 
+        // Иначе CloudController не найдет файл для отправки в S3
+        CacheManager::instance().saveToCache(newHash, ba);
+        
+        // 3. Отправляем в стек истории
         if (m_undoStack) {
             m_undoStack->push(new UpscaleImageCommand(
                 m_model, index,
-                oldPixmap, oldCrop,
-                newPixmap, newCrop
+                oldPixmap, oldCrop, oldHash,  // Передаем старый хэш
+                newPixmap, newCrop, newHash   // Передаем новый хэш
             ));
         } else {
-            // Fallback (just in case)
             m_model->setPixmap(index, newPixmap);
+            m_model->setImageHash(index, newHash); // Устанавливаем хэш напрямую
             if (data.cropWidth > 0 && data.cropHeight > 0) {
                 m_model->setCrop(index, 0, 0, 0, 0);
             }

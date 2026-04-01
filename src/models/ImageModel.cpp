@@ -355,6 +355,15 @@ void ImagoImageModel::setPixmap(int index, const QPixmap &pixmap)
     emit dataChanged(modelIndex, modelIndex, {SourceRole});
 }
 
+void ImagoImageModel::setImageHash(int index, const QString &hash) {
+    if (index < 0 || index >= m_items.size()) return;
+    m_items[index].imageHash = hash;
+    
+    // Оповещаем QML (если у тебя есть роль ImageHashRole, подставь ее)
+    QModelIndex modelIndex = createIndex(index, 0);
+    emit dataChanged(modelIndex, modelIndex); 
+}
+
 void ImagoImageModel::loadPixmapFromCache(int index)
 {
     if (index < 0 || index >= m_items.count())

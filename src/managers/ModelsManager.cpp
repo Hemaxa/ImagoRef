@@ -6,7 +6,7 @@
 #include <QJSEngine>
 #include <QQmlEngine>
 
-const QString C_BASE_MODEL_URL = "https://imagoref.ru/models/upscale-model-DF2K";
+const QString C_BASE_MODEL_URL = "https://imagoref.ru/models/";
 const QString C_MODEL_BIN = "model-DF2K.bin";
 const QString C_MODEL_PARAM = "model-DF2K.param";
 
