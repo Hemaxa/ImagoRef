@@ -12,6 +12,8 @@ class AuthController : public QObject {
     
     Q_PROPERTY(bool isLoggedIn READ getIsLoggedIn NOTIFY authStateChanged)
     Q_PROPERTY(QString userEmail READ getUserEmail NOTIFY authStateChanged)
+    Q_PROPERTY(QString userNickname READ getUserNickname NOTIFY authStateChanged)
+    Q_PROPERTY(QString userAvatarHash READ getUserAvatarHash NOTIFY authStateChanged)
 
 public:
     static AuthController* create(QQmlEngine *qmlEngine, QJSEngine *jsEngine);
@@ -23,6 +25,10 @@ public:
 
     bool getIsLoggedIn() const;
     QString getUserEmail() const;
+    QString getUserNickname() const;
+    QString getUserAvatarHash() const;
+    
+    Q_INVOKABLE void updateProfile(const QString &nickname, const QString &avatarFilePath);
 
 signals:
     void authStateChanged();

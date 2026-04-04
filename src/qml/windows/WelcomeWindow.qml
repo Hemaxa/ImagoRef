@@ -273,19 +273,38 @@ Dialog {
             height: 40
 
             Rectangle {
+                id: authBtnRect
                 anchors.fill: parent
                 radius: 20
+                clip: true
                 color: AuthController.isLoggedIn ? ThemeManager.colors.controlBackground : root.accentYellow
                 border.color: ThemeManager.colors.controlBorder
                 border.width: 1
 
+                property string initialStr: {
+                    if (!AuthController.isLoggedIn) return "Войти"
+                    if (AuthController.userNickname !== "") return AuthController.userNickname.charAt(0).toUpperCase()
+                    if (AuthController.userEmail !== "") return AuthController.userEmail.charAt(0).toUpperCase()
+                    return "?"
+                }
+
                 Text {
                     id: authBtnText
                     anchors.centerIn: parent
-                    text: AuthController.isLoggedIn ? AuthController.userEmail.charAt(0).toUpperCase() : "Войти"
+                    text: authBtnRect.initialStr
                     font.pixelSize: AuthController.isLoggedIn ? 18 : 14
                     font.bold: true
                     color: AuthController.isLoggedIn ? ThemeManager.colors.textColor : root.textDark
+                    visible: !AuthController.isLoggedIn || AuthController.userAvatarHash === ""
+                }
+                
+                Image {
+                    id: userAvatarImage
+                    anchors.fill: parent
+                    anchors.margins: 1
+                    source: AuthController.isLoggedIn && AuthController.userAvatarHash !== "" ? "https://imagoref.s3.timeweb.com/" + AuthController.userAvatarHash : ""
+                    fillMode: Image.PreserveAspectCrop
+                    visible: AuthController.isLoggedIn && AuthController.userAvatarHash !== ""
                 }
 
                 MouseArea {
@@ -310,6 +329,14 @@ Dialog {
                 Menu {
                     id: avatarMenu
                     y: parent.height + 5
+                    MenuItem {
+                        text: "Профиль"
+                        onTriggered: {
+                            profileDialog.nicknameInput.text = AuthController.userNickname
+                            profileDialog.avatarPath = ""
+                            profileDialog.open()
+                        }
+                    }
                     MenuItem {
                         text: "Доски"
                         onTriggered: {
@@ -346,32 +373,34 @@ Dialog {
                     
                     property var projData: index < SettingsManager.recentBoards.length ? SettingsManager.recentBoards[index] : null
                     
-                    // Рамка с полосками
+                    // Рамка
                     Image {
                         id: frameImage
                         anchors.fill: parent
                         source: ThemeManager.icons.frame || ""
-                        fillMode: Image.Stretch
+                        // Используем PreserveAspectFit вместо Stretch, чтобы рамка не искажалась
+                        fillMode: Image.PreserveAspectFit 
                         visible: true
                     }
                     
-                    // Превью проекта или "пустой" квадрат
+                    // Контейнер для скриншота (предпросмотра)
                     Rectangle {
                         anchors.fill: parent
-                        anchors.margins: 12 // Уменьшил отступ, чтобы больше покрывать белый фон внутри SVG
-                        color: root.bgColor // ОРАНЖЕВЫЙ, чтобы перекрыть белый пустой фон рамки
+                        // Оставьте нужный отступ, чтобы попасть точно в прозрачное/серое "окно" вашей SVG-рамки
+                        anchors.margins: 12 
+                        
+                        // Делаем фон прозрачным, чтобы серый фон из SVG-рамки был виден
+                        color: "transparent" 
                         radius: 5
                         clip: true
                         
                         Image {
                             anchors.fill: parent
                             source: projData ? (projData.previewPath ? projData.previewPath : "") : ""
-                            fillMode: Image.PreserveAspectCrop
+                            // Сохраняем PreserveAspectCrop, чтобы скриншот заполнял область без сплющивания
+                            fillMode: Image.PreserveAspectCrop 
                             visible: projData !== null && projData.previewPath && projData.previewPath !== ""
                         }
-                        
-                        // Иконка типа
-                        // Удалили отсутствующие иконки для чистой консоли
                     }
                     
                     MouseArea {
@@ -418,25 +447,17 @@ Dialog {
             anchors.bottomMargin: 40
             spacing: 20
             
-            // Кнопка "New Board"
-            Item {
+            Image {
                 id: newBoardBtn
-                width: 160
-                height: 60
-                
-                Image {
-                    anchors.fill: parent
-                    source: ThemeManager.icons.button_1 || ""
-                    fillMode: Image.Stretch
-                }
-                
-                // Удалили QML Text, так как он зашит внутрь button_1.svg
-                
+                source: ThemeManager.icons.button_1 || ""
+                // Мы полностью убрали width, height и fillMode. 
+                // Image автоматически примет размер исходного SVG файла.
+
                 MouseArea {
                     anchors.fill: parent
                     cursorShape: Qt.PointingHandCursor
                     hoverEnabled: true
-                    
+
                     onClicked: {
                         if (AuthController.isLoggedIn) {
                             CloudBoardsManager.createBoard("New Board")
@@ -444,30 +465,22 @@ Dialog {
                             root.newBoardRequested()
                         }
                     }
-                    
+
                     onEntered: parent.scale = 1.05
                     onExited: parent.scale = 1.0
                 }
-                
-                Behavior on scale {
-                    NumberAnimation { duration: 100 }
+
+                Behavior on scale { 
+                    NumberAnimation { duration: 100 } 
                 }
             }
-            
+
             // Кнопка "Open Existing"
-            Item {
+            Image {
                 id: openExistingBtn
-                width: 160
-                height: 60
-                
-                Image {
-                    anchors.fill: parent
-                    source: ThemeManager.icons.button_2 || ""
-                    fillMode: Image.Stretch
-                }
-                
-                // Удалили QML Text, так как он зашит внутрь button_2.svg!
-                
+                source: ThemeManager.icons.button_2 || ""
+                // Аналогично: никаких жестких рамок
+
                 MouseArea {
                     anchors.fill: parent
                     cursorShape: Qt.PointingHandCursor
@@ -496,13 +509,13 @@ Dialog {
                             }
                         }
                     }
-                    
+
                     onEntered: parent.scale = 1.05
                     onExited: parent.scale = 1.0
                 }
-                
-                Behavior on scale {
-                    NumberAnimation { duration: 100 }
+
+                Behavior on scale { 
+                    NumberAnimation { duration: 100 } 
                 }
             }
         }
@@ -597,9 +610,90 @@ Dialog {
             passwordInput.text = ""
         }
     }
+    // ========================================
+    // PROFILE DIALOG
+    // ========================================
+    Dialog {
+        id: profileDialog
+        title: "Профиль"
+        width: 350
+        anchors.centerIn: parent
+        modal: true
+        standardButtons: Dialog.Save | Dialog.Cancel
+        
+        property string avatarPath: ""
+        property alias nicknameInput: nicknameField
+        
+        ColumnLayout {
+            anchors.fill: parent
+            spacing: 15
+            
+            Rectangle {
+                Layout.alignment: Qt.AlignHCenter
+                width: 80
+                height: 80
+                radius: 40
+                color: ThemeManager.colors.controlBackground
+                border.color: ThemeManager.colors.controlBorder
+                border.width: 1
+                clip: true
+                
+                Image {
+                    id: profileAvatarImage
+                    anchors.fill: parent
+                    anchors.margins: 1
+                    fillMode: Image.PreserveAspectCrop
+                    source: {
+                        if (profileDialog.avatarPath !== "") return profileDialog.avatarPath;
+                        if (AuthController.userAvatarHash !== "") return "https://imagoref.s3.timeweb.com/" + AuthController.userAvatarHash;
+                        return "";
+                    }
+                    visible: source !== ""
+                }
+                
+                Text {
+                    anchors.centerIn: parent
+                    text: AuthController.userNickname !== "" ? AuthController.userNickname.charAt(0).toUpperCase() : (AuthController.userEmail !== "" ? AuthController.userEmail.charAt(0).toUpperCase() : "?")
+                    font.pixelSize: 24
+                    color: ThemeManager.colors.textColor
+                    visible: profileAvatarImage.source == ""
+                }
+                
+                MouseArea {
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: avatarFileDialog.open()
+                }
+            }
+            
+            Button {
+                Layout.alignment: Qt.AlignHCenter
+                text: "Выбрать аватарку"
+                onClicked: avatarFileDialog.open()
+            }
+            
+            TextField {
+                id: nicknameField
+                Layout.fillWidth: true
+                placeholderText: "Никнейм"
+            }
+        }
+        
+        onAccepted: {
+            AuthController.updateProfile(nicknameField.text, avatarPath)
+        }
+    }
+    
+    FileDialog {
+        id: avatarFileDialog
+        title: "Выбрать аватарку"
+        nameFilters: ["Изображения (*.png *.jpg *.jpeg)"]
+        onAccepted: {
+            profileDialog.avatarPath = selectedFile
+        }
+    }
 
     // ========================================
-    // CLOUD DASHBOARD DIALOG
     // ========================================
     Dialog {
         id: cloudDashboardDialog

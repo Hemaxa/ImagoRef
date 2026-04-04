@@ -39,6 +39,8 @@ void SettingsManager::loadSettings()
     m_colorHistory = m_settings.value("colorHistory", QStringList()).toStringList();
     m_jwtToken = m_settings.value("auth/jwtToken", "").toString();
     m_userEmail = m_settings.value("auth/userEmail", "").toString();
+    m_userNickname = m_settings.value("auth/userNickname", "").toString();
+    m_userAvatarHash = m_settings.value("auth/userAvatarHash", "").toString();
     
     // Загрузка recentBoards из JSON строки
     m_recentBoards.clear();
@@ -83,6 +85,8 @@ void SettingsManager::saveSettings()
     m_settings.setValue("colorHistory", m_colorHistory);
     m_settings.setValue("auth/jwtToken", m_jwtToken);
     m_settings.setValue("auth/userEmail", m_userEmail);
+    m_settings.setValue("auth/userNickname", m_userNickname);
+    m_settings.setValue("auth/userAvatarHash", m_userAvatarHash);
     
     // Сохранение recentBoards как JSON строка
     QJsonArray arr;
@@ -267,6 +271,34 @@ void SettingsManager::setUserEmail(const QString& email)
         m_userEmail = email;
         saveSettings();
         emit userEmailChanged();
+    }
+}
+
+QString SettingsManager::getUserNickname() const
+{
+    return m_userNickname;
+}
+
+void SettingsManager::setUserNickname(const QString& nickname)
+{
+    if (m_userNickname != nickname) {
+        m_userNickname = nickname;
+        saveSettings();
+        emit userNicknameChanged();
+    }
+}
+
+QString SettingsManager::getUserAvatarHash() const
+{
+    return m_userAvatarHash;
+}
+
+void SettingsManager::setUserAvatarHash(const QString& hash)
+{
+    if (m_userAvatarHash != hash) {
+        m_userAvatarHash = hash;
+        saveSettings();
+        emit userAvatarHashChanged();
     }
 }
 

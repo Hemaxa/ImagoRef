@@ -51,6 +51,16 @@ ApplicationWindow {
             title: "Файл"
             
             Action {
+                text: "На стартовый экран"
+                onTriggered: {
+                    mainLoader.active = false
+                    welcomeDialog.open()
+                }
+            }
+
+            MenuSeparator {}
+
+            Action {
                 text: "Открыть..."
                 shortcut: StandardKey.Open
                 onTriggered: {
@@ -96,7 +106,11 @@ ApplicationWindow {
                         if (boardController.currentBoardId !== "") {
                             boardController.cloudController.syncUp(boardController.currentBoardId)
                         } else if (AuthController.isLoggedIn) {
-                            CloudBoardsManager.createBoard("New Board")
+                            newCloudBoardNameInput.text = boardController.fileController.windowTitle.replace("ImagoRef - ", "")
+                            if (newCloudBoardNameInput.text === "" || newCloudBoardNameInput.text === "ImagoRef") {
+                                newCloudBoardNameInput.text = "New Board"
+                            }
+                            newCloudBoardDialog.open()
                         }
                     }
                 }
@@ -362,6 +376,28 @@ ApplicationWindow {
                 text: "Нет досок"
                 color: ThemeManager.colors.textColor
                 visible: CloudBoardsManager.cloudBoards.length === 0
+            }
+        }
+    }
+
+    // Диалог для ввода имени новой облачной доски
+    Dialog {
+        id: newCloudBoardDialog
+        title: "Сохранить в облако"
+        anchors.centerIn: parent
+        standardButtons: Dialog.Ok | Dialog.Cancel
+        
+        ColumnLayout {
+            TextField {
+                id: newCloudBoardNameInput
+                placeholderText: "Имя доски"
+                text: "New Board"
+            }
+        }
+        
+        onAccepted: {
+            if (newCloudBoardNameInput.text.trim() !== "") {
+                CloudBoardsManager.createBoard(newCloudBoardNameInput.text.trim())
             }
         }
     }

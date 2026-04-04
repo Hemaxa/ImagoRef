@@ -25,6 +25,8 @@ class SettingsManager : public QObject {
     Q_PROPERTY(QStringList colorHistory READ getColorHistory WRITE setColorHistory NOTIFY colorHistoryChanged)
     Q_PROPERTY(QString jwtToken READ getJwtToken WRITE setJwtToken NOTIFY jwtTokenChanged)
     Q_PROPERTY(QString userEmail READ getUserEmail WRITE setUserEmail NOTIFY userEmailChanged)
+    Q_PROPERTY(QString userNickname READ getUserNickname WRITE setUserNickname NOTIFY userNicknameChanged)
+    Q_PROPERTY(QString userAvatarHash READ getUserAvatarHash WRITE setUserAvatarHash NOTIFY userAvatarHashChanged)
     Q_PROPERTY(QVariantList recentBoards READ getRecentBoards WRITE setRecentBoards NOTIFY recentBoardsChanged)
 
 public:
@@ -68,6 +70,12 @@ public:
     QString getUserEmail() const;
     void setUserEmail(const QString& email);
 
+    QString getUserNickname() const;
+    void setUserNickname(const QString& nickname);
+
+    QString getUserAvatarHash() const;
+    void setUserAvatarHash(const QString& hash);
+
     QVariantList getRecentBoards() const;
     void setRecentBoards(const QVariantList& boards);
     Q_INVOKABLE void addRecentBoard(const QVariantMap& board);
@@ -88,6 +96,8 @@ signals:
     void colorHistoryChanged();
     void jwtTokenChanged();
     void userEmailChanged();
+    void userNicknameChanged();
+    void userAvatarHashChanged();
     void recentBoardsChanged();
     
     void toolEnablementChanged(QString toolName, bool enabled);
@@ -109,6 +119,8 @@ private:
     QStringList m_colorHistory;
     QString m_jwtToken;
     QString m_userEmail;
+    QString m_userNickname;
+    QString m_userAvatarHash;
     QVariantList m_recentBoards;
     QHash<QString, bool> m_toolsEnablement;
 };
