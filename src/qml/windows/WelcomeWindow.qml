@@ -406,6 +406,15 @@ Dialog {
                     MouseArea {
                         anchors.fill: parent
                         cursorShape: projData !== null ? Qt.PointingHandCursor : Qt.ArrowCursor
+                        hoverEnabled: projData !== null
+                        
+                        onEntered: {
+                            if (projData !== null) parent.scale = 1.05
+                        }
+                        onExited: {
+                            parent.scale = 1.0
+                        }
+
                         onClicked: {
                             if (projData !== null) {
                                 if (projData.type === "cloud") {
@@ -415,6 +424,10 @@ Dialog {
                                 }
                             }
                         }
+                    }
+                    
+                    Behavior on scale {
+                        NumberAnimation { duration: 100 }
                     }
                 }
             }
@@ -447,75 +460,120 @@ Dialog {
             anchors.bottomMargin: 40
             spacing: 20
             
-            Image {
-                id: newBoardBtn
-                source: ThemeManager.icons.button_1 || ""
-                // Мы полностью убрали width, height и fillMode. 
-                // Image автоматически примет размер исходного SVG файла.
+            Item {
+                anchors.bottom: parent.bottom
+                width: Math.max(text1.width, newBoardBtn.width)
+                height: text1.height + newBoardBtn.height + 2
 
-                MouseArea {
-                    anchors.fill: parent
-                    cursorShape: Qt.PointingHandCursor
-                    hoverEnabled: true
-
-                    onClicked: {
-                        if (AuthController.isLoggedIn) {
-                            CloudBoardsManager.createBoard("New Board")
-                        } else {
-                            root.newBoardRequested()
-                        }
-                    }
-
-                    onEntered: parent.scale = 1.05
-                    onExited: parent.scale = 1.0
+                Text {
+                    id: text1
+                    text: "Новая доска"
+                    color: root.accentYellow
+                    font.pixelSize: 18
+                    font.bold: true
+                    style: Text.Raised
+                    styleColor: "gray"
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.bottom: newBoardBtn.top
+                    anchors.bottomMargin: 2
                 }
 
-                Behavior on scale { 
-                    NumberAnimation { duration: 100 } 
+                Image {
+                    id: newBoardBtn
+                    source: ThemeManager.icons.button_1 || ""
+                    width: implicitWidth ? implicitWidth * 0.85 : 120
+                    height: implicitHeight ? implicitHeight * 0.85 : 40
+                    fillMode: Image.PreserveAspectFit
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.bottom: parent.bottom
+
+                    MouseArea {
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        hoverEnabled: true
+
+                        onClicked: {
+                            if (AuthController.isLoggedIn) {
+                                CloudBoardsManager.createBoard("New Board")
+                            } else {
+                                root.newBoardRequested()
+                            }
+                        }
+
+                        onEntered: newBoardBtn.scale = 1.05
+                        onExited: newBoardBtn.scale = 1.0
+                    }
+
+                    Behavior on scale { 
+                        NumberAnimation { duration: 100 } 
+                    }
                 }
             }
 
             // Кнопка "Open Existing"
-            Image {
-                id: openExistingBtn
-                source: ThemeManager.icons.button_2 || ""
-                // Аналогично: никаких жестких рамок
+            Item {
+                anchors.bottom: parent.bottom
+                width: Math.max(text2.width, openExistingBtn.width)
+                height: text2.height + openExistingBtn.height + 2
 
-                MouseArea {
-                    anchors.fill: parent
-                    cursorShape: Qt.PointingHandCursor
-                    hoverEnabled: true
-                    
-                    onClicked: {
-                        if (AuthController.isLoggedIn) {
-                            openChoiceMenu.open()
-                        } else {
-                            fileDialog.open()
-                        }
-                    }
-                    
-                    Menu {
-                        id: openChoiceMenu
-                        y: -height - 10
-                        MenuItem {
-                            text: "Открыть локальный файл"
-                            onTriggered: fileDialog.open()
-                        }
-                        MenuItem {
-                            text: "Открыть из облака"
-                            onTriggered: {
-                                CloudBoardsManager.fetchBoards()
-                                cloudDashboardDialog.open()
-                            }
-                        }
-                    }
-
-                    onEntered: parent.scale = 1.05
-                    onExited: parent.scale = 1.0
+                Text {
+                    id: text2
+                    text: "Открыть доску"
+                    color: root.btnOpenColor
+                    font.pixelSize: 18
+                    font.bold: true
+                    style: Text.Raised
+                    styleColor: "gray"
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.bottom: openExistingBtn.top
+                    anchors.bottomMargin: 2
                 }
 
-                Behavior on scale { 
-                    NumberAnimation { duration: 100 } 
+                Image {
+                    id: openExistingBtn
+                    source: ThemeManager.icons.button_2 || ""
+                    width: implicitWidth ? implicitWidth * 0.85 : 120
+                    height: implicitHeight ? implicitHeight * 0.85 : 40
+                    fillMode: Image.PreserveAspectFit
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.bottom: parent.bottom
+
+                    MouseArea {
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        hoverEnabled: true
+                        
+                        onClicked: {
+                            if (AuthController.isLoggedIn) {
+                                openChoiceMenu.open()
+                            } else {
+                                fileDialog.open()
+                            }
+                        }
+                        
+                        Menu {
+                            id: openChoiceMenu
+                            y: -height - 10
+                            MenuItem {
+                                text: "Открыть локальный файл"
+                                onTriggered: fileDialog.open()
+                            }
+                            MenuItem {
+                                text: "Открыть из облака"
+                                onTriggered: {
+                                    CloudBoardsManager.fetchBoards()
+                                    cloudDashboardDialog.open()
+                                }
+                            }
+                        }
+
+                        onEntered: openExistingBtn.scale = 1.05
+                        onExited: openExistingBtn.scale = 1.0
+                    }
+
+                    Behavior on scale { 
+                        NumberAnimation { duration: 100 } 
+                    }
                 }
             }
         }
