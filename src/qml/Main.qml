@@ -54,6 +54,10 @@ ApplicationWindow {
                 text: "На стартовый экран"
                 onTriggered: {
                     mainLoader.active = false
+                    // Возвращаем окно в исходное состояние
+                    root.showNormal()
+                    root.width = 600
+                    root.height = 800
                     welcomeDialog.open()
                 }
             }

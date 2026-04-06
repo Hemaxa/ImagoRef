@@ -12,6 +12,7 @@ Dialog {
     height: 800
     modal: true
     closePolicy: Dialog.NoAutoClose
+    padding: 1
     
     signal newBoardRequested()
     signal openBoardRequested(url fileUrl)
@@ -32,204 +33,193 @@ Dialog {
     background: Rectangle {
         color: root.bgColor
         border.color: "#181818"
-        border.width: 4
-        radius: 8
+        border.width: 2
+        
+        topLeftRadius: 0
+        topRightRadius: 0
+        bottomLeftRadius: 12
+        bottomRightRadius: 12
+
+        clip: true
         
         // Декоративные элементы фона
         Image { 
-            source: ThemeManager.icons.dots
-            anchors.right: parent.right
-            anchors.rightMargin: 40
-            anchors.top: parent.top
-            anchors.topMargin: 20
-        }
-        Image { 
-            source: ThemeManager.icons.dots
-            anchors.left: parent.left
-            anchors.leftMargin: 20
-            anchors.bottom: parent.bottom
-            anchors.bottomMargin: 40
-        }
-        Image { 
-            source: ThemeManager.icons.dots
-            anchors.right: parent.right
-            anchors.rightMargin: 40
-            anchors.bottom: parent.bottom
-            anchors.bottomMargin: 20
+            source: ThemeManager.icons.path_2
+            anchors.top: parent.top; anchors.left: parent.left
+            anchors.topMargin: 180; anchors.leftMargin: 120
+            scale: 0.9
         }
         Image { 
             source: ThemeManager.icons.rectangles_1
-            anchors.left: parent.left
-            anchors.leftMargin: 10
-            anchors.top: parent.top
-            anchors.topMargin: 50
-        }
-        Image { 
-            source: ThemeManager.icons.path_1
-            anchors.left: parent.left
-            anchors.leftMargin: 100
-            anchors.top: parent.top
-            anchors.topMargin: 20
+            anchors.top: parent.top; anchors.right: parent.right
+            anchors.topMargin: 163; anchors.rightMargin: -10 
         }
         Image { 
             source: ThemeManager.icons.triangles_1
-            anchors.left: parent.left
-            anchors.leftMargin: 190
-            anchors.top: parent.top
-            anchors.topMargin: 20
-        }
-        Image { 
-            source: ThemeManager.icons.circles_1
-            anchors.right: parent.right
-            anchors.rightMargin: 160
-            anchors.top: parent.top
-            anchors.topMargin: 15
-        }
-
-        Image { 
-            source: ThemeManager.icons.star_1
-            anchors.left: parent.left
-            anchors.leftMargin: 70
-            anchors.top: parent.top
-            anchors.topMargin: 180
-        }
-        Image { 
-            source: ThemeManager.icons.line_1
-            anchors.left: parent.left
-            anchors.leftMargin: 160
-            anchors.top: parent.top
-            anchors.topMargin: 200
-        }
-        Image { 
-            source: ThemeManager.icons.circles_2
-            anchors.left: parent.left
-            anchors.leftMargin: 280
-            anchors.top: parent.top
-            anchors.topMargin: 220
-        }
-        Image { 
-            source: ThemeManager.icons.star_2
-            anchors.right: parent.right
-            anchors.rightMargin: 130
-            anchors.top: parent.top
-            anchors.topMargin: 210
-        }
-        Image { 
-            source: ThemeManager.icons.path_2
-            anchors.right: parent.right
-            anchors.rightMargin: 60
-            anchors.top: parent.top
-            anchors.topMargin: 230
-        }
-
-        Image { 
-            source: ThemeManager.icons.rect_1
-            anchors.left: parent.left
-            anchors.leftMargin: 20
-            anchors.top: parent.top
-            anchors.topMargin: 250
-        }
-        Image { 
-            source: ThemeManager.icons.star_3
-            anchors.right: parent.right
-            anchors.rightMargin: 30
-            anchors.top: parent.top
-            anchors.topMargin: 270
-        }
-
-        Image { 
-            source: ThemeManager.icons.path_3
-            anchors.left: parent.left
-            anchors.leftMargin: 20
-            anchors.top: parent.top
-            anchors.topMargin: 310
-        }
-        Image { 
-            source: ThemeManager.icons.line_2
-            anchors.right: parent.right
-            anchors.rightMargin: 90
-            anchors.top: parent.top
-            anchors.topMargin: 310
-        }
-
-        Image { 
-            source: ThemeManager.icons.form_1
-            anchors.left: parent.left
-            anchors.leftMargin: 10
-            anchors.bottom: parent.bottom
-            anchors.bottomMargin: 280
-        }
-        Image { 
-            source: ThemeManager.icons.circles_3
-            anchors.right: parent.right
-            anchors.rightMargin: 30
-            anchors.bottom: parent.bottom
-            anchors.bottomMargin: 250
-        }
-
-        Image { 
-            source: ThemeManager.icons.rect_2
-            anchors.left: parent.left
-            anchors.leftMargin: 25
-            anchors.bottom: parent.bottom
-            anchors.bottomMargin: 150
-        }
-        Image { 
-            source: ThemeManager.icons.circles_4
-            anchors.left: parent.left
-            anchors.leftMargin: 220
-            anchors.bottom: parent.bottom
-            anchors.bottomMargin: 140
-        }
-
-        Image { 
-            source: ThemeManager.icons.lines_star
-            anchors.right: parent.right
-            anchors.rightMargin: 180
-            anchors.bottom: parent.bottom
-            anchors.bottomMargin: 140
-        }
-        Image { 
-            source: ThemeManager.icons.form_2
-            anchors.right: parent.right
-            anchors.rightMargin: 20
-            anchors.bottom: parent.bottom
-            anchors.bottomMargin: 130
-        }
-        Image { 
-            source: ThemeManager.icons.line_3
-            anchors.right: parent.right
-            anchors.rightMargin: 50
-            anchors.bottom: parent.bottom
-            anchors.bottomMargin: 170
-        }
-        Image { 
-            source: ThemeManager.icons.form_3
-            anchors.right: parent.right
-            anchors.rightMargin: 200
-            anchors.bottom: parent.bottom
-            anchors.bottomMargin: 10
-        }
-        Image { 
-            source: ThemeManager.icons.form_4
-            anchors.left: parent.left
-            anchors.leftMargin: 280
-            anchors.bottom: parent.bottom
-            anchors.bottomMargin: 20
+            anchors.top: parent.top; anchors.left: parent.left
+            anchors.topMargin: 20; anchors.leftMargin: -7
         }
         Image { 
             source: ThemeManager.icons.triangles_2
-            anchors.left: parent.left
-            anchors.leftMargin: 90
-            anchors.top: parent.top
-            anchors.topMargin: 150
+            anchors.top: parent.top; anchors.right: parent.right
+            anchors.topMargin: 10; anchors.rightMargin: 200 
+        }
+        Image { 
+            source: ThemeManager.icons.star_1
+            anchors.top: parent.top; anchors.left: parent.left
+            anchors.topMargin: 340; anchors.leftMargin: 10 
+            rotation: 20
+            scale: 1.1
+        }
+        Image { 
+            source: ThemeManager.icons.star_1
+            anchors.top: parent.top; anchors.left: parent.left
+            anchors.topMargin: 30; anchors.leftMargin: 280
+        }
+        Image { 
+            source: ThemeManager.icons.form_2
+            anchors.top: parent.top; anchors.left: parent.left
+            anchors.topMargin: -50; anchors.leftMargin: 170
+            scale: 0.8
+        }
+        Image { 
+            source: ThemeManager.icons.rect_1
+            anchors.top: parent.top; anchors.left: parent.left
+            anchors.topMargin: 240; anchors.leftMargin: 5
+        }
+        Image { 
+            source: ThemeManager.icons.path_3
+            anchors.top: parent.top; anchors.right: parent.right
+            anchors.topMargin: 290; anchors.rightMargin: 15
+        }
+        Image { 
+            source: ThemeManager.icons.dots
+            anchors.top: parent.top; anchors.right: parent.right
+            anchors.topMargin: -50; anchors.rightMargin: 80
+        }
+        Image { 
+            source: ThemeManager.icons.circles_4
+            anchors.top: parent.top; anchors.left: parent.left
+            anchors.topMargin: 170; anchors.leftMargin: -8
         }
         Image { 
             source: ThemeManager.icons.rectangles_2
-            anchors.right: parent.right
-            anchors.rightMargin: 120
-            anchors.top: parent.top
-            anchors.topMargin: 120
+            anchors.bottom: parent.bottom; anchors.left: parent.left
+            anchors.bottomMargin:330; anchors.leftMargin: -15
+        }
+        Image { 
+            source: ThemeManager.icons.star_3
+            anchors.top: parent.top; anchors.right: parent.right
+            anchors.topMargin: 180; anchors.rightMargin: 130 
+        }
+        Image { 
+            source: ThemeManager.icons.path_1
+            anchors.bottom: parent.bottom; anchors.right: parent.right
+            anchors.bottomMargin: 145; anchors.rightMargin: 10 
+        }
+        Image { 
+            source: ThemeManager.icons.star_3
+            anchors.bottom: parent.bottom; anchors.right: parent.right
+            anchors.bottomMargin: 300; anchors.rightMargin: 40
+        }
+        Image { 
+            source: ThemeManager.icons.line_2
+            anchors.top: parent.top; anchors.right: parent.right
+            anchors.topMargin: 210; anchors.rightMargin: 70 
+        }
+        Image { 
+            source: ThemeManager.icons.line_1
+            anchors.top: parent.top; anchors.left: parent.left
+            anchors.topMargin: 20; anchors.leftMargin: 100 
+        }
+        Image { 
+            source: ThemeManager.icons.circles_3
+            anchors.top: parent.top; anchors.left: parent.left
+            anchors.topMargin: 190; anchors.leftMargin: 240
+            scale: 0.8
+        }
+        Image { 
+            source: ThemeManager.icons.dots
+            anchors.bottom: parent.bottom; anchors.left: parent.left
+            anchors.bottomMargin: 60; anchors.leftMargin: -50
+        }
+        Image { 
+            source: ThemeManager.icons.form_3
+            anchors.bottom: parent.bottom; anchors.left: parent.left
+            anchors.bottomMargin: 180; anchors.leftMargin: 5 
+        }
+        Image { 
+            source: ThemeManager.icons.rect_2
+            anchors.bottom: parent.bottom; anchors.right: parent.right
+            anchors.bottomMargin: -8; anchors.rightMargin: 300 
+        }
+        Image { 
+            source: ThemeManager.icons.circles_1
+            anchors.bottom: parent.bottom; anchors.left: parent.left
+            anchors.bottomMargin: 135; anchors.leftMargin: 220
+            scale: 0.9
+        }
+        Image { 
+            source: ThemeManager.icons.form_4
+            anchors.bottom: parent.bottom; anchors.right: parent.right
+            anchors.bottomMargin: 20; anchors.rightMargin: -10
+        }
+        Image { 
+            source: ThemeManager.icons.dots
+            anchors.bottom: parent.bottom; anchors.right: parent.right
+            anchors.bottomMargin: -55; anchors.rightMargin: 50
+        }
+        Image { 
+            source: ThemeManager.icons.circles_2
+            anchors.bottom: parent.bottom; anchors.right: parent.right
+            anchors.bottomMargin: 230; anchors.rightMargin: 10
+        }
+        Image { 
+            source: ThemeManager.icons.lines_star
+            anchors.bottom: parent.bottom; anchors.right: parent.right
+            anchors.bottomMargin: 140; anchors.rightMargin: 180 
+        }
+        Image { 
+            source: ThemeManager.icons.form_1
+            anchors.top: parent.top; anchors.right: parent.right
+            anchors.topMargin: 240; anchors.rightMargin: -5
+            scale: 0.9
+        }
+        Image { 
+            source: ThemeManager.icons.line_3
+            anchors.top: parent.top; anchors.right: parent.right
+            anchors.topMargin: 220; anchors.rightMargin: 100
+        }
+        Image { 
+            source: ThemeManager.icons.form_4
+            anchors.top: parent.top; anchors.right: parent.right
+            anchors.topMargin: 180; anchors.rightMargin: 200
+            scale: 0.8
+            rotation: 30
+        }
+        Image { 
+            source: ThemeManager.icons.line_1
+            anchors.bottom: parent.bottom; anchors.right: parent.right
+            anchors.bottomMargin: 20; anchors.rightMargin: 220
+        }
+        Image { 
+            source: ThemeManager.icons.star_3
+            anchors.bottom: parent.bottom; anchors.left: parent.left
+            anchors.bottomMargin: 260; anchors.leftMargin: 10 
+        }
+        Image { 
+            source: ThemeManager.icons.lines_star
+            anchors.top: parent.top; anchors.left: parent.left
+            anchors.topMargin: 170; anchors.leftMargin: 70
+            scale: 0.9
+            rotation: 70
+        }
+        Image { 
+            source: ThemeManager.icons.lines_star
+            anchors.top: parent.top; anchors.right: parent.right
+            anchors.topMargin: 240; anchors.rightMargin: 150
+            scale: 1.1
+            rotation: -30
         }
     }
     
@@ -239,27 +229,26 @@ Dialog {
     Item {
         anchors.fill: parent
         
-        // Логотип вверху по центру
+        //Логотип
         Image {
             id: logoImage
             source: ThemeManager.icons.logo
             anchors.horizontalCenter: parent.horizontalCenter
-            y: 70
-            width: 520
-            height: 140
+            y: 35
+            width: 560
+            height: 180
             fillMode: Image.PreserveAspectFit
         }
         
-        // Заголовок "Recent projects"
+        //Заголовок "Recent projects"
         Image {
             id: sectionHeader
             source: ThemeManager.icons.recent_projects
             anchors.top: logoImage.bottom
             anchors.topMargin: 30
             anchors.left: parent.left
-            anchors.leftMargin: 40
-            width: 380
-            height: 50
+            anchors.leftMargin: 50
+            width: 360
             fillMode: Image.PreserveAspectFit
         }
 
@@ -360,7 +349,7 @@ Dialog {
             anchors.horizontalCenter: parent.horizontalCenter
             
             columns: 3
-            rowSpacing: 15
+            rowSpacing: 25
             columnSpacing: 25
             
             Repeater {
@@ -368,8 +357,8 @@ Dialog {
                 
                 // Карточка проекта
                 Item {
-                    width: 160
-                    height: 160
+                    width: 140
+                    height: 140
                     
                     property var projData: index < SettingsManager.recentBoards.length ? SettingsManager.recentBoards[index] : null
                     
@@ -440,11 +429,10 @@ Dialog {
             id: mascotImage
             source: ThemeManager.icons.character || ""
             anchors.left: parent.left
-            anchors.leftMargin: 40
+            anchors.leftMargin: 20
             anchors.bottom: parent.bottom
-            anchors.bottomMargin: 10
-            width: 170
-            height: 230
+            anchors.bottomMargin: 0
+            width: 230
             fillMode: Image.PreserveAspectFit
             verticalAlignment: Image.AlignBottom
         }
@@ -454,126 +442,82 @@ Dialog {
         // ========================================
         Row {
             id: buttonsRow
-            anchors.left: mascotImage.right
-            anchors.leftMargin: 20
+            anchors.right: parent.right
+            anchors.rightMargin: 20
             anchors.bottom: parent.bottom
-            anchors.bottomMargin: 40
-            spacing: 20
+            anchors.bottomMargin: 60
+            spacing: 10
             
-            Item {
-                anchors.bottom: parent.bottom
-                width: Math.max(text1.width, newBoardBtn.width)
-                height: text1.height + newBoardBtn.height + 2
+            Image {
+                id: newBoardBtn
+                source: ThemeManager.icons.button_1 || ""
+                width: 156
+                fillMode: Image.PreserveAspectFit
 
-                Text {
-                    id: text1
-                    text: "Новая доска"
-                    color: root.accentYellow
-                    font.pixelSize: 18
-                    font.bold: true
-                    style: Text.Raised
-                    styleColor: "gray"
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    anchors.bottom: newBoardBtn.top
-                    anchors.bottomMargin: 2
+                MouseArea {
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    hoverEnabled: true
+
+                    onClicked: {
+                        if (AuthController.isLoggedIn) {
+                            CloudBoardsManager.createBoard("New Board")
+                        } else {
+                            root.newBoardRequested()
+                        }
+                    }
+
+                    onEntered: newBoardBtn.scale = 1.05
+                    onExited: newBoardBtn.scale = 1.0
                 }
 
-                Image {
-                    id: newBoardBtn
-                    source: ThemeManager.icons.button_1 || ""
-                    width: implicitWidth ? implicitWidth * 0.85 : 120
-                    height: implicitHeight ? implicitHeight * 0.85 : 40
-                    fillMode: Image.PreserveAspectFit
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    anchors.bottom: parent.bottom
-
-                    MouseArea {
-                        anchors.fill: parent
-                        cursorShape: Qt.PointingHandCursor
-                        hoverEnabled: true
-
-                        onClicked: {
-                            if (AuthController.isLoggedIn) {
-                                CloudBoardsManager.createBoard("New Board")
-                            } else {
-                                root.newBoardRequested()
-                            }
-                        }
-
-                        onEntered: newBoardBtn.scale = 1.05
-                        onExited: newBoardBtn.scale = 1.0
-                    }
-
-                    Behavior on scale { 
-                        NumberAnimation { duration: 100 } 
-                    }
+                Behavior on scale { 
+                    NumberAnimation { duration: 100 } 
                 }
             }
 
             // Кнопка "Open Existing"
-            Item {
-                anchors.bottom: parent.bottom
-                width: Math.max(text2.width, openExistingBtn.width)
-                height: text2.height + openExistingBtn.height + 2
+            Image {
+                id: openExistingBtn
+                source: ThemeManager.icons.button_2 || ""
+                width: 156
+                fillMode: Image.PreserveAspectFit
 
-                Text {
-                    id: text2
-                    text: "Открыть доску"
-                    color: root.btnOpenColor
-                    font.pixelSize: 18
-                    font.bold: true
-                    style: Text.Raised
-                    styleColor: "gray"
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    anchors.bottom: openExistingBtn.top
-                    anchors.bottomMargin: 2
+                MouseArea {
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    hoverEnabled: true
+                    
+                    onClicked: {
+                        if (AuthController.isLoggedIn) {
+                            openChoiceMenu.open()
+                        } else {
+                            fileDialog.open()
+                        }
+                    }
+                    
+                    Menu {
+                        id: openChoiceMenu
+                        y: -height - 10
+                        MenuItem {
+                            text: "Открыть локальный файл"
+                            onTriggered: fileDialog.open()
+                        }
+                        MenuItem {
+                            text: "Открыть из облака"
+                            onTriggered: {
+                                CloudBoardsManager.fetchBoards()
+                                cloudDashboardDialog.open()
+                            }
+                        }
+                    }
+
+                    onEntered: openExistingBtn.scale = 1.05
+                    onExited: openExistingBtn.scale = 1.0
                 }
 
-                Image {
-                    id: openExistingBtn
-                    source: ThemeManager.icons.button_2 || ""
-                    width: implicitWidth ? implicitWidth * 0.85 : 120
-                    height: implicitHeight ? implicitHeight * 0.85 : 40
-                    fillMode: Image.PreserveAspectFit
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    anchors.bottom: parent.bottom
-
-                    MouseArea {
-                        anchors.fill: parent
-                        cursorShape: Qt.PointingHandCursor
-                        hoverEnabled: true
-                        
-                        onClicked: {
-                            if (AuthController.isLoggedIn) {
-                                openChoiceMenu.open()
-                            } else {
-                                fileDialog.open()
-                            }
-                        }
-                        
-                        Menu {
-                            id: openChoiceMenu
-                            y: -height - 10
-                            MenuItem {
-                                text: "Открыть локальный файл"
-                                onTriggered: fileDialog.open()
-                            }
-                            MenuItem {
-                                text: "Открыть из облака"
-                                onTriggered: {
-                                    CloudBoardsManager.fetchBoards()
-                                    cloudDashboardDialog.open()
-                                }
-                            }
-                        }
-
-                        onEntered: openExistingBtn.scale = 1.05
-                        onExited: openExistingBtn.scale = 1.0
-                    }
-
-                    Behavior on scale { 
-                        NumberAnimation { duration: 100 } 
-                    }
+                Behavior on scale { 
+                    NumberAnimation { duration: 100 } 
                 }
             }
         }
