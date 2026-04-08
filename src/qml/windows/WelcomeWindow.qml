@@ -8,8 +8,10 @@ import QtQuick.Dialogs
 Dialog {
     id: root
     
-    width: 600
-    height: 800
+    width: parent.width
+    height: parent.height
+    anchors.centerIn: parent
+
     modal: true
     closePolicy: Dialog.NoAutoClose
     padding: 1
