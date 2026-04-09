@@ -27,7 +27,7 @@ public:
 signals:
     void cloudBoardsChanged();
     void boardsFetched(bool success);
-    void boardCreated(const QString& id, bool success);
+    void boardCreated(const QString& boardId, bool success);
     void boardRenamed(bool success);
     void boardDeleted(bool success);
 

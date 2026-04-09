@@ -793,10 +793,10 @@ Dialog {
     // Обработка создания доски
     Connections {
         target: CloudBoardsManager
-        function onBoardCreated(id, success) {
+        function onBoardCreated(boardId, success) {
             if (success) {
                 // Если мы находимся в WelcomeWindow и создали доску через New Board
-                root.openCloudBoardRequested(id)
+                root.openCloudBoardRequested(boardId)
             }
         }
     }

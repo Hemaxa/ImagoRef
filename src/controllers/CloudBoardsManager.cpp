@@ -95,15 +95,25 @@ void CloudBoardsManager::onCreateBoardReply()
     reply->deleteLater();
 
     if (reply->error() != QNetworkReply::NoError) {
+        // --- ДОБАВЬ ЭТИ ДВЕ СТРОЧКИ ---
+        qDebug() << "HTTP Ошибка:" << reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+        qDebug() << "Детали от сервера:" << reply->readAll();
+        // ------------------------------
+        
         emit boardCreated("", false);
         return;
     }
 
+    // === УСПЕШНАЯ ВЕТКА ===
     QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
     QJsonObject obj = doc.object();
-    QString id = QString::number(obj["id"].toInt());
+    
+    // БЫЛО: QString id = ...
+    // СТАЛО: меняем имя переменной на boardId
+    QString boardId = QString::number(obj["id"].toInt());
 
-    emit boardCreated(id, true);
+    // Вызываем сигнал с новой переменной
+    emit boardCreated(boardId, true); 
     fetchBoards(); // Обновляем список
 }
 

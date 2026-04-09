@@ -12,7 +12,7 @@ Dialog {
     
     title: ""
     width: 700
-    height: 420
+    height: 500
     
     // Центрируем диалог вручную для корректной работы анимации
     x: (parent.width - width) / 2
