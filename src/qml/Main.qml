@@ -81,11 +81,16 @@ ApplicationWindow {
                 shortcut: StandardKey.Save
                 onTriggered: {
                     if (mainLoader.active) {
+                        // Если мы авторизованы и открыта облачная доска -> пушим изменения на сервер
                         if (AuthController.isLoggedIn && boardController.currentBoardId !== "") {
-
-                        } else if (boardController.storageController.currentFilePath !== "") {
+                            boardController.networkController.syncBoardToServer()
+                        } 
+                        // Если это локальный iref файл -> сохраняем как обычно на диск
+                        else if (boardController.storageController.currentFilePath !== "") {
                             boardController.storageController.saveBoard()
-                        } else {
+                        } 
+                        // Иначе предлагаем сохранить как файл
+                        else {
                             fileSaveDialog.open()
                         }
                     }

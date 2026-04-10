@@ -53,7 +53,8 @@ void StorageController::initDatabase()
     q.exec("CREATE TABLE IF NOT EXISTS boards ("
            "id TEXT PRIMARY KEY, "
            "name TEXT, "
-           "updated_at INTEGER)");
+           "updated_at INTEGER, "
+           "is_dirty INTEGER DEFAULT 1)");
            
     q.exec("CREATE TABLE IF NOT EXISTS items ("
            "id TEXT PRIMARY KEY, "
@@ -65,13 +66,9 @@ void StorageController::initDatabase()
            "height REAL, "
            "z_index INTEGER, "
            "payload TEXT, "
-           "updated_at INTEGER)");
-
-    q.exec("CREATE TABLE IF NOT EXISTS sync_queue ("
-           "id INTEGER PRIMARY KEY AUTOINCREMENT, "
-           "action_type TEXT, "
-           "payload TEXT, "
-           "created_at INTEGER)");
+           "updated_at INTEGER, "
+           "is_dirty INTEGER DEFAULT 1, "
+           "is_deleted INTEGER DEFAULT 0)");
 }
 
 QVariantList StorageController::getLocalBoards()
@@ -94,7 +91,7 @@ QVariantList StorageController::getLocalBoards()
 void StorageController::createLocalBoard(const QString& id, const QString& title)
 {
     QSqlQuery q;
-    q.prepare("INSERT INTO boards (id, name, updated_at) VALUES (:id, :name, :updated_at)");
+    q.prepare("INSERT INTO boards (id, name, updated_at, is_dirty) VALUES (:id, :name, :updated_at, 1)");
     q.bindValue(":id", id);
     q.bindValue(":name", title);
     q.bindValue(":updated_at", QDateTime::currentSecsSinceEpoch());
@@ -106,7 +103,7 @@ void StorageController::createLocalBoard(const QString& id, const QString& title
 void StorageController::renameLocalBoard(const QString& id, const QString& newTitle)
 {
     QSqlQuery q;
-    q.prepare("UPDATE boards SET name = :name, updated_at = :updated_at WHERE id = :id");
+    q.prepare("UPDATE boards SET name = :name, updated_at = :updated_at, is_dirty = 1 WHERE id = :id");
     q.bindValue(":name", newTitle);
     q.bindValue(":updated_at", QDateTime::currentSecsSinceEpoch());
     q.bindValue(":id", id);
@@ -134,7 +131,6 @@ QString StorageController::getCurrentFilePath() const
     return m_currentFilePath;
 }
 
-//метод формирования заголовка окна
 QString StorageController::getWindowTitle() const
 {
     QString title;
@@ -162,19 +158,15 @@ void StorageController::newBoard()
 
 bool StorageController::openBoard(const QUrl &fileUrl)
 {
-    //получение путя в системе
     QString filePath = fileUrl.toLocalFile();
     return importFromIref(filePath);
 }
 
-//метод простого сохранения
 bool StorageController::saveBoard()
 {
-    //проверка наличия пути к файлу
     if (m_currentFilePath.isEmpty()) {
         return false;
     }
-    //вызываем метод сохранения по пути с только что найденным нами путем
     return saveBoardAs(QUrl::fromLocalFile(m_currentFilePath));
 }
 
@@ -190,11 +182,9 @@ bool StorageController::importFromIref(const QString& filePath)
 {
     if (!QFile::exists(filePath)) return false;
 
-    //создаем временную папку, куда будем распаковывать наш проект-архив
     QTemporaryDir tempDir;
     if (!tempDir.isValid()) return false;
 
-    //распаковываем ZIP-архив (filePath) во временную папку (tempDir.path())
     if (JlCompress::extractDir(filePath, tempDir.path()).isEmpty()) {
         //игнорирование ошибки распаковки
     }
@@ -206,7 +196,6 @@ bool StorageController::importFromIref(const QString& filePath)
         jsonFile.close();
     }
     else {
-        //если файла data.json внутри нет (или это вообще был не архив), мы предполагаем, что пользователь пытается открыть старый проект из предыдущей версии приложения
         QFile file(filePath);
         if (!file.open(QIODevice::ReadOnly)) {
             return false;
@@ -215,11 +204,9 @@ bool StorageController::importFromIref(const QString& filePath)
         file.close();
     }
 
-    //пытаемся превратить прочитанный текст в JSON документ
     QJsonDocument doc = QJsonDocument::fromJson(docData);
     if (doc.isNull()) return false;
     
-    //перед загрузкой новой доски полностью очищаем старую
     m_model->clear();
     m_undoStack->clear();
 
@@ -235,13 +222,12 @@ bool StorageController::importFromIref(const QString& filePath)
     }
 
     QSqlQuery q;
-    q.prepare("INSERT OR REPLACE INTO boards (id, name, updated_at) VALUES (:id, :name, :updated)");
+    q.prepare("INSERT OR REPLACE INTO boards (id, name, updated_at, is_dirty) VALUES (:id, :name, :updated, 1)");
     q.bindValue(":id", boardId);
     q.bindValue(":name", QFileInfo(filePath).fileName());
     q.bindValue(":updated", QDateTime::currentSecsSinceEpoch());
     q.exec();
 
-    //загрузка настроек холста
     if (rootObj.contains("canvas")) {
         QJsonObject canvasObj = rootObj["canvas"].toObject();
         int loadedGridSize = canvasObj["gridSize"].toInt(25);
@@ -256,7 +242,6 @@ bool StorageController::importFromIref(const QString& filePath)
         }
     }
 
-    //загрузка объектов
     if (rootObj.contains("items")) {
         QJsonArray itemsArray = rootObj["items"].toArray();
         for (const QJsonValue &value : itemsArray) {
@@ -300,7 +285,6 @@ bool StorageController::importFromIref(const QString& filePath)
                 
                 m_model->addImage(data);
 
-                // Insert into db
                 QJsonObject payloadObj;
                 payloadObj["rotation"] = data.rotation;
                 payloadObj["label"] = data.label;
@@ -311,8 +295,8 @@ bool StorageController::importFromIref(const QString& filePath)
                 payloadObj["opacity"] = data.opacity;
                 payloadObj["imageHash"] = data.imageHash;
 
-                q.prepare("INSERT OR REPLACE INTO items (id, board_id, type, x, y, width, height, z_index, payload, updated_at) "
-                          "VALUES (:id, :board_id, :type, :x, :y, :width, :height, :z_index, :payload, :updated)");
+                q.prepare("INSERT OR REPLACE INTO items (id, board_id, type, x, y, width, height, z_index, payload, updated_at, is_dirty, is_deleted) "
+                          "VALUES (:id, :board_id, :type, :x, :y, :width, :height, :z_index, :payload, :updated, 1, 0)");
                 q.bindValue(":id", data.id);
                 q.bindValue(":board_id", boardId);
                 q.bindValue(":type", "image");
@@ -336,7 +320,6 @@ bool StorageController::importFromIref(const QString& filePath)
 
 bool StorageController::exportToIref(const QString& boardId, const QString& filePath)
 {
-    // If not given a boardId, we export the current model from memory
     QString exportBoardId = boardId;
     BoardController* board = qobject_cast<BoardController*>(parent());
     
@@ -344,39 +327,32 @@ bool StorageController::exportToIref(const QString& boardId, const QString& file
         exportBoardId = board->getCurrentBoardId();
     }
 
-    //создание главного JSON объекта с описанием проекта
     QJsonObject rootObj;
     rootObj["version"] = "1.0";
     
-    //создание вложенного объекта с настройками холста
     QJsonObject canvasObj;
     canvasObj["gridSize"] = m_gridSize;
     
     if (board) {
-        //сохранение параметров камеры
         canvasObj["cameraX"] = board->getCameraX();
         canvasObj["cameraY"] = board->getCameraY();
         canvasObj["cameraZoom"] = board->getCameraZoom();
     }
     
-    //включение вложенного объекта в основной
     rootObj["canvas"] = canvasObj;
 
-    //создание временной папки
     QTemporaryDir tempDir;
     if (!tempDir.isValid()) return false;
 
-    //создание папки со всеми объектами
     QDir dir(tempDir.path());
     dir.mkdir("images");
 
-    //создание массива с параметрами отдельной картинки
     QJsonArray itemsArray;
 
-    // Use items from DB if boardId is found, otherwise from memory
     if (!exportBoardId.isEmpty()) {
         QSqlQuery q;
-        q.prepare("SELECT * FROM items WHERE board_id = :board_id");
+        // ЭКСПОРТИРУЕМ ТОЛЬКО НЕ УДАЛЕННЫЕ ЭЛЕМЕНТЫ
+        q.prepare("SELECT * FROM items WHERE board_id = :board_id AND is_deleted = 0");
         q.bindValue(":board_id", exportBoardId);
         if (q.exec()) {
             while (q.next()) {
@@ -400,7 +376,6 @@ bool StorageController::exportToIref(const QString& boardId, const QString& file
                 itemObj["cropHeight"] = payloadObj["cropHeight"].toDouble();
                 itemObj["opacity"] = payloadObj.contains("opacity") ? payloadObj["opacity"].toDouble() : 1.0;
 
-                //относительный путь до картинки
                 QString imageRelPath = QString("images/%1.png").arg(id);
                 itemObj["imagePath"] = imageRelPath;
 
@@ -427,7 +402,6 @@ bool StorageController::exportToIref(const QString& boardId, const QString& file
         }
     }
     
-    // Если БД пустая (например, локальная доска еще не загружена / старый проект), загружаем из памяти
     if (itemsArray.isEmpty()) {
         for (const ImagoImageData &item : m_model->getAllItems()) {
             QJsonObject itemObj;
@@ -455,37 +429,28 @@ bool StorageController::exportToIref(const QString& boardId, const QString& file
         }
     }
 
-    //включение вложенного объекта в основной
     rootObj["items"] = itemsArray;
 
-    //превращаем JSON-объект в текстовый документ QJsonDocument
     QJsonDocument doc(rootObj);
-
-    //создаем файл "data.json" в корне нашей временной папки
     QFile jsonFile(dir.filePath("data.json"));
 
-    //открываем файл для записи и записываем данные
     if (jsonFile.open(QIODevice::WriteOnly)) {
         jsonFile.write(doc.toJson());
         jsonFile.close();
-    }
-    else {
+    } else {
         return false;
     }
 
-    //если по указанному пути уже есть файл, удаляем его, чтобы перезаписать
     if (QFile::exists(filePath)) {
         QFile::remove(filePath);
     }
 
-    //сжимаем всю временную папку (с data.json и папкой images) в один ZIP-архив с помощью сторонней библиотеки JlCompress и сохраняем по пути filePath
     bool success = JlCompress::compressDir(filePath, tempDir.path());
 
     if (!success) {
         return false;
     }
 
-    //обновляем текущий путь к файлу в памяти приложения
     m_currentFilePath = filePath;
     emit filePathChanged();
     emit boardSaved();
@@ -509,8 +474,8 @@ void StorageController::upsertItem(const ImagoImageData &item)
     payloadObj["imageHash"] = item.imageHash;
 
     QSqlQuery q;
-    q.prepare("INSERT OR REPLACE INTO items (id, board_id, type, x, y, width, height, z_index, payload, updated_at) "
-              "VALUES (:id, :board_id, :type, :x, :y, :width, :height, :z_index, :payload, :updated)");
+    q.prepare("INSERT OR REPLACE INTO items (id, board_id, type, x, y, width, height, z_index, payload, updated_at, is_dirty, is_deleted) "
+              "VALUES (:id, :board_id, :type, :x, :y, :width, :height, :z_index, :payload, :updated, 1, 0)");
     q.bindValue(":id", item.id);
     q.bindValue(":board_id", boardId);
     q.bindValue(":type", "image");
@@ -525,29 +490,24 @@ void StorageController::upsertItem(const ImagoImageData &item)
     if (!q.exec()) {
         qWarning() << "Failed to upsert item:" << q.lastError().text();
     }
+
+    // Обновляем статус доски
+    QSqlQuery qBoard;
+    qBoard.prepare("UPDATE boards SET is_dirty = 1, updated_at = :updated WHERE id = :id");
+    qBoard.bindValue(":updated", QDateTime::currentSecsSinceEpoch());
+    qBoard.bindValue(":id", boardId);
+    qBoard.exec();
 }
 
 void StorageController::deleteItem(const QString &itemId)
 {
     QSqlQuery q;
-    q.prepare("DELETE FROM items WHERE id = :id");
+    q.prepare("UPDATE items SET is_deleted = 1, is_dirty = 1, updated_at = :updated WHERE id = :id");
+    q.bindValue(":updated", QDateTime::currentSecsSinceEpoch());
     q.bindValue(":id", itemId);
     
     if (!q.exec()) {
-        qWarning() << "Failed to delete item:" << q.lastError().text();
-    }
-}
-
-void StorageController::enqueueSyncTask(const QString &actionType, const QJsonObject &payload)
-{
-    QSqlQuery q;
-    q.prepare("INSERT INTO sync_queue (action_type, payload, created_at) VALUES (:action_type, :payload, :created_at)");
-    q.bindValue(":action_type", actionType);
-    q.bindValue(":payload", QString(QJsonDocument(payload).toJson(QJsonDocument::Compact)));
-    q.bindValue(":created_at", QDateTime::currentSecsSinceEpoch());
-    
-    if (!q.exec()) {
-        qWarning() << "Failed to enqueue sync task:" << q.lastError().text();
+        qWarning() << "Failed to soft delete item:" << q.lastError().text();
     }
 }
 
@@ -557,65 +517,21 @@ void StorageController::updateBoardMetadata(qreal camX, qreal camY, qreal camZoo
     QString boardId = board ? board->getCurrentBoardId() : "";
     if (boardId.isEmpty()) return;
 
-    QJsonObject payloadObj;
-    payloadObj["cameraX"] = camX;
-    payloadObj["cameraY"] = camY;
-    payloadObj["cameraZoom"] = camZoom;
-    payloadObj["gridSize"] = m_gridSize;
-
-    enqueueSyncTask("UPDATE_BOARD", payloadObj);
-    
     QSqlQuery q;
-    q.prepare("UPDATE boards SET updated_at = :updated WHERE id = :id");
+    q.prepare("UPDATE boards SET updated_at = :updated, is_dirty = 1 WHERE id = :id");
     q.bindValue(":updated", QDateTime::currentSecsSinceEpoch());
     q.bindValue(":id", boardId);
     q.exec();
 }
 
-QVariantList StorageController::getSyncTasks(int limit)
-{
-    QVariantList tasks;
-    QSqlQuery q;
-    q.prepare("SELECT id, action_type, payload FROM sync_queue ORDER BY created_at ASC LIMIT :limit");
-    q.bindValue(":limit", limit);
-    if (q.exec()) {
-        while (q.next()) {
-            QVariantMap task;
-            task["id"] = q.value("id").toInt();
-            task["action_type"] = q.value("action_type").toString();
-            task["payload"] = q.value("payload").toString();
-            tasks.append(task);
-        }
-    }
-    return tasks;
-}
-
-void StorageController::removeSyncTask(int taskId)
-{
-    QSqlQuery q;
-    q.prepare("DELETE FROM sync_queue WHERE id = :id");
-    q.bindValue(":id", taskId);
-    q.exec();
-}
-
 bool StorageController::applyNetworkDelta(const QString& actionType, const QJsonObject& payload)
 {
+    // Этот метод мы позже адаптируем под Snapshot Sync, пока оставляем базовую вставку
     QString itemId = payload["id"].toString();
     if (itemId.isEmpty()) itemId = payload["item_id"].toString();
     if (itemId.isEmpty()) return false;
 
     qint64 networkUpdated = payload.contains("updated_at") ? payload["updated_at"].toVariant().toLongLong() : QDateTime::currentSecsSinceEpoch();
-
-    QSqlQuery qCheck;
-    qCheck.prepare("SELECT updated_at FROM items WHERE id = :id");
-    qCheck.bindValue(":id", itemId);
-    
-    if (qCheck.exec() && qCheck.next()) {
-        qint64 localUpdated = qCheck.value(0).toLongLong();
-        if (localUpdated >= networkUpdated) {
-            return false;
-        }
-    }
 
     if (actionType == "DELETE_ITEM") {
         deleteItem(itemId);
@@ -623,8 +539,8 @@ bool StorageController::applyNetworkDelta(const QString& actionType, const QJson
     }
 
     QSqlQuery q;
-    q.prepare("INSERT OR REPLACE INTO items (id, board_id, type, x, y, width, height, z_index, payload, updated_at) "
-              "VALUES (:id, :board_id, :type, :x, :y, :width, :height, :z_index, :payload, :updated_at)");
+    q.prepare("INSERT OR REPLACE INTO items (id, board_id, type, x, y, width, height, z_index, payload, updated_at, is_dirty, is_deleted) "
+              "VALUES (:id, :board_id, :type, :x, :y, :width, :height, :z_index, :payload, :updated_at, 0, 0)");
     q.bindValue(":id", itemId);
     q.bindValue(":board_id", payload["board_id"].toString());
     q.bindValue(":type", payload["type"].toString("image"));
@@ -645,7 +561,7 @@ ImagoImageData StorageController::getItemFromDb(const QString& itemId)
 {
     ImagoImageData data;
     QSqlQuery q;
-    q.prepare("SELECT * FROM items WHERE id = :id");
+    q.prepare("SELECT * FROM items WHERE id = :id AND is_deleted = 0");
     q.bindValue(":id", itemId);
     if (!q.exec() || !q.next()) return data;
 
@@ -674,18 +590,16 @@ ImagoImageData StorageController::getItemFromDb(const QString& itemId)
 
 void StorageController::loadBoardFromDb(const QString& boardId)
 {
-    // 1. СТАВИМ ФЛАГ ЗАГРУЗКИ (чтобы отключить отправку в S3)
     m_isLoading = true;
 
-    // Очищаем старую доску
     m_model->clear();
     m_undoStack->clear();
     m_currentFilePath.clear();
     emit filePathChanged();
 
-    // Запрашиваем элементы из БД
     QSqlQuery q;
-    q.prepare("SELECT id FROM items WHERE board_id = :board_id");
+    // ГРУЗИМ ТОЛЬКО АКТИВНЫЕ ЭЛЕМЕНТЫ
+    q.prepare("SELECT id FROM items WHERE board_id = :board_id AND is_deleted = 0");
     q.bindValue(":board_id", boardId);
     
     if (q.exec()) {
@@ -698,7 +612,6 @@ void StorageController::loadBoardFromDb(const QString& boardId)
         }
     }
     
-    // 2. СНИМАЕМ ФЛАГ ЗАГРУЗКИ
     m_isLoading = false;
     emit boardLoaded();
 }
@@ -709,11 +622,70 @@ QString StorageController::getBoardTitle(const QString& boardId)
     q.prepare("SELECT name FROM boards WHERE id = :id");
     q.bindValue(":id", boardId);
     
-    // Если запрос успешен и вернул строку, отдаем имя доски
     if (q.exec() && q.next()) {
         return q.value("name").toString();
     }
     
-    // Если доски почему-то нет в БД, возвращаем дефолтное имя
     return "Recovered Board";
+}
+
+// ==========================================
+// НОВЫЕ МЕТОДЫ ДЛЯ OFFLINE FIRST СИНХРОНИЗАЦИИ
+// ==========================================
+
+QJsonObject StorageController::getUnsyncedBoardState(const QString& boardId)
+{
+    QJsonObject state;
+    QJsonArray updatedItems;
+    QJsonArray deletedItems;
+
+    QSqlQuery q;
+    q.prepare("SELECT * FROM items WHERE board_id = :board_id AND is_dirty = 1");
+    q.bindValue(":board_id", boardId);
+    
+    if (q.exec()) {
+        while (q.next()) {
+            if (q.value("is_deleted").toInt() == 1) {
+                deletedItems.append(q.value("id").toString());
+            } else {
+                QJsonObject itemObj;
+                itemObj["id"] = q.value("id").toString();
+                itemObj["board_id"] = boardId;
+                itemObj["type"] = q.value("type").toString();
+                itemObj["x"] = q.value("x").toDouble();
+                itemObj["y"] = q.value("y").toDouble();
+                itemObj["width"] = q.value("width").toDouble();
+                itemObj["height"] = q.value("height").toDouble();
+                itemObj["z_index"] = q.value("z_index").toInt();
+                itemObj["payload"] = QJsonDocument::fromJson(q.value("payload").toString().toUtf8()).object();
+                
+                updatedItems.append(itemObj);
+            }
+        }
+    }
+    
+    state["updated_items"] = updatedItems;
+    state["deleted_items"] = deletedItems;
+    return state;
+}
+
+void StorageController::markAsSynced(const QString& boardId)
+{
+    // Физически удаляем из БД записи, которые были помечены как is_deleted
+    QSqlQuery qDelete;
+    qDelete.prepare("DELETE FROM items WHERE board_id = :board_id AND is_deleted = 1");
+    qDelete.bindValue(":board_id", boardId);
+    qDelete.exec();
+
+    // Снимаем флаг is_dirty с остальных
+    QSqlQuery qUpdate;
+    qUpdate.prepare("UPDATE items SET is_dirty = 0 WHERE board_id = :board_id");
+    qUpdate.bindValue(":board_id", boardId);
+    qUpdate.exec();
+
+    // Снимаем флаг с самой доски
+    QSqlQuery qBoard;
+    qBoard.prepare("UPDATE boards SET is_dirty = 0 WHERE id = :id");
+    qBoard.bindValue(":id", boardId);
+    qBoard.exec();
 }

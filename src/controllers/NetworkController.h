@@ -3,8 +3,9 @@
 #include <QObject>
 #include <QNetworkAccessManager>
 #include <QWebSocket>
-#include <QTimer>
 #include <QtQml/qqml.h>
+#include <QJsonObject>
+#include <QSet>
 
 class StorageController;
 
@@ -18,24 +19,28 @@ public:
 
     Q_INVOKABLE void connectToBoard(const QString &boardId);
     Q_INVOKABLE void disconnectFromBoard();
+    
+    // НОВЫЙ МЕТОД ДЛЯ Ctrl+S
+    Q_INVOKABLE void syncBoardToServer();
 
 signals:
     void itemUpdatedFromNetwork(const QString &itemId);
     
+    // Сигналы для UI (можно показывать крутилку загрузки)
+    void syncStarted();
+    void syncFinished(bool success);
+    
 private slots:
-    void processSyncQueue();
-    // WebSocket handlers
     void onConnected();
     void onDisconnected();
     void onTextMessageReceived(const QString &message);
     void onError(QAbstractSocket::SocketError error);
 
 private:
-    void handleUploadTask(int taskId, const QJsonObject &payload);
-    void handleWebSocketTask(int taskId, const QString &action, const QJsonObject &payload);
-    
-    // API logic to fetch presigned URL and upload -> on finish delete task & send WS
-    void uploadImageToS3(int taskId, const QString &itemId, const QString &imageHash);
+    // Новые методы пакетной синхронизации
+    void checkMissingImagesAndUpload(const QJsonObject& boardState, const QSet<QString>& hashes);
+    void uploadToS3(const QString& hash, const QString& url);
+    void pushStateToServer(const QJsonObject& boardState);
 
     void fetchMetadataAndMissingImages();
     void downloadImageFromS3(const QString &hash, const QString &url);
@@ -44,12 +49,13 @@ private:
     StorageController *m_storageController;
     QNetworkAccessManager *m_networkManager;
     QWebSocket *m_webSocket;
-    QTimer *m_syncTimer;
     QString m_currentBoardId;
 
-    bool m_isUploading = false;
+    // Переменные для отслеживания пакетной загрузки
+    int m_pendingUploads = 0;
+    QJsonObject m_pendingBoardState;
     
-    // API routes (Mock)
+    // API routes
     const QString API_BASE_URL = "https://imagoref.ru/api";
     const QString WS_URL = "wss://imagoref.ru/ws";
 };

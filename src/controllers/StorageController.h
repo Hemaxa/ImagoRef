@@ -9,6 +9,7 @@
 #include <QSqlDatabase>
 #include <QSqlQuery>
 #include <QVariantList>
+#include <QJsonObject>
 #include "ImageModel.h"
 
 class ImagoImageModel;
@@ -41,12 +42,13 @@ public:
     //методы синхронизации и атомарных сохранений
     void upsertItem(const ImagoImageData &item);
     void deleteItem(const QString &itemId);
-    void enqueueSyncTask(const QString &actionType, const QJsonObject &payload);
     void updateBoardMetadata(qreal camX, qreal camY, qreal camZoom);
     void loadBoardFromDb(const QString& boardId);
 
-    QVariantList getSyncTasks(int limit = 5);
-    void removeSyncTask(int taskId);
+    //новые методы для пакетной синхронизации (State-based Sync)
+    QJsonObject getUnsyncedBoardState(const QString& boardId);
+    void markAsSynced(const QString& boardId);
+
     bool applyNetworkDelta(const QString& actionType, const QJsonObject& payload);
     ImagoImageData getItemFromDb(const QString& itemId);
     bool isLoading() const { return m_isLoading; }

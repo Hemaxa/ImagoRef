@@ -53,24 +53,20 @@ BoardController::~BoardController() {
 //метод связывания сигналов
 void BoardController::connectSignals()
 {
-    //синхронизация стека с сигналами об изменении
     connect(m_undoStack, &QUndoStack::canUndoChanged, this, &BoardController::undoStateChanged);
     connect(m_undoStack, &QUndoStack::canRedoChanged, this, &BoardController::redoStateChanged);
     
-    //синхронизация gridSize с SettingsManager
     connect(&SettingsManager::instance(), &SettingsManager::gridSizeChanged, this, [this]() {
         m_gridSize = SettingsManager::instance().getGridSize();
         m_storageController->setGridSize(m_gridSize);
         m_storageController->updateBoardMetadata(m_cameraX, m_cameraY, m_cameraZoom);
-        emit gridSizeChanged(); //оповещаем QML
+        emit gridSizeChanged();
     });
     
-    //синхронизация gridSize из файла при загрузке доски
     connect(m_storageController, &StorageController::gridSizeLoaded, this, [this](int loadedGridSize) {
         setGridSize(loadedGridSize);
     });
 
-    //синхронизация камеры из файла при загрузке доски
     connect(m_storageController, &StorageController::cameraLoaded, this, [this](qreal x, qreal y, qreal zoom) {
         m_cameraX = x;
         m_cameraY = y;
@@ -78,16 +74,14 @@ void BoardController::connectSignals()
         emit cameraChanged();
     });
 
-    // Сохранение новых картинок в локальную базу данных и постановка в очередь
+    // Сохранение новых картинок в локальную базу данных (без отправки в сеть)
     connect(m_model, &QAbstractItemModel::rowsInserted, this, [this](const QModelIndex&, int first, int last) {
         
-        if (m_storageController->isLoading()) return; // Защита от бесконечного цикла, которую мы добавили ранее
+        if (m_storageController->isLoading()) return; 
 
         for (int i = first; i <= last; ++i) {
             ImagoImageData item = m_model->getItem(i);
             
-            // --- НОВЫЙ БЛОК: СОХРАНЯЕМ ФАЙЛ В ЛОКАЛЬНЫЙ КЭШ ---
-            // Теперь, даже если выключить интернет и закрыть приложение, картинка загрузится с диска!
             if (!item.pixmap.isNull() && !item.imageHash.isEmpty()) {
                 QByteArray bytes;
                 QBuffer buffer(&bytes);
@@ -95,33 +89,23 @@ void BoardController::connectSignals()
                 item.pixmap.save(&buffer, "PNG");
                 CacheManager::instance().saveToCache(item.imageHash, bytes);
             }
-            // ---------------------------------------------------
 
             m_storageController->upsertItem(item);
-            
-            QJsonObject payload;
-            payload["image_id"] = item.id;
-            m_storageController->enqueueSyncTask("UPLOAD_IMAGE", payload);
         }
     });
 
-    // Очередь на удаление
+    // Очередь на удаление (софт-удаление локально)
     connect(m_model, &QAbstractItemModel::rowsAboutToBeRemoved, this, [this](const QModelIndex&, int first, int last) {
         
-        // ДОБАВЬ ЭТУ СТРОКУ: Иначе при смене доски приложение будет удалять все картинки с сервера!
         if (m_storageController->isLoading()) return;
 
         for (int i = first; i <= last; ++i) {
             ImagoImageData item = m_model->getItem(i);
             m_storageController->deleteItem(item.id);
-            
-            QJsonObject payload;
-            payload["image_id"] = item.id;
-            m_storageController->enqueueSyncTask("DELETE_ITEM", payload);
         }
     });
 
-    // Обработка входящих обновлений по сети (LWW)
+    // Обработка входящих обновлений по сети (оставим пока как есть, адаптируем в шаге 2)
     connect(m_networkController, &NetworkController::itemUpdatedFromNetwork, this, [this](const QString& itemId) {
         ImagoImageData data = m_storageController->getItemFromDb(itemId);
         if (!data.id.isEmpty()) {
@@ -219,14 +203,8 @@ void BoardController::endMove(int index, qreal newX, qreal newY)
             QPointF(newX, newY)
         ));
         
-        
         ImagoImageData item = m_model->getItem(index);
-        m_storageController->upsertItem(item);
-        QJsonObject payload;
-        payload["image_id"] = item.id;
-        payload["deltaX"] = newX - m_moveStartPos.x();
-        payload["deltaY"] = newY - m_moveStartPos.y();
-        m_storageController->enqueueSyncTask("UPDATE_ITEM", payload);
+        m_storageController->upsertItem(item); // Просто сохраняем локально, никаких очередей
     }
 }
 
@@ -250,14 +228,8 @@ void BoardController::endResize(int index, qreal newX, qreal newY, qreal newWidt
             newRect, newPos
         ));
         
-        
         ImagoImageData item = m_model->getItem(index);
         m_storageController->upsertItem(item);
-        QJsonObject payload;
-        payload["image_id"] = item.id;
-        payload["newWidth"] = newWidth;
-        payload["newHeight"] = newHeight;
-        m_storageController->enqueueSyncTask("UPDATE_ITEM", payload);
     }
 }
 
@@ -285,7 +257,6 @@ void BoardController::updateMoveSelection(qreal deltaX, qreal deltaY)
         qreal newX = startPos.x() + deltaX;
         qreal newY = startPos.y() + deltaY;
         
-        //приклеивание к границам рабочей области
         ImagoImageData item = m_model->getItem(index);
         qreal itemW = item.width > 0 ? item.width : 100;
         qreal itemH = item.height > 0 ? item.height : 100;
@@ -325,12 +296,6 @@ void BoardController::endMoveSelection()
         for (int i = 0; i < m_moveSelectionIndices.size(); ++i) {
             ImagoImageData item = m_model->getItem(m_moveSelectionIndices[i]);
             m_storageController->upsertItem(item);
-            
-            QJsonObject payload;
-            payload["image_id"] = item.id;
-            payload["deltaX"] = newPositions[i].x() - m_moveSelectionStartPos[i].x();
-            payload["deltaY"] = newPositions[i].y() - m_moveSelectionStartPos[i].y();
-            m_storageController->enqueueSyncTask("UPDATE_ITEM", payload);
         }
     }
     
