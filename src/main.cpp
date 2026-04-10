@@ -13,7 +13,8 @@
 #include "ImageProvider.h"
 #include "ModelsManager.h"
 #include "AuthController.h"
-#include "CloudBoardsManager.h"
+#include "StorageController.h"
+#include "BoardsManager.h"
 
 int main(int argc, char *argv[])
 {
@@ -32,6 +33,9 @@ int main(int argc, char *argv[])
     //загрузка пользовательских настроек
     SettingsManager::instance().loadSettings();
 
+    //инициализация локальной базы данных SQLite
+    StorageController::initDatabase();
+
     //создание QML движка
     QQmlApplicationEngine engine;
 
@@ -39,7 +43,7 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("SettingsManager", &SettingsManager::instance());
     engine.rootContext()->setContextProperty("ModelsManager", &ModelsManager::instance());
     engine.rootContext()->setContextProperty("AuthController", &AuthController::instance());
-    engine.rootContext()->setContextProperty("CloudBoardsManager", &CloudBoardsManager::instance());
+    engine.rootContext()->setContextProperty("BoardsManager", &BoardsManager::instance());
     ThemeManager::instance().applyTheme(SettingsManager::instance().getThemeName());
 
     //загрузка главного QML файла из модуля Qt6

@@ -143,7 +143,7 @@ Item {
 
     // Восстановление позиции камеры при открытии файла
     Connections {
-        target: controller.fileController
+        target: controller.storageController
         function onBoardLoaded() {
             if (controller.cameraX >= 0 && controller.cameraY >= 0) {
                 root.zoomLevel = controller.cameraZoom

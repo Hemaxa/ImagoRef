@@ -331,7 +331,7 @@ Dialog {
                     MenuItem {
                         text: "Доски"
                         onTriggered: {
-                            CloudBoardsManager.fetchBoards()
+                            BoardsManager.loadBoards()
                             cloudDashboardDialog.open()
                         }
                     }
@@ -463,7 +463,7 @@ Dialog {
 
                     onClicked: {
                         if (AuthController.isLoggedIn) {
-                            CloudBoardsManager.createBoard("New Board")
+                            BoardsManager.createBoard("New Board")
                         } else {
                             root.newBoardRequested()
                         }
@@ -508,7 +508,7 @@ Dialog {
                         MenuItem {
                             text: "Открыть из облака"
                             onTriggered: {
-                                CloudBoardsManager.fetchBoards()
+                                BoardsManager.loadBoards()
                                 cloudDashboardDialog.open()
                             }
                         }
@@ -710,7 +710,7 @@ Dialog {
         ListView {
             id: boardsListView
             anchors.fill: parent
-            model: CloudBoardsManager.cloudBoards
+            model: BoardsManager.boards
             clip: true
             spacing: 10
             
@@ -751,7 +751,7 @@ Dialog {
                     Button {
                         text: "Удалить"
                         onClicked: {
-                            CloudBoardsManager.deleteBoard(modelData.id)
+                            BoardsManager.deleteBoard(modelData.id)
                         }
                     }
                 }
@@ -761,7 +761,7 @@ Dialog {
                 anchors.centerIn: parent
                 text: "Нет досок"
                 color: ThemeManager.colors.textColor
-                visible: CloudBoardsManager.cloudBoards.length === 0
+                visible: BoardsManager.boards.length === 0
             }
         }
     }
@@ -785,14 +785,14 @@ Dialog {
         
         onAccepted: {
             if (inputField.text.trim() !== "") {
-                CloudBoardsManager.renameBoard(boardId, inputField.text.trim())
+                BoardsManager.renameBoard(boardId, inputField.text.trim())
             }
         }
     }
 
     // Обработка создания доски
     Connections {
-        target: CloudBoardsManager
+        target: BoardsManager
         function onBoardCreated(boardId, success) {
             if (success) {
                 // Если мы находимся в WelcomeWindow и создали доску через New Board

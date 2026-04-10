@@ -9,13 +9,12 @@
 #include <QtQml/qqml.h>
 
 #include "ImageModel.h"
-#include "FileController.h"
+#include "StorageController.h"
 #include "SelectionController.h"
 #include "ClipboardController.h"
 #include "ToolController.h"
 #include "UpscaleController.h"
-#include "CloudController.h"
-#include "SyncController.h"
+#include "NetworkController.h"
 
 class BoardController : public QObject {
     Q_OBJECT //обязательный макрос для любого класса Qt, который использует сигналы, слоты или свойства (Q_PROPERTY)
@@ -25,13 +24,12 @@ class BoardController : public QObject {
     Q_PROPERTY(ImagoImageModel* model READ getModel CONSTANT) //модель данных
     
     //остальные контроллеры
-    Q_PROPERTY(FileController* fileController READ getFileController CONSTANT)
+    Q_PROPERTY(StorageController* storageController READ getStorageController CONSTANT)
     Q_PROPERTY(SelectionController* selectionController READ getSelectionController CONSTANT)
     Q_PROPERTY(ClipboardController* clipboardController READ getClipboardController CONSTANT)
     Q_PROPERTY(ToolController* toolController READ getToolController CONSTANT)
     Q_PROPERTY(UpscaleController* upscaleController READ getUpscaleController CONSTANT)
-    Q_PROPERTY(CloudController* cloudController READ getCloudController CONSTANT)
-    Q_PROPERTY(SyncController* syncController READ getSyncController CONSTANT)
+    Q_PROPERTY(NetworkController* networkController READ getNetworkController CONSTANT)
 
     //состояния для кнопок Undo/Redo
     Q_PROPERTY(bool canUndo READ getCanUndo NOTIFY undoStateChanged)
@@ -53,13 +51,12 @@ public:
 
     //геттеры для свойств
     ImagoImageModel* getModel() const;
-    FileController* getFileController() const;
+    StorageController* getStorageController() const;
     SelectionController* getSelectionController() const;
     ClipboardController* getClipboardController() const;
     ToolController* getToolController() const;
     UpscaleController* getUpscaleController() const;
-    CloudController* getCloudController() const;
-    SyncController* getSyncController() const;
+    NetworkController* getNetworkController() const;
 
     bool getCanUndo() const;
     bool getCanRedo() const;
@@ -108,7 +105,6 @@ signals:
 private:
     //вспомогательный метод для настройки сигналов
     void connectSignals();
-    void scheduleMetadataUpload();
 
     //внутренние переменные класса
     ImagoImageModel *m_model;
@@ -119,15 +115,13 @@ private:
     qreal m_cameraZoom;
 
     //указатели на остальные контроллеры
-    FileController *m_fileController;
+    StorageController *m_storageController;
     SelectionController *m_selectionController;
     ClipboardController *m_clipboardController;
     ToolController *m_toolController;
     UpscaleController *m_upscaleController;
-    CloudController *m_cloudController;
-    SyncController *m_syncController;
+    NetworkController *m_networkController;
     QString m_currentBoardId;
-    QTimer *m_metadataDebounceTimer;
 
     //переменные для хранения начального состояния объекта, когда пользователь только начинает его перетаскивать или менять размер
     QPointF m_moveStartPos;

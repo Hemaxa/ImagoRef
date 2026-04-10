@@ -168,6 +168,20 @@ void ImagoImageModel::addImage(const ImagoImageData &data)
     emit countChanged(); //сигнал о том, что количество объектов изменилось
 }
 
+void ImagoImageModel::updateItemData(const QString& id, const ImagoImageData& data)
+{
+    int idx = getIndexById(id);
+    if (idx >= 0) {
+        m_items[idx] = data;
+        QModelIndex modelIndex = createIndex(idx, 0);
+        QVector<int> roles;
+        for (int r = IdRole; r <= OpacityRole; ++r) {
+            roles.append(r);
+        }
+        emit dataChanged(modelIndex, modelIndex, roles);
+    }
+}
+
 //удаление объекта
 void ImagoImageModel::removeImage(int index)
 {

@@ -16,7 +16,7 @@ ApplicationWindow {
     visible: true //режим видимости
     width: 600 //ширина
     height: 800 //высота
-    title: boardController.fileController.windowTitle //заголовок окна берется из контроллера файлов посредством контроллера доски 
+    title: boardController.storageController.windowTitle //заголовок окна берется из контроллера файлов посредством контроллера доски 
     
     // Свойства для режима закрепления
     property bool isPinned: boardController.toolController.isPinned
@@ -82,9 +82,9 @@ ApplicationWindow {
                 onTriggered: {
                     if (mainLoader.active) {
                         if (AuthController.isLoggedIn && boardController.currentBoardId !== "") {
-                            boardController.cloudController.syncUp(boardController.currentBoardId)
-                        } else if (boardController.fileController.currentFilePath !== "") {
-                            boardController.fileController.saveBoard()
+
+                        } else if (boardController.storageController.currentFilePath !== "") {
+                            boardController.storageController.saveBoard()
                         } else {
                             fileSaveDialog.open()
                         }
@@ -108,9 +108,9 @@ ApplicationWindow {
                 onTriggered: {
                     if (mainLoader.active) {
                         if (boardController.currentBoardId !== "") {
-                            boardController.cloudController.syncUp(boardController.currentBoardId)
+
                         } else if (AuthController.isLoggedIn) {
-                            newCloudBoardNameInput.text = boardController.fileController.windowTitle.replace("ImagoRef - ", "")
+                            newCloudBoardNameInput.text = boardController.storageController.windowTitle.replace("ImagoRef - ", "")
                             if (newCloudBoardNameInput.text === "" || newCloudBoardNameInput.text === "ImagoRef") {
                                 newCloudBoardNameInput.text = "New Board"
                             }
@@ -122,7 +122,7 @@ ApplicationWindow {
             Action {
                 text: "Открыть из облака"
                 onTriggered: {
-                    CloudBoardsManager.fetchBoards()
+                    BoardsManager.loadBoards()
                     mainCloudDashboard.open()
                 }
             }
@@ -275,7 +275,7 @@ ApplicationWindow {
         onNewBoardRequested: {
             boardController.currentBoardId = ""
             root.showMaximized()
-            boardController.fileController.newBoard()
+            boardController.storageController.newBoard()
             mainLoader.active = true
             welcomeDialog.close()
         }
@@ -283,7 +283,7 @@ ApplicationWindow {
         //открытие существующей доски
         onOpenBoardRequested: function(fileUrl) {
             boardController.currentBoardId = ""
-            if (boardController.fileController.openBoard(fileUrl)) {
+            if (boardController.storageController.openBoard(fileUrl)) {
                 root.addLocalToHistory(fileUrl)
                 root.showMaximized()
                 mainLoader.active = true
@@ -298,8 +298,8 @@ ApplicationWindow {
             root.showMaximized()
             mainLoader.active = true
             welcomeDialog.close()
-            boardController.cloudController.syncDown(boardId)
-            boardController.syncController.connectToBoard(boardId)
+
+            boardController.networkController.connectToBoard(boardId)
         }
     }
     
@@ -311,7 +311,7 @@ ApplicationWindow {
         fileMode: FileDialog.SaveFile
         nameFilters: ["ImagoRef доска (*.iref)", "Все файлы (*)"]
         onAccepted: {
-            boardController.fileController.saveBoardAs(selectedFile)
+            boardController.storageController.saveBoardAs(selectedFile)
             root.addLocalToHistory(selectedFile)
         }
     }
@@ -322,7 +322,7 @@ ApplicationWindow {
         title: "Открыть доску"
         nameFilters: ["ImagoRef доска (*.iref)", "Все файлы (*)"]
         onAccepted: {
-            if (boardController.fileController.openBoard(selectedFile)) {
+            if (boardController.storageController.openBoard(selectedFile)) {
                 root.addLocalToHistory(selectedFile)
             }
         }
@@ -339,7 +339,7 @@ ApplicationWindow {
         
         ListView {
             anchors.fill: parent
-            model: CloudBoardsManager.cloudBoards
+            model: BoardsManager.boards
             clip: true
             spacing: 10
             
@@ -363,13 +363,11 @@ ApplicationWindow {
                     Button {
                         text: "Открыть"
                         onClicked: {
-                            boardController.currentBoardId = modelData.id
                             root.addCloudToHistory(modelData.id)
                             root.showMaximized()
                             mainLoader.active = true
                             mainCloudDashboard.close()
-                            boardController.cloudController.syncDown(modelData.id)
-                            boardController.syncController.connectToBoard(modelData.id)
+                            boardController.openCloudBoard(modelData.id)
                         }
                     }
                 }
@@ -379,7 +377,7 @@ ApplicationWindow {
                 anchors.centerIn: parent
                 text: "Нет досок"
                 color: ThemeManager.colors.textColor
-                visible: CloudBoardsManager.cloudBoards.length === 0
+                visible: BoardsManager.boards.length === 0
             }
         }
     }
@@ -401,20 +399,20 @@ ApplicationWindow {
         
         onAccepted: {
             if (newCloudBoardNameInput.text.trim() !== "") {
-                CloudBoardsManager.createBoard(newCloudBoardNameInput.text.trim())
+                BoardsManager.createBoard(newCloudBoardNameInput.text.trim())
             }
         }
     }
 
     // Обработка создания доски из меню "Сохранить в облако"
     Connections {
-        target: CloudBoardsManager
+        target: BoardsManager
         function onBoardCreated(id, success) {
             if (success && mainLoader.active && boardController.currentBoardId === "") {
                 boardController.currentBoardId = id
                 root.addCloudToHistory(id)
-                boardController.cloudController.syncUp(id)
-                boardController.syncController.connectToBoard(id)
+
+                boardController.networkController.connectToBoard(id)
             }
         }
     }
@@ -436,9 +434,9 @@ ApplicationWindow {
 
     function addCloudToHistory(boardId) {
         var name = "Cloud Board"
-        for (var i = 0; i < CloudBoardsManager.cloudBoards.length; i++) {
-            if (CloudBoardsManager.cloudBoards[i].id === boardId) {
-                name = CloudBoardsManager.cloudBoards[i].name
+        for (var i = 0; i < BoardsManager.boards.length; i++) {
+            if (BoardsManager.boards[i].id === boardId) {
+                name = BoardsManager.boards[i].name
                 break
             }
         }

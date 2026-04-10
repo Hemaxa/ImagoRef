@@ -82,7 +82,8 @@ public:
     Q_INVOKABLE ImagoImageData getItem(int index) const;
     int getIndexById(const QString &id) const;
     
-    //работа со всеми объектами сразу (FileController)
+    //работа со всеми объектами сразу (StorageController)
+    void updateItemData(const QString& id, const ImagoImageData& data);
     QVector<ImagoImageData> getAllItems() const;
     void setAllItems(const QVector<ImagoImageData> &items);
 

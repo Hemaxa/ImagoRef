@@ -3,25 +3,23 @@
 #include "SettingsManager.h"
 #include "ImageProvider.h"
 #include "ModelsManager.h"
-#include "CloudController.h"
-#include "SyncController.h"
+#include "NetworkController.h"
 #include <QPainter>
 #include <QImage>
 #include <QStandardPaths>
 #include <QDir>
 #include <QCryptographicHash>
+#include <QJsonObject>
 
 BoardController::BoardController(QObject *parent) : QObject(parent)
     , m_model(new ImagoImageModel(this))
     , m_undoStack(new QUndoStack(this))
-    , m_fileController(new FileController(m_model, m_undoStack, this))
+    , m_storageController(new StorageController(m_model, m_undoStack, this))
     , m_selectionController(new SelectionController(m_model, this))
     , m_clipboardController(new ClipboardController(m_model, m_undoStack, this))
     , m_toolController(new ToolController(m_model, m_undoStack, this))
     , m_upscaleController(new UpscaleController(m_model, &ModelsManager::instance(), m_undoStack, this))
-    , m_cloudController(new CloudController(m_model, m_undoStack, this))
-    , m_syncController(new SyncController(m_model, this))
-    , m_metadataDebounceTimer(new QTimer(this))
+    , m_networkController(new NetworkController(m_storageController, this))
     , m_gridSize(SettingsManager::instance().getGridSize())
     , m_cameraX(-1)
     , m_cameraY(-1)
@@ -31,16 +29,7 @@ BoardController::BoardController(QObject *parent) : QObject(parent)
     connectSignals();
     
     //синхронизировать начальное значение
-    m_fileController->setGridSize(m_gridSize);
-    
-    //настройка таймера для дебаунса метаданных
-    m_metadataDebounceTimer->setSingleShot(true);
-    m_metadataDebounceTimer->setInterval(2000); // 2 секунды
-    connect(m_metadataDebounceTimer, &QTimer::timeout, this, [this]() {
-        if (!m_currentBoardId.isEmpty()) {
-            m_cloudController->uploadMetadata(m_currentBoardId);
-        }
-    });
+    m_storageController->setGridSize(m_gridSize);
     
     //регистрация модели в глобальном провайдере изображений ImagoImageProvider
     if (ImagoImageProvider::instance()) {
@@ -49,13 +38,6 @@ BoardController::BoardController(QObject *parent) : QObject(parent)
 }
 
 BoardController::~BoardController() {
-    if (m_metadataDebounceTimer->isActive()) {
-        m_metadataDebounceTimer->stop();
-        if (!m_currentBoardId.isEmpty()) {
-            m_cloudController->uploadMetadata(m_currentBoardId);
-        }
-    }
-    
     if (!m_model->getAllItems().isEmpty()) {
         generateBoardPreview();
     }
@@ -75,40 +57,67 @@ void BoardController::connectSignals()
     //синхронизация gridSize с SettingsManager
     connect(&SettingsManager::instance(), &SettingsManager::gridSizeChanged, this, [this]() {
         m_gridSize = SettingsManager::instance().getGridSize();
-        m_fileController->setGridSize(m_gridSize);
+        m_storageController->setGridSize(m_gridSize);
+        m_storageController->updateBoardMetadata(m_cameraX, m_cameraY, m_cameraZoom);
         emit gridSizeChanged(); //оповещаем QML
     });
     
     //синхронизация gridSize из файла при загрузке доски
-    connect(m_fileController, &FileController::gridSizeLoaded, this, [this](int loadedGridSize) {
+    connect(m_storageController, &StorageController::gridSizeLoaded, this, [this](int loadedGridSize) {
         setGridSize(loadedGridSize);
     });
 
     //синхронизация камеры из файла при загрузке доски
-    connect(m_fileController, &FileController::cameraLoaded, this, [this](qreal x, qreal y, qreal zoom) {
+    connect(m_storageController, &StorageController::cameraLoaded, this, [this](qreal x, qreal y, qreal zoom) {
         m_cameraX = x;
         m_cameraY = y;
         m_cameraZoom = zoom;
         emit cameraChanged();
     });
 
-    // Автоматическая загрузка новых картинок в S3 при добавлении их на холст
-    connect(m_model, &QAbstractItemModel::rowsInserted, this, [this]() {
-        if (!m_currentBoardId.isEmpty()) {
-            m_cloudController->syncUp(m_currentBoardId);
+    // Сохранение новых картинок в локальную базу данных и постановка в очередь
+    connect(m_model, &QAbstractItemModel::rowsInserted, this, [this](const QModelIndex&, int first, int last) {
+        for (int i = first; i <= last; ++i) {
+            ImagoImageData item = m_model->getItem(i);
+            m_storageController->upsertItem(item);
+            
+            QJsonObject payload;
+            payload["image_id"] = item.id;
+            m_storageController->enqueueSyncTask("UPLOAD_IMAGE", payload);
+        }
+    });
+
+    // Очередь на удаление
+    connect(m_model, &QAbstractItemModel::rowsAboutToBeRemoved, this, [this](const QModelIndex&, int first, int last) {
+        for (int i = first; i <= last; ++i) {
+            ImagoImageData item = m_model->getItem(i);
+            m_storageController->deleteItem(item.id);
+            
+            QJsonObject payload;
+            payload["image_id"] = item.id;
+            m_storageController->enqueueSyncTask("DELETE_ITEM", payload);
+        }
+    });
+
+    // Обработка входящих обновлений по сети (LWW)
+    connect(m_networkController, &NetworkController::itemUpdatedFromNetwork, this, [this](const QString& itemId) {
+        ImagoImageData data = m_storageController->getItemFromDb(itemId);
+        if (!data.id.isEmpty()) {
+            m_model->updateItemData(itemId, data);
+        } else {
+            m_model->removeImageById(itemId);
         }
     });
 }
 
 //геттеры
 ImagoImageModel* BoardController::getModel() const { return m_model; }
-FileController* BoardController::getFileController() const { return m_fileController; }
+StorageController* BoardController::getStorageController() const { return m_storageController; }
 SelectionController* BoardController::getSelectionController() const { return m_selectionController; }
 ClipboardController* BoardController::getClipboardController() const { return m_clipboardController; }
 ToolController* BoardController::getToolController() const { return m_toolController; }
 UpscaleController* BoardController::getUpscaleController() const { return m_upscaleController; }
-CloudController* BoardController::getCloudController() const { return m_cloudController; }
-SyncController* BoardController::getSyncController() const { return m_syncController; }
+NetworkController* BoardController::getNetworkController() const { return m_networkController; }
 
 bool BoardController::getCanUndo() const { return m_undoStack->canUndo(); }
 bool BoardController::getCanRedo() const { return m_undoStack->canRedo(); }
@@ -123,8 +132,9 @@ void BoardController::setGridSize(int size)
 {
     if (m_gridSize != size && size > 0) {
         m_gridSize = size;
-        m_fileController->setGridSize(size);
+        m_storageController->setGridSize(size);
         SettingsManager::instance().setGridSize(size);
+        m_storageController->updateBoardMetadata(m_cameraX, m_cameraY, m_cameraZoom);
         emit gridSizeChanged();
     }
 }
@@ -132,6 +142,7 @@ void BoardController::setGridSize(int size)
 void BoardController::setCameraX(qreal x) {
     if (!qFuzzyCompare(m_cameraX, x)) {
         m_cameraX = x;
+        m_storageController->updateBoardMetadata(m_cameraX, m_cameraY, m_cameraZoom);
         emit cameraChanged();
     }
 }
@@ -139,6 +150,7 @@ void BoardController::setCameraX(qreal x) {
 void BoardController::setCameraY(qreal y) {
     if (!qFuzzyCompare(m_cameraY, y)) {
         m_cameraY = y;
+        m_storageController->updateBoardMetadata(m_cameraX, m_cameraY, m_cameraZoom);
         emit cameraChanged();
     }
 }
@@ -146,6 +158,7 @@ void BoardController::setCameraY(qreal y) {
 void BoardController::setCameraZoom(qreal zoom) {
     if (!qFuzzyCompare(m_cameraZoom, zoom)) {
         m_cameraZoom = zoom;
+        m_storageController->updateBoardMetadata(m_cameraX, m_cameraY, m_cameraZoom);
         emit cameraChanged();
     }
 }
@@ -184,9 +197,14 @@ void BoardController::endMove(int index, qreal newX, qreal newY)
             QPointF(newX, newY)
         ));
         
+        
         ImagoImageData item = m_model->getItem(index);
-        m_syncController->sendMoveEvent(item.id, newX, newY);
-        scheduleMetadataUpload();
+        m_storageController->upsertItem(item);
+        QJsonObject payload;
+        payload["image_id"] = item.id;
+        payload["deltaX"] = newX - m_moveStartPos.x();
+        payload["deltaY"] = newY - m_moveStartPos.y();
+        m_storageController->enqueueSyncTask("UPDATE_ITEM", payload);
     }
 }
 
@@ -210,9 +228,14 @@ void BoardController::endResize(int index, qreal newX, qreal newY, qreal newWidt
             newRect, newPos
         ));
         
+        
         ImagoImageData item = m_model->getItem(index);
-        m_syncController->sendResizeEvent(item.id, newX, newY, newWidth, newHeight);
-        scheduleMetadataUpload();
+        m_storageController->upsertItem(item);
+        QJsonObject payload;
+        payload["image_id"] = item.id;
+        payload["newWidth"] = newWidth;
+        payload["newHeight"] = newHeight;
+        m_storageController->enqueueSyncTask("UPDATE_ITEM", payload);
     }
 }
 
@@ -249,7 +272,6 @@ void BoardController::updateMoveSelection(qreal deltaX, qreal deltaY)
         newY = qMax(0.0, qMin(30000.0 - itemH, newY));
         
         m_model->setPosition(index, newX, newY);
-        m_syncController->sendMoveEvent(item.id, newX, newY);
     }
 }
 
@@ -277,18 +299,21 @@ void BoardController::endMoveSelection()
             m_model, m_moveSelectionIndices,
             m_moveSelectionStartPos, newPositions
         ));
-        scheduleMetadataUpload();
+        
+        for (int i = 0; i < m_moveSelectionIndices.size(); ++i) {
+            ImagoImageData item = m_model->getItem(m_moveSelectionIndices[i]);
+            m_storageController->upsertItem(item);
+            
+            QJsonObject payload;
+            payload["image_id"] = item.id;
+            payload["deltaX"] = newPositions[i].x() - m_moveSelectionStartPos[i].x();
+            payload["deltaY"] = newPositions[i].y() - m_moveSelectionStartPos[i].y();
+            m_storageController->enqueueSyncTask("UPDATE_ITEM", payload);
+        }
     }
     
     m_moveSelectionIndices.clear();
     m_moveSelectionStartPos.clear();
-}
-
-void BoardController::scheduleMetadataUpload()
-{
-    if (!m_currentBoardId.isEmpty()) {
-        m_metadataDebounceTimer->start(); // (re)start the timer
-    }
 }
 
 void BoardController::openCloudBoard(const QString &boardId)
@@ -297,8 +322,8 @@ void BoardController::openCloudBoard(const QString &boardId)
         generateBoardPreview();
     }
     setCurrentBoardId(boardId);
-    m_cloudController->syncDown(boardId);
-    m_syncController->connectToBoard(boardId);
+    m_storageController->loadBoardFromDb(boardId);
+    m_networkController->connectToBoard(boardId);
 }
 
 void BoardController::openLocalFile(const QUrl &fileUrl)
@@ -307,14 +332,15 @@ void BoardController::openLocalFile(const QUrl &fileUrl)
         generateBoardPreview();
     }
     setCurrentBoardId("");
-    m_fileController->openBoard(fileUrl);
+    m_networkController->disconnectFromBoard();
+    m_storageController->openBoard(fileUrl);
 }
 
 QString BoardController::generateBoardPreview()
 {
     if (m_model->getAllItems().isEmpty()) return "";
 
-    QString identifier = m_currentBoardId.isEmpty() ? m_fileController->getCurrentFilePath() : m_currentBoardId;
+    QString identifier = m_currentBoardId.isEmpty() ? m_storageController->getCurrentFilePath() : m_currentBoardId;
     if (identifier.isEmpty()) return "";
     
     QRectF bounds;

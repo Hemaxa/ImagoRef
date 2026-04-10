@@ -9,7 +9,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 #определение используемых пакетов (Qt Quick вместо Widgets)
-find_package(Qt6 REQUIRED COMPONENTS Core Gui Quick QuickControls2 Qml Svg Network WebSockets)
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Quick QuickControls2 Qml Svg Network WebSockets Sql)
 
 #включение Qt-автоматизаций
 set(CMAKE_AUTOMOC ON)
@@ -28,8 +28,8 @@ target_sources(ImagoRef PRIVATE
     ${SRC_DIR}/controllers/BoardController.cpp
     ${SRC_DIR}/controllers/StackController.h
     ${SRC_DIR}/controllers/StackController.cpp
-    ${SRC_DIR}/controllers/FileController.h
-    ${SRC_DIR}/controllers/FileController.cpp
+    ${SRC_DIR}/controllers/StorageController.h
+    ${SRC_DIR}/controllers/StorageController.cpp
     ${SRC_DIR}/controllers/SelectionController.h
     ${SRC_DIR}/controllers/SelectionController.cpp
     ${SRC_DIR}/controllers/ClipboardController.h
@@ -38,15 +38,13 @@ target_sources(ImagoRef PRIVATE
     ${SRC_DIR}/controllers/ToolController.cpp
     ${SRC_DIR}/controllers/UpscaleController.h
     ${SRC_DIR}/controllers/UpscaleController.cpp
-    ${SRC_DIR}/controllers/CloudController.h
-    ${SRC_DIR}/controllers/CloudController.cpp
-    ${SRC_DIR}/controllers/SyncController.h
-    ${SRC_DIR}/controllers/SyncController.cpp
+    ${SRC_DIR}/controllers/NetworkController.h
+    ${SRC_DIR}/controllers/NetworkController.cpp
     ${SRC_DIR}/controllers/AuthController.h
     ${SRC_DIR}/controllers/AuthController.cpp
-    ${SRC_DIR}/controllers/CloudBoardsManager.h
-    ${SRC_DIR}/controllers/CloudBoardsManager.cpp
-
+    
+    ${SRC_DIR}/managers/BoardsManager.h
+    ${SRC_DIR}/managers/BoardsManager.cpp
     ${SRC_DIR}/managers/SettingsManager.h
     ${SRC_DIR}/managers/SettingsManager.cpp
     ${SRC_DIR}/managers/ThemesManager.h
@@ -160,6 +158,7 @@ if(APPLE)
         Qt6::Svg
         Qt6::Network
         Qt6::WebSockets
+        Qt6::Sql
 
         OpenGL::GL
         ZLIB::ZLIB
@@ -241,6 +240,7 @@ if(WIN32)
         Qt6::Svg
         Qt6::Network
         Qt6::WebSockets
+        Qt6::Sql
     )
 
     #задание свойств конечного файла
@@ -306,6 +306,7 @@ if(UNIX AND NOT APPLE)
         Qt6::Svg
         Qt6::Network
         Qt6::WebSockets
+        Qt6::Sql
     )
 
     #регистрация приложения (Info.desktop.in)
