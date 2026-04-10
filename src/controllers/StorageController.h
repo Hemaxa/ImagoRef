@@ -36,6 +36,7 @@ public:
     //геттеры
     QString getCurrentFilePath() const;
     QString getWindowTitle() const;
+    QString getBoardTitle(const QString& boardId);
 
     //методы синхронизации и атомарных сохранений
     void upsertItem(const ImagoImageData &item);
@@ -48,6 +49,7 @@ public:
     void removeSyncTask(int taskId);
     bool applyNetworkDelta(const QString& actionType, const QJsonObject& payload);
     ImagoImageData getItemFromDb(const QString& itemId);
+    bool isLoading() const { return m_isLoading; }
 
     //методы операций
     Q_INVOKABLE void newBoard();
@@ -77,4 +79,5 @@ private:
     QUndoStack *m_undoStack;
     QString m_currentFilePath;
     int m_gridSize = 25;
+    bool m_isLoading = false;
 };

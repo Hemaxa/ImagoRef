@@ -39,6 +39,7 @@ private:
 
     void fetchMetadataAndMissingImages();
     void downloadImageFromS3(const QString &hash, const QString &url);
+    void syncLocalBoardToServer();
 
     StorageController *m_storageController;
     QNetworkAccessManager *m_networkManager;

@@ -201,8 +201,6 @@ void NetworkController::uploadImageToS3(int taskId, const QString &itemId, const
 {
     m_isUploading = true;
 
-    // Убедись, что API_BASE_URL содержит /api (например: http://твой_впс:8000/api)
-    // Либо жестко пропиши здесь: API_BASE_URL + "/api/boards/" ...
     QString apiUrl = API_BASE_URL + "/boards/" + m_currentBoardId + "/sync_hashes";
     QNetworkRequest request((QUrl(apiUrl)));
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
@@ -223,9 +221,12 @@ void NetworkController::uploadImageToS3(int taskId, const QString &itemId, const
         if (reply->error() != QNetworkReply::NoError) {
             qWarning() << "Failed to get presigned URL from API:" << reply->errorString();
             m_isUploading = false;
-            // КРИТИЧНО: Удаляем задачу при ошибке 404 (доски нет и т.д.), 
-            // иначе очередь заблокируется навсегда!
-            m_storageController->removeSyncTask(taskId);
+            
+            // ИСПРАВЛЕНИЕ 1: Удаляем только если сервер ответил 404 (доски нет). 
+            // Иначе (таймаут, нет сети) - оставляем задачу в БД, чтобы она попыталась снова!
+            if (reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() == 404) {
+                m_storageController->removeSyncTask(taskId);
+            }
             return;
         }
 
@@ -247,7 +248,8 @@ void NetworkController::uploadImageToS3(int taskId, const QString &itemId, const
         if (!file->open(QIODevice::ReadOnly)) {
             file->deleteLater();
             m_isUploading = false;
-            m_storageController->removeSyncTask(taskId); // Защита от блокировки
+            // Если файла физически нет в кэше - выгрузить мы его не сможем. Снимаем задачу.
+            m_storageController->removeSyncTask(taskId); 
             return;
         }
 
@@ -258,22 +260,25 @@ void NetworkController::uploadImageToS3(int taskId, const QString &itemId, const
         connect(s3Reply, &QNetworkReply::finished, this, [this, s3Reply, file, taskId, itemId]() {
             s3Reply->deleteLater();
             file->deleteLater();
-            m_isUploading = false;
-
+            
             if (s3Reply->error() == QNetworkReply::NoError) {
                 qDebug() << "Successfully uploaded to S3!";
                 QJsonObject wsPayload;
                 wsPayload["image_id"] = itemId;
                 handleWebSocketTask(taskId, "ADD_ITEM", wsPayload); 
             } else {
-                // ДОБАВЬТЕ ЭТИ СТРОКИ ДЛЯ ДЕБАГА
                 qWarning() << "S3 Upload failed:" << s3Reply->errorString();
-                qWarning() << "HTTP Status:" << s3Reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
-                qWarning() << "S3 URL was:" << s3Reply->url().toString();
-                qWarning() << "Response from S3:" << s3Reply->readAll();
                 
-                m_storageController->removeSyncTask(taskId);
+                // ИСПРАВЛЕНИЕ 2: Если обрыв интернета при выгрузке в S3 - не удаляем задачу!
+                int statusCode = s3Reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+                if (statusCode == 400 || statusCode == 403) {
+                    // Критическая ошибка S3 (например, протухшая ссылка). Удаляем.
+                    m_storageController->removeSyncTask(taskId);
+                }
             }
+            
+            // Обязательно освобождаем флаг выгрузки, чтобы очередь пошла дальше
+            m_isUploading = false; 
         });
     });
 }
@@ -293,9 +298,19 @@ void NetworkController::fetchMetadataAndMissingImages()
     QNetworkReply *reply = m_networkManager->get(request);
     
     connect(reply, &QNetworkReply::finished, this, [this, reply]() {
-        reply->deleteLater();
+        int statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+        
+        // ЕСЛИ СЕРВЕР ОТВЕТИЛ 404 - ЗНАЧИТ ЭТО OFFLINE ДОСКА, КОТОРУЮ ЕЩЕ НЕ ВЫГРУЗИЛИ
+        if (statusCode == 404) {
+            qDebug() << "Board not found on server. Uploading local board to server...";
+            syncLocalBoardToServer();
+            reply->deleteLater();
+            return;
+        }
+
         if (reply->error() != QNetworkReply::NoError) {
             qWarning() << "Failed to fetch metadata:" << reply->errorString();
+            reply->deleteLater();
             return;
         }
 
@@ -372,5 +387,36 @@ void NetworkController::downloadImageFromS3(const QString &hash, const QString &
         } else {
             qWarning() << "Failed to download image from S3. HTTP Status:" << statusCode;
         }
+    });
+}
+
+void NetworkController::syncLocalBoardToServer()
+{
+    // Берем название доски из базы данных (замени на свой метод получения title, если он другой)
+    QString title = m_storageController->getBoardTitle(m_currentBoardId); 
+    if (title.isEmpty()) title = "Recovered Board";
+
+    QString apiUrl = API_BASE_URL + "/boards/"; 
+    QNetworkRequest request((QUrl(apiUrl)));
+    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+    
+    QString token = SettingsManager::instance().getJwtToken();
+    request.setRawHeader("Authorization", ("Bearer " + token).toUtf8());
+
+    QJsonObject payload;
+    payload["id"] = m_currentBoardId;
+    payload["title"] = title;
+
+    QNetworkReply *reply = m_networkManager->post(request, QJsonDocument(payload).toJson());
+    
+    connect(reply, &QNetworkReply::finished, this, [this, reply]() {
+        if (reply->error() == QNetworkReply::NoError) {
+            qDebug() << "Offline board successfully pushed to server!";
+            // Теперь доска есть на сервере! Запрашиваем метаданные заново.
+            fetchMetadataAndMissingImages();
+        } else {
+            qWarning() << "Failed to push offline board to server:" << reply->errorString();
+        }
+        reply->deleteLater();
     });
 }

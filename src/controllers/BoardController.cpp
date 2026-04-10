@@ -4,10 +4,13 @@
 #include "ImageProvider.h"
 #include "ModelsManager.h"
 #include "NetworkController.h"
+#include "CacheManager.h"
+
 #include <QPainter>
 #include <QImage>
 #include <QStandardPaths>
 #include <QDir>
+#include <QBuffer>
 #include <QCryptographicHash>
 #include <QJsonObject>
 
@@ -77,8 +80,23 @@ void BoardController::connectSignals()
 
     // Сохранение новых картинок в локальную базу данных и постановка в очередь
     connect(m_model, &QAbstractItemModel::rowsInserted, this, [this](const QModelIndex&, int first, int last) {
+        
+        if (m_storageController->isLoading()) return; // Защита от бесконечного цикла, которую мы добавили ранее
+
         for (int i = first; i <= last; ++i) {
             ImagoImageData item = m_model->getItem(i);
+            
+            // --- НОВЫЙ БЛОК: СОХРАНЯЕМ ФАЙЛ В ЛОКАЛЬНЫЙ КЭШ ---
+            // Теперь, даже если выключить интернет и закрыть приложение, картинка загрузится с диска!
+            if (!item.pixmap.isNull() && !item.imageHash.isEmpty()) {
+                QByteArray bytes;
+                QBuffer buffer(&bytes);
+                buffer.open(QIODevice::WriteOnly);
+                item.pixmap.save(&buffer, "PNG");
+                CacheManager::instance().saveToCache(item.imageHash, bytes);
+            }
+            // ---------------------------------------------------
+
             m_storageController->upsertItem(item);
             
             QJsonObject payload;
@@ -89,6 +107,10 @@ void BoardController::connectSignals()
 
     // Очередь на удаление
     connect(m_model, &QAbstractItemModel::rowsAboutToBeRemoved, this, [this](const QModelIndex&, int first, int last) {
+        
+        // ДОБАВЬ ЭТУ СТРОКУ: Иначе при смене доски приложение будет удалять все картинки с сервера!
+        if (m_storageController->isLoading()) return;
+
         for (int i = first; i <= last; ++i) {
             ImagoImageData item = m_model->getItem(i);
             m_storageController->deleteItem(item.id);

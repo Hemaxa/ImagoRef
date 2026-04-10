@@ -674,6 +674,9 @@ ImagoImageData StorageController::getItemFromDb(const QString& itemId)
 
 void StorageController::loadBoardFromDb(const QString& boardId)
 {
+    // 1. СТАВИМ ФЛАГ ЗАГРУЗКИ (чтобы отключить отправку в S3)
+    m_isLoading = true;
+
     // Очищаем старую доску
     m_model->clear();
     m_undoStack->clear();
@@ -690,10 +693,27 @@ void StorageController::loadBoardFromDb(const QString& boardId)
             QString itemId = q.value("id").toString();
             ImagoImageData data = getItemFromDb(itemId);
             if (!data.id.isEmpty()) {
-                m_model->addImage(data); // Рисуем картинку на холсте
+                m_model->addImage(data); 
             }
         }
     }
     
+    // 2. СНИМАЕМ ФЛАГ ЗАГРУЗКИ
+    m_isLoading = false;
     emit boardLoaded();
+}
+
+QString StorageController::getBoardTitle(const QString& boardId)
+{
+    QSqlQuery q;
+    q.prepare("SELECT name FROM boards WHERE id = :id");
+    q.bindValue(":id", boardId);
+    
+    // Если запрос успешен и вернул строку, отдаем имя доски
+    if (q.exec() && q.next()) {
+        return q.value("name").toString();
+    }
+    
+    // Если доски почему-то нет в БД, возвращаем дефолтное имя
+    return "Recovered Board";
 }
