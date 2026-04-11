@@ -105,6 +105,30 @@ void BoardController::connectSignals()
         }
     });
 
+    // Отслеживание изменения существующих элементов (метки, вращение, апскейл, кроп, прозрачность)
+    connect(m_model, &QAbstractItemModel::dataChanged, this, [this](const QModelIndex& topLeft, const QModelIndex& bottomRight, const QVector<int>& roles) {
+        if (m_storageController->isLoading()) return;
+
+        for (int row = topLeft.row(); row <= bottomRight.row(); ++row) {
+            ImagoImageData item = m_model->getItem(row);
+            
+            // Если картинки с таким хэшем еще нет в локальном кэше (например, после апскейла 
+            // сгенерировался новый хэш), мы обязаны сохранить её физически на диск.
+            if (!item.pixmap.isNull() && !item.imageHash.isEmpty()) {
+                if (!CacheManager::instance().isCached(item.imageHash)) {
+                    QByteArray bytes;
+                    QBuffer buffer(&bytes);
+                    buffer.open(QIODevice::WriteOnly);
+                    item.pixmap.save(&buffer, "PNG");
+                    CacheManager::instance().saveToCache(item.imageHash, bytes);
+                }
+            }
+            
+            // Перезаписываем элемент в БД (он пометится как is_dirty = 1)
+            m_storageController->upsertItem(item);
+        }
+    });
+
     // Обработка входящих обновлений по сети (оставим пока как есть, адаптируем в шаге 2)
     connect(m_networkController, &NetworkController::itemUpdatedFromNetwork, this, [this](const QString& itemId) {
         ImagoImageData data = m_storageController->getItemFromDb(itemId);
