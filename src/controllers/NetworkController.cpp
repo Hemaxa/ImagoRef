@@ -170,28 +170,34 @@ void NetworkController::checkMissingImagesAndUpload(const QJsonObject& boardStat
 void NetworkController::uploadToS3(const QString& hash, const QString& url)
 {
     QString imageCachePath = CacheManager::instance().getCacheFilePath(hash);
-    QFile *file = new QFile(imageCachePath);
+    QFile file(imageCachePath);
     
-    if (!file->open(QIODevice::ReadOnly)) {
+    // Открываем локально, без выделения памяти через new
+    if (!file.open(QIODevice::ReadOnly)) {
         qWarning() << "Cannot find image in cache for upload:" << hash;
-        file->deleteLater();
         m_pendingUploads--;
         if (m_pendingUploads == 0) pushStateToServer(m_pendingBoardState);
         return;
     }
 
+    // Вычитываем все байты в память
+    QByteArray fileData = file.readAll();
+    file.close(); // Файл больше не нужен, закрываем сразу
+
     QNetworkRequest request((QUrl(url)));
+    // Устанавливаем заголовки. S3 требует точного совпадения Content-Type с тем, что было при генерации presigned URL
     request.setHeader(QNetworkRequest::ContentTypeHeader, "image/png");
+    request.setHeader(QNetworkRequest::ContentLengthHeader, fileData.size());
     
-    QNetworkReply *reply = m_networkManager->put(request, file);
-    connect(reply, &QNetworkReply::finished, this, [this, reply, file]() {
+    // Передаем QByteArray вместо файла
+    QNetworkReply *reply = m_networkManager->put(request, fileData);
+    connect(reply, &QNetworkReply::finished, this, [this, reply, hash]() {
         if (reply->error() != QNetworkReply::NoError) {
-            qWarning() << "Failed to upload image to S3:" << reply->errorString();
+            qWarning() << "Failed to upload image to S3:" << hash << "Error:" << reply->errorString();
         } else {
-            qDebug() << "Successfully uploaded image to S3.";
+            qDebug() << "Successfully uploaded image to S3:" << hash;
         }
 
-        file->deleteLater();
         reply->deleteLater();
 
         // Уменьшаем счетчик. Когда дойдет до 0, заливаем JSON конфигурацию доски

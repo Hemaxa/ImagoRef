@@ -213,6 +213,42 @@ Dialog {
                                 validator: gridSizeSpinBox.validator
                                 inputMethodHints: Qt.ImhFormattedNumbersOnly
                             }
+
+                            up.indicator: Rectangle {
+                                x: parent.mirrored ? 0 : parent.width - width
+                                height: parent.height
+                                implicitWidth: 30
+                                implicitHeight: 30
+                                color: gridSizeSpinBox.up.pressed ? ThemeManager.colors.accentPressedColor : ThemeManager.colors.controlBackground
+                                border.color: ThemeManager.colors.borderColor
+                                border.width: 1
+                                radius: 6
+
+                                Text {
+                                    text: "+"
+                                    font.pixelSize: 16
+                                    color: ThemeManager.colors.textColor
+                                    anchors.centerIn: parent
+                                }
+                            }
+
+                            down.indicator: Rectangle {
+                                x: parent.mirrored ? parent.width - width : 0
+                                height: parent.height
+                                implicitWidth: 30
+                                implicitHeight: 30
+                                color: gridSizeSpinBox.down.pressed ? ThemeManager.colors.accentPressedColor : ThemeManager.colors.controlBackground
+                                border.color: ThemeManager.colors.borderColor
+                                border.width: 1
+                                radius: 6
+
+                                Text {
+                                    text: "\u2212"
+                                    font.pixelSize: 16
+                                    color: ThemeManager.colors.textColor
+                                    anchors.centerIn: parent
+                                }
+                            }
                         }
                     }
                     
@@ -340,6 +376,42 @@ Dialog {
                                 validator: labelFontSizeSpinBox.validator
                                 inputMethodHints: Qt.ImhFormattedNumbersOnly
                             }
+
+                            up.indicator: Rectangle {
+                                x: parent.mirrored ? 0 : parent.width - width
+                                height: parent.height
+                                implicitWidth: 30
+                                implicitHeight: 30
+                                color: labelFontSizeSpinBox.up.pressed ? ThemeManager.colors.accentPressedColor : ThemeManager.colors.controlBackground
+                                border.color: ThemeManager.colors.borderColor
+                                border.width: 1
+                                radius: 6
+
+                                Text {
+                                    text: "+"
+                                    font.pixelSize: 16
+                                    color: ThemeManager.colors.textColor
+                                    anchors.centerIn: parent
+                                }
+                            }
+
+                            down.indicator: Rectangle {
+                                x: parent.mirrored ? parent.width - width : 0
+                                height: parent.height
+                                implicitWidth: 30
+                                implicitHeight: 30
+                                color: labelFontSizeSpinBox.down.pressed ? ThemeManager.colors.accentPressedColor : ThemeManager.colors.controlBackground
+                                border.color: ThemeManager.colors.borderColor
+                                border.width: 1
+                                radius: 6
+
+                                Text {
+                                    text: "\u2212"
+                                    font.pixelSize: 16
+                                    color: ThemeManager.colors.textColor
+                                    anchors.centerIn: parent
+                                }
+                            }
                         }
                     }
                     
@@ -385,6 +457,42 @@ Dialog {
                                 readOnly: !arrangeSpacingSpinBox.editable
                                 validator: arrangeSpacingSpinBox.validator
                                 inputMethodHints: Qt.ImhFormattedNumbersOnly
+                            }
+
+                            up.indicator: Rectangle {
+                                x: parent.mirrored ? 0 : parent.width - width
+                                height: parent.height
+                                implicitWidth: 30
+                                implicitHeight: 30
+                                color: arrangeSpacingSpinBox.up.pressed ? ThemeManager.colors.accentPressedColor : ThemeManager.colors.controlBackground
+                                border.color: ThemeManager.colors.borderColor
+                                border.width: 1
+                                radius: 6
+
+                                Text {
+                                    text: "+"
+                                    font.pixelSize: 16
+                                    color: ThemeManager.colors.textColor
+                                    anchors.centerIn: parent
+                                }
+                            }
+
+                            down.indicator: Rectangle {
+                                x: parent.mirrored ? parent.width - width : 0
+                                height: parent.height
+                                implicitWidth: 30
+                                implicitHeight: 30
+                                color: arrangeSpacingSpinBox.down.pressed ? ThemeManager.colors.accentPressedColor : ThemeManager.colors.controlBackground
+                                border.color: ThemeManager.colors.borderColor
+                                border.width: 1
+                                radius: 6
+
+                                Text {
+                                    text: "\u2212"
+                                    font.pixelSize: 16
+                                    color: ThemeManager.colors.textColor
+                                    anchors.centerIn: parent
+                                }
                             }
                         }
                     }
@@ -531,6 +639,11 @@ Dialog {
                     
                     HotkeyRow { description: "Изменить размер:"; keys: "S" }
                     HotkeyRow { description: "Обрезать:"; keys: "C" }
+                    HotkeyRow { description: "Непрозрачность:"; keys: "O" }
+                    HotkeyRow { description: "Подписать:"; keys: "L" }
+                    HotkeyRow { description: "Расположить:"; keys: "A" }
+                    HotkeyRow { description: "Пипетка:"; keys: "I" }
+                    HotkeyRow { description: "Панель истории цветов:"; keys: "P" }
                     HotkeyRow { description: "Вращать по часовой:"; keys: "R" }
                     HotkeyRow { description: "Вращать против часовой:"; keys: "Shift + R" }
                     HotkeyRow { description: "Сохранять пропорции:"; keys: "Зажать Shift" }

@@ -69,6 +69,19 @@ ApplicationWindow {
                 shortcut: StandardKey.Open
                 onTriggered: {
                     if (mainLoader.active) {
+                        if (AuthController.isLoggedIn) {
+                            BoardsManager.loadBoards()
+                            mainCloudDashboard.open()
+                        } else {
+                            fileOpenDialog.open()
+                        }
+                    }
+                }
+            }
+            Action {
+                text: "Открыть из файла"
+                onTriggered: {
+                    if (mainLoader.active) {
                         fileOpenDialog.open()
                     }
                 }
@@ -81,17 +94,27 @@ ApplicationWindow {
                 shortcut: StandardKey.Save
                 onTriggered: {
                     if (mainLoader.active) {
-                        // Если мы авторизованы и открыта облачная доска -> пушим изменения на сервер
-                        if (AuthController.isLoggedIn && boardController.currentBoardId !== "") {
-                            boardController.networkController.syncBoardToServer()
-                        } 
-                        // Если это локальный iref файл -> сохраняем как обычно на диск
-                        else if (boardController.storageController.currentFilePath !== "") {
-                            boardController.storageController.saveBoard()
-                        } 
-                        // Иначе предлагаем сохранить как файл
-                        else {
-                            fileSaveDialog.open()
+                        if (AuthController.isLoggedIn) {
+                            // Облачная доска уже привязана — синхронизируем
+                            if (boardController.currentBoardId !== "") {
+                                boardController.networkController.syncBoardToServer()
+                            }
+                            // Новая доска без ID — предлагаем сохранить в облако
+                            else {
+                                var defaultName = boardController.storageController.windowTitle.replace("ImagoRef - ", "")
+                                if (defaultName === "" || defaultName === "ImagoRef") {
+                                    defaultName = "New Board"
+                                }
+                                newCloudBoardNameInput.text = defaultName
+                                newCloudBoardDialog.open()
+                            }
+                        } else {
+                            // Не авторизован — сохраняем локально
+                            if (boardController.storageController.currentFilePath !== "") {
+                                boardController.storageController.saveBoard()
+                            } else {
+                                fileSaveDialog.open()
+                            }
                         }
                     }
                 }
@@ -101,34 +124,25 @@ ApplicationWindow {
                 shortcut: StandardKey.SaveAs
                 onTriggered: {
                     if (mainLoader.active) {
-                        fileSaveDialog.open()
-                    }
-                }
-            }
-
-            MenuSeparator {} //разделитель
-
-            Action {
-                text: "Сохранить в облако"
-                onTriggered: {
-                    if (mainLoader.active) {
-                        if (boardController.currentBoardId !== "") {
-
-                        } else if (AuthController.isLoggedIn) {
-                            newCloudBoardNameInput.text = boardController.storageController.windowTitle.replace("ImagoRef - ", "")
-                            if (newCloudBoardNameInput.text === "" || newCloudBoardNameInput.text === "ImagoRef") {
-                                newCloudBoardNameInput.text = "New Board"
+                        if (AuthController.isLoggedIn) {
+                            var copyName = boardController.storageController.windowTitle.replace("ImagoRef - ", "")
+                            if (copyName === "" || copyName === "ImagoRef") {
+                                copyName = "New Board"
                             }
+                            newCloudBoardNameInput.text = copyName + " (Копия)"
                             newCloudBoardDialog.open()
+                        } else {
+                            fileSaveDialog.open()
                         }
                     }
                 }
             }
             Action {
-                text: "Открыть из облака"
+                text: "Сохранить как файл"
                 onTriggered: {
-                    BoardsManager.loadBoards()
-                    mainCloudDashboard.open()
+                    if (mainLoader.active) {
+                        fileSaveDialog.open()
+                    }
                 }
             }
         }
@@ -341,6 +355,13 @@ ApplicationWindow {
         height: 400
         anchors.centerIn: parent
         modal: true
+
+        background: Rectangle {
+            color: ThemeManager.colors.backgroundColor
+            border.color: ThemeManager.colors.accentColor
+            border.width: 1
+            radius: 8
+        }
         
         ListView {
             anchors.fill: parent
@@ -392,16 +413,102 @@ ApplicationWindow {
         id: newCloudBoardDialog
         title: "Сохранить в облако"
         anchors.centerIn: parent
-        standardButtons: Dialog.Ok | Dialog.Cancel
-        
-        ColumnLayout {
-            TextField {
-                id: newCloudBoardNameInput
-                placeholderText: "Имя доски"
-                text: "New Board"
+        modal: true
+        width: 380
+        padding: 20
+
+        background: Rectangle {
+            color: ThemeManager.colors.backgroundColor
+            border.color: ThemeManager.colors.controlBackground
+            border.width: 1
+            radius: 8
+        }
+
+        header: Item {
+            height: 40
+            Text {
+                anchors.centerIn: parent
+                text: "Сохранить в облако"
+                color: ThemeManager.colors.textColor
+                font.pixelSize: 16
+                font.bold: true
             }
         }
-        
+
+        contentItem: ColumnLayout {
+            spacing: 16
+
+            Text {
+                text: "Имя доски:"
+                color: ThemeManager.colors.textColor
+                font.pixelSize: 13
+            }
+
+            TextField {
+                id: newCloudBoardNameInput
+                Layout.fillWidth: true
+                placeholderText: "Введите имя доски"
+                text: "New Board"
+                color: ThemeManager.colors.textColor
+                font.pixelSize: 14
+                selectByMouse: true
+
+                background: Rectangle {
+                    color: ThemeManager.colors.controlBackground
+                    border.color: newCloudBoardNameInput.activeFocus ? ThemeManager.colors.accentColor : ThemeManager.colors.controlBackground
+                    border.width: 1
+                    radius: 4
+                }
+            }
+
+            RowLayout {
+                Layout.fillWidth: true
+                Layout.topMargin: 4
+                spacing: 10
+
+                Item { Layout.fillWidth: true } // спейсер
+
+                Button {
+                    text: "Отмена"
+                    onClicked: newCloudBoardDialog.close()
+                    contentItem: Text {
+                        text: parent.text
+                        color: ThemeManager.colors.textColor
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                    }
+                    background: Rectangle {
+                        implicitWidth: 90
+                        implicitHeight: 32
+                        color: parent.hovered ? ThemeManager.colors.controlBackground : "transparent"
+                        border.color: ThemeManager.colors.controlBackground
+                        border.width: 1
+                        radius: 4
+                    }
+                }
+
+                Button {
+                    text: "Сохранить"
+                    onClicked: {
+                        newCloudBoardDialog.accepted()
+                        newCloudBoardDialog.close()
+                    }
+                    contentItem: Text {
+                        text: parent.text
+                        color: "#ffffff"
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                    }
+                    background: Rectangle {
+                        implicitWidth: 100
+                        implicitHeight: 32
+                        color: parent.hovered ? Qt.darker(ThemeManager.colors.accentColor, 1.15) : ThemeManager.colors.accentColor
+                        radius: 4
+                    }
+                }
+            }
+        }
+
         onAccepted: {
             if (newCloudBoardNameInput.text.trim() !== "") {
                 BoardsManager.createBoard(newCloudBoardNameInput.text.trim())

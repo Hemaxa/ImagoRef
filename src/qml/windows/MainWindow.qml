@@ -556,4 +556,72 @@ Item {
             }
         }
     }
+    // Индикатор облачной синхронизации
+    Rectangle {
+        id: syncIndicator
+        width: 36
+        height: 36
+        anchors.top: parent.top
+        anchors.right: parent.right
+        anchors.margins: 20
+        color: ThemeManager.colors.controlBackground
+        border.color: ThemeManager.colors.borderColor
+        border.width: 1
+        radius: 18
+        visible: false
+        z: 200 // Поверх тулбаров
+
+        // Анимация вращения
+        RotationAnimation on rotation {
+            loops: Animation.Infinite
+            from: 0
+            to: 360
+            duration: 1000
+            running: syncIndicator.visible
+        }
+
+        // Внутреннее оранжевое "разорванное" кольцо
+        Canvas {
+            anchors.fill: parent
+            anchors.margins: 6
+            onPaint: {
+                var ctx = getContext("2d")
+                ctx.reset()
+                var centerX = width / 2
+                var centerY = height / 2
+                var radius = width / 2 - 2
+                
+                ctx.beginPath()
+                // Рисуем дугу от 0 до 270 градусов (создаем разрыв для визуализации вращения)
+                ctx.arc(centerX, centerY, radius, 0, 1.5 * Math.PI)
+                ctx.lineWidth = 3
+                ctx.strokeStyle = ThemeManager.colors.accentColor
+                ctx.stroke()
+            }
+        }
+        
+        // Всплывающая подсказка при наведении (опционально)
+        MouseArea {
+            anchors.fill: parent
+            hoverEnabled: true
+            ToolTip.visible: containsMouse
+            ToolTip.text: "Синхронизация с облаком..."
+            ToolTip.delay: 200
+        }
+    }
+
+    // Подключаемся к сигналам контроллера сети
+    Connections {
+        target: root.controller.networkController
+        function onSyncStarted() {
+            syncIndicator.visible = true
+        }
+        function onSyncFinished(success) {
+            syncIndicator.visible = false
+            if (!success) {
+                // Если нужно, здесь можно показать уведомление об ошибке (например, Toast)
+                console.log("Ошибка синхронизации с облаком")
+            }
+        }
+    }
 }

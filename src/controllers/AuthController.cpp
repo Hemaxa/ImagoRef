@@ -56,11 +56,7 @@ void AuthController::updateProfile(const QString &nickname, const QString &avata
 {
     QString filePath = avatarFilePath;
     if (filePath.startsWith("file://")) {
-#ifdef Q_OS_WIN
-        filePath = filePath.mid(8);
-#else
-        filePath = filePath.mid(7);
-#endif
+        filePath = QUrl(avatarFilePath).toLocalFile();
     }
 
     if (filePath.isEmpty()) {
@@ -149,18 +145,25 @@ void AuthController::updateProfile(const QString &nickname, const QString &avata
         };
 
         if (!uploadUrl.isEmpty()) {
-            QNetworkRequest s3Req(QUrl(uploadUrl, QUrl::StrictMode));
-            s3Req.setRawHeader("Content-Type", "image/png");
-            s3Req.setRawHeader("Content-Length", QByteArray::number(pngData.size()));
+            QNetworkRequest s3Req((QUrl(uploadUrl))); // Убрали StrictMode
+            s3Req.setHeader(QNetworkRequest::ContentTypeHeader, "image/png");
+            s3Req.setHeader(QNetworkRequest::ContentLengthHeader, pngData.size());
             
             QNetworkReply *s3Reply = m_networkManager->put(s3Req, pngData);
             connect(s3Reply, &QNetworkReply::finished, this, [s3Reply, finishProfilePut]() {
-                s3Reply->deleteLater();
                 if (s3Reply->error() == QNetworkReply::NoError) {
-                    finishProfilePut();
+                    qDebug() << "Avatar uploaded to S3 successfully!";
+                } else {
+                    qWarning() << "Failed to upload avatar to S3:" << s3Reply->errorString();
                 }
+                
+                // ВАЖНО: Вызываем сохранение профиля на сервере в любом случае!
+                // Даже если аватарка не залилась, никнейм должен обновиться.
+                finishProfilePut(); 
+                s3Reply->deleteLater();
             });
-        } else {
+        }
+        else {
             finishProfilePut();
         }
     });

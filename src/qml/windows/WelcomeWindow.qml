@@ -269,7 +269,7 @@ Dialog {
                 radius: 20
                 clip: true
                 color: AuthController.isLoggedIn ? ThemeManager.colors.controlBackground : root.accentYellow
-                border.color: ThemeManager.colors.controlBorder
+                border.color: ThemeManager.colors.borderColor
                 border.width: 1
 
                 property string initialStr: {
@@ -462,11 +462,7 @@ Dialog {
                     hoverEnabled: true
 
                     onClicked: {
-                        if (AuthController.isLoggedIn) {
-                            BoardsManager.createBoard("New Board")
-                        } else {
-                            root.newBoardRequested()
-                        }
+                        root.newBoardRequested()
                     }
 
                     onEntered: newBoardBtn.scale = 1.05
@@ -544,6 +540,13 @@ Dialog {
         width: 350
         anchors.centerIn: parent
         modal: true
+
+        background: Rectangle {
+            color: ThemeManager.colors.backgroundColor
+            border.color: ThemeManager.colors.accentColor
+            border.width: 1
+            radius: 8
+        }
         
         ColumnLayout {
             anchors.fill: parent
@@ -624,6 +627,13 @@ Dialog {
         anchors.centerIn: parent
         modal: true
         standardButtons: Dialog.Save | Dialog.Cancel
+
+        background: Rectangle {
+            color: ThemeManager.colors.backgroundColor
+            border.color: ThemeManager.colors.accentColor
+            border.width: 1
+            radius: 8
+        }
         
         property string avatarPath: ""
         property alias nicknameInput: nicknameField
@@ -638,7 +648,7 @@ Dialog {
                 height: 80
                 radius: 40
                 color: ThemeManager.colors.controlBackground
-                border.color: ThemeManager.colors.controlBorder
+                border.color: ThemeManager.colors.borderColor
                 border.width: 1
                 clip: true
                 
@@ -706,6 +716,13 @@ Dialog {
         height: 400
         anchors.centerIn: parent
         modal: true
+
+        background: Rectangle {
+            color: ThemeManager.colors.backgroundColor
+            border.color: ThemeManager.colors.accentColor
+            border.width: 1
+            radius: 8
+        }
         
         ListView {
             id: boardsListView
@@ -772,6 +789,13 @@ Dialog {
         title: "Переименовать доску"
         anchors.centerIn: parent
         standardButtons: Dialog.Ok | Dialog.Cancel
+
+        background: Rectangle {
+            color: ThemeManager.colors.backgroundColor
+            border.color: ThemeManager.colors.accentColor
+            border.width: 1
+            radius: 8
+        }
         
         property string boardId: ""
         property alias newNameInput: inputField
