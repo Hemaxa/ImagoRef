@@ -254,6 +254,34 @@ Dialog {
             fillMode: Image.PreserveAspectFit
         }
 
+        Button {
+            id: clearRecentButton
+            anchors.verticalCenter: sectionHeader.verticalCenter
+            anchors.right: parent.right
+            anchors.rightMargin: 42
+            text: "Очистить"
+            visible: SettingsManager.recentBoards.length > 0
+            onClicked: SettingsManager.clearRecentBoards()
+
+            contentItem: Text {
+                text: parent.text
+                color: root.textDark
+                font.pixelSize: 13
+                font.bold: true
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
+            }
+
+            background: Rectangle {
+                implicitWidth: 110
+                implicitHeight: 38
+                radius: 19
+                color: ThemeManager.colors.welcomeAccentYellow
+                border.color: "#181818"
+                border.width: 1
+            }
+        }
+
         // Кнопка авторизации / Аватар пользователя (В правом верхнем углу)
         Item {
             anchors.top: parent.top
@@ -712,7 +740,7 @@ Dialog {
     Dialog {
         id: cloudDashboardDialog
         title: "Облачные доски"
-        width: 500
+        width: 560
         height: 400
         anchors.centerIn: parent
         modal: true
@@ -740,16 +768,19 @@ Dialog {
                 RowLayout {
                     anchors.fill: parent
                     anchors.margins: 10
+                    spacing: 8
                     
                     Text {
                         text: modelData.name
                         color: ThemeManager.colors.textColor
                         font.pixelSize: 16
                         Layout.fillWidth: true
+                        elide: Text.ElideRight
                     }
                     
                     Button {
                         text: "Открыть"
+                        Layout.preferredWidth: 86
                         onClicked: {
                             root.openCloudBoardRequested(modelData.id)
                             cloudDashboardDialog.close()
@@ -758,6 +789,7 @@ Dialog {
                     
                     Button {
                         text: "Переим."
+                        Layout.preferredWidth: 86
                         onClicked: {
                             renameBoardDialog.boardId = modelData.id
                             renameBoardDialog.newNameInput.text = modelData.name
@@ -767,8 +799,11 @@ Dialog {
                     
                     Button {
                         text: "Удалить"
+                        Layout.preferredWidth: 92
                         onClicked: {
-                            BoardsManager.deleteBoard(modelData.id)
+                            deleteBoardDialog.boardId = modelData.id
+                            deleteBoardDialog.boardName = modelData.name
+                            deleteBoardDialog.open()
                         }
                     }
                 }
@@ -810,6 +845,64 @@ Dialog {
         onAccepted: {
             if (inputField.text.trim() !== "") {
                 BoardsManager.renameBoard(boardId, inputField.text.trim())
+            }
+        }
+    }
+
+    Dialog {
+        id: deleteBoardDialog
+        title: "Удалить доску"
+        anchors.centerIn: parent
+        modal: true
+        width: 360
+        property string boardId: ""
+        property string boardName: ""
+
+        background: Rectangle {
+            color: ThemeManager.colors.backgroundColor
+            border.color: ThemeManager.colors.accentColor
+            border.width: 1
+            radius: 8
+        }
+
+        contentItem: ColumnLayout {
+            spacing: 14
+
+            Text {
+                Layout.fillWidth: true
+                text: "Удалить доску \"" + deleteBoardDialog.boardName + "\"?"
+                wrapMode: Text.WordWrap
+                color: ThemeManager.colors.textColor
+                font.pixelSize: 15
+                font.bold: true
+            }
+
+            Text {
+                Layout.fillWidth: true
+                text: "Это удалит доску из облака и уберет ее из локальной истории."
+                wrapMode: Text.WordWrap
+                color: ThemeManager.colors.textColor
+                font.pixelSize: 13
+            }
+
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: 10
+
+                Item { Layout.fillWidth: true }
+
+                Button {
+                    text: "Отмена"
+                    onClicked: deleteBoardDialog.close()
+                }
+
+                Button {
+                    text: "Удалить"
+                    onClicked: {
+                        BoardsManager.deleteBoard(deleteBoardDialog.boardId)
+                        deleteBoardDialog.close()
+                    }
+                }
             }
         }
     }

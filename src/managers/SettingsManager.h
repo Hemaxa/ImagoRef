@@ -80,6 +80,9 @@ public:
     void setRecentBoards(const QVariantList& boards);
     Q_INVOKABLE void addRecentBoard(const QVariantMap& board);
     Q_INVOKABLE void updateBoardPreview(const QString& idOrPath, const QString& previewPath);
+    Q_INVOKABLE void clearRecentBoards();
+    Q_INVOKABLE void removeRecentBoard(const QString& idOrPath);
+    Q_INVOKABLE void renameRecentBoard(const QString& idOrPath, const QString& newName);
     
     Q_INVOKABLE bool isToolEnabled(const QString &toolName) const;
     Q_INVOKABLE void setToolEnabled(const QString &toolName, bool enabled);

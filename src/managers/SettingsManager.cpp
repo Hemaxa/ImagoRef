@@ -376,6 +376,70 @@ void SettingsManager::updateBoardPreview(const QString& idOrPath, const QString&
     }
 }
 
+void SettingsManager::clearRecentBoards()
+{
+    if (m_recentBoards.isEmpty()) {
+        return;
+    }
+
+    m_recentBoards.clear();
+    saveSettings();
+    emit recentBoardsChanged();
+}
+
+void SettingsManager::removeRecentBoard(const QString& idOrPath)
+{
+    if (idOrPath.isEmpty()) {
+        return;
+    }
+
+    bool changed = false;
+    for (int i = m_recentBoards.size() - 1; i >= 0; --i) {
+        QVariantMap existing = m_recentBoards[i].toMap();
+        QString existingIdOrPath = existing.value("id").toString();
+        if (existingIdOrPath.isEmpty()) {
+            existingIdOrPath = existing.value("path").toString();
+        }
+
+        if (existingIdOrPath == idOrPath) {
+            m_recentBoards.removeAt(i);
+            changed = true;
+        }
+    }
+
+    if (changed) {
+        saveSettings();
+        emit recentBoardsChanged();
+    }
+}
+
+void SettingsManager::renameRecentBoard(const QString& idOrPath, const QString& newName)
+{
+    if (idOrPath.isEmpty() || newName.trimmed().isEmpty()) {
+        return;
+    }
+
+    bool changed = false;
+    for (int i = 0; i < m_recentBoards.size(); ++i) {
+        QVariantMap existing = m_recentBoards[i].toMap();
+        QString existingIdOrPath = existing.value("id").toString();
+        if (existingIdOrPath.isEmpty()) {
+            existingIdOrPath = existing.value("path").toString();
+        }
+
+        if (existingIdOrPath == idOrPath) {
+            existing["name"] = newName.trimmed();
+            m_recentBoards[i] = existing;
+            changed = true;
+        }
+    }
+
+    if (changed) {
+        saveSettings();
+        emit recentBoardsChanged();
+    }
+}
+
 bool SettingsManager::isToolEnabled(const QString &toolName) const
 {
     // По умолчанию все инструменты включены
