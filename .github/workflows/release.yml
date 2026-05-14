@@ -32,16 +32,8 @@ jobs:
       - name: Compute version and tag
         id: meta
         run: |
-          VERSION="$(python3 - <<'PY'
-import re
-from pathlib import Path
-text = Path('CMakeLists.txt').read_text(encoding='utf-8')
-match = re.search(r'project\(ImagoRef VERSION ([0-9.]+)', text)
-if not match:
-    raise SystemExit('Unable to extract project version')
-print(match.group(1))
-PY
-)"
+          VERSION="$(sed -nE 's/^project\(ImagoRef VERSION ([0-9.]+).*/\1/p' CMakeLists.txt | head -n 1)"
+          test -n "$VERSION"
           DATE="$(date -u +%Y%m%d)"
           TAG="v${VERSION}-${DATE}.${GITHUB_RUN_NUMBER}"
           echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
