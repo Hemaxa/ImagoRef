@@ -41,7 +41,7 @@ jobs:
           echo "release_name=ImagoRef ${TAG}" >> "$GITHUB_OUTPUT"
 
   build-macos:
-    name: Build macOS Package
+    name: Build macOS
     needs: meta
     runs-on: macos-14
     steps:
@@ -54,6 +54,7 @@ jobs:
           version: ${{ env.QT_VERSION }}
           target: desktop
           arch: clang_64
+          modules: qtwebsockets
           cache: true
 
       - name: Configure project
@@ -70,7 +71,7 @@ jobs:
           if-no-files-found: error
 
   build-windows:
-    name: Build Windows Installer
+    name: Build Windows
     needs: meta
     runs-on: windows-2022
     steps:
@@ -83,12 +84,12 @@ jobs:
           version: ${{ env.QT_VERSION }}
           target: desktop
           arch: win64_msvc2022_64
+          modules: qtwebsockets
           cache: true
 
-      - name: Setup NSIS
-        uses: repolevedavaj/install-nsis@v1.0.1
-        with:
-          nsis-version: "3.10"
+      - name: Install NSIS
+        shell: pwsh
+        run: choco install nsis --no-progress -y
 
       - name: Configure project
         shell: pwsh
@@ -125,7 +126,7 @@ jobs:
           if-no-files-found: error
 
   build-linux:
-    name: Build Linux AppImage
+    name: Build Linux
     needs: meta
     runs-on: ubuntu-22.04
     steps:
@@ -142,7 +143,8 @@ jobs:
         with:
           version: ${{ env.QT_VERSION }}
           target: desktop
-          arch: gcc_64
+          arch: linux_gcc_64
+          modules: qtwebsockets
           cache: true
 
       - name: Download linuxdeployqt
