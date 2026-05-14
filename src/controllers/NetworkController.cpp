@@ -50,6 +50,7 @@ void NetworkController::disconnectFromBoard()
     }
     m_currentBoardId.clear();
     m_pendingUploads = 0;
+    m_uploadFailed = false;
 }
 
 void NetworkController::onConnected()
@@ -102,6 +103,7 @@ void NetworkController::syncBoardToServer()
     }
 
     emit syncStarted();
+    m_uploadFailed = false;
 
     // 2. Собираем хэши всех картинок, которые мы хотим отправить
     QSet<QString> hashesToUpload;
@@ -175,8 +177,11 @@ void NetworkController::uploadToS3(const QString& hash, const QString& url)
     // Открываем локально, без выделения памяти через new
     if (!file.open(QIODevice::ReadOnly)) {
         qWarning() << "Cannot find image in cache for upload:" << hash;
+        m_uploadFailed = true;
         m_pendingUploads--;
-        if (m_pendingUploads == 0) pushStateToServer(m_pendingBoardState);
+        if (m_pendingUploads == 0) {
+            emit syncFinished(false);
+        }
         return;
     }
 
@@ -194,6 +199,7 @@ void NetworkController::uploadToS3(const QString& hash, const QString& url)
     connect(reply, &QNetworkReply::finished, this, [this, reply, hash]() {
         if (reply->error() != QNetworkReply::NoError) {
             qWarning() << "Failed to upload image to S3:" << hash << "Error:" << reply->errorString();
+            m_uploadFailed = true;
         } else {
             qDebug() << "Successfully uploaded image to S3:" << hash;
         }
@@ -203,7 +209,11 @@ void NetworkController::uploadToS3(const QString& hash, const QString& url)
         // Уменьшаем счетчик. Когда дойдет до 0, заливаем JSON конфигурацию доски
         m_pendingUploads--;
         if (m_pendingUploads == 0) {
-            pushStateToServer(m_pendingBoardState);
+            if (m_uploadFailed) {
+                emit syncFinished(false);
+            } else {
+                pushStateToServer(m_pendingBoardState);
+            }
         }
     });
 }
@@ -225,6 +235,7 @@ void NetworkController::pushStateToServer(const QJsonObject& boardState)
             
             // Снимаем флаги is_dirty и физически удаляем удаленные элементы из БД
             m_storageController->markAsSynced(m_currentBoardId);
+            fetchMetadataAndMissingImages();
             emit syncFinished(true);
         } else {
             qWarning() << "Failed to sync board state:" << reply->errorString();
@@ -270,15 +281,34 @@ void NetworkController::fetchMetadataAndMissingImages()
         QJsonObject dataObj = response["data"].toObject();
         QJsonArray itemsArray = dataObj["items"].toArray();
         bool localDbChanged = false;
+        QSet<QString> serverItemIds;
         
-        // ВАЖНО: Сейчас мы просто делаем UPSERT пришедших данных.
-        // Для идеального Snapshot Sync тут нужно сравнивать элементы 
-        // и удалять те, которых нет в itemsArray, но есть локально (и не грязные).
         QSqlDatabase::database().transaction();
         for (const QJsonValue &val : itemsArray) {
             QJsonObject itemObj = val.toObject();
+            const QString itemId = itemObj["id"].toString();
+            if (!itemId.isEmpty()) {
+                serverItemIds.insert(itemId);
+            }
             if (m_storageController->applyNetworkDelta("ADD_ITEM", itemObj)) {
                 localDbChanged = true;
+            }
+        }
+
+        QSqlQuery localItemsQuery;
+        localItemsQuery.prepare("SELECT id FROM items WHERE board_id = :board_id AND is_dirty = 0 AND is_deleted = 0");
+        localItemsQuery.bindValue(":board_id", m_currentBoardId);
+        if (localItemsQuery.exec()) {
+            while (localItemsQuery.next()) {
+                const QString localId = localItemsQuery.value("id").toString();
+                if (!serverItemIds.contains(localId)) {
+                    QSqlQuery deleteQuery;
+                    deleteQuery.prepare("DELETE FROM items WHERE id = :id");
+                    deleteQuery.bindValue(":id", localId);
+                    if (deleteQuery.exec()) {
+                        localDbChanged = true;
+                    }
+                }
             }
         }
         QSqlDatabase::database().commit();

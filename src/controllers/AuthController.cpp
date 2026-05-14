@@ -11,6 +11,7 @@
 #include <QCryptographicHash>
 #include "CacheManager.h"
 #include <QUrl>
+#include <QDateTime>
 
 AuthController* AuthController::create(QQmlEngine *qmlEngine, QJSEngine *jsEngine)
 {
@@ -30,6 +31,10 @@ AuthController& AuthController::instance()
 AuthController::AuthController(QObject* parent)
     : QObject(parent), m_networkManager(new QNetworkAccessManager(this))
 {
+    bumpProfileRevision();
+    if (getIsLoggedIn()) {
+        refreshProfile();
+    }
 }
 
 bool AuthController::getIsLoggedIn() const
@@ -52,8 +57,86 @@ QString AuthController::getUserAvatarHash() const
     return SettingsManager::instance().getUserAvatarHash();
 }
 
+QString AuthController::getUserAvatarUrl() const
+{
+    if (!m_userAvatarUrl.isEmpty()) {
+        return m_userAvatarUrl;
+    }
+
+    const QString hash = getUserAvatarHash();
+    return hash.isEmpty() ? QString() : "https://imagoref.s3.timeweb.com/" + hash;
+}
+
+qint64 AuthController::getProfileRevision() const
+{
+    return m_profileRevision;
+}
+
+void AuthController::applyUserResponse(const QJsonObject& userObject, bool preserveExisting)
+{
+    const QString email = userObject["email"].toString();
+    const QString nickname = userObject["nickname"].toString();
+    const QJsonValue avatarValue = userObject["avatar_hash"];
+    const QString avatarHash = avatarValue.isString() ? avatarValue.toString() : QString();
+    const QString avatarUrl = userObject["avatar_url"].toString().trimmed();
+
+    if (!email.isEmpty() || !preserveExisting) {
+        SettingsManager::instance().setUserEmail(email);
+    }
+
+    if (!nickname.isEmpty() || !preserveExisting || userObject.contains("nickname")) {
+        SettingsManager::instance().setUserNickname(nickname);
+    }
+
+    if (avatarValue.isString() || avatarValue.isNull() || !preserveExisting) {
+        SettingsManager::instance().setUserAvatarHash(avatarHash);
+    }
+
+    if (!avatarUrl.isEmpty() || !preserveExisting || userObject.contains("avatar_url")) {
+        m_userAvatarUrl = avatarUrl;
+    }
+}
+
+void AuthController::bumpProfileRevision()
+{
+    m_profileRevision = QDateTime::currentMSecsSinceEpoch();
+}
+
+void AuthController::refreshProfile()
+{
+    if (!getIsLoggedIn()) {
+        m_userAvatarUrl.clear();
+        return;
+    }
+
+    QNetworkRequest request(QUrl(API_BASE_URL + "/users/me"));
+    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+    const QString token = SettingsManager::instance().getJwtToken();
+    if (!token.isEmpty()) {
+        request.setRawHeader("Authorization", ("Bearer " + token).toUtf8());
+    }
+
+    QNetworkReply *reply = m_networkManager->get(request);
+    connect(reply, &QNetworkReply::finished, this, [this, reply]() {
+        reply->deleteLater();
+
+        if (reply->error() != QNetworkReply::NoError) {
+            if (reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() == 401) {
+                logout();
+            }
+            return;
+        }
+
+        const QJsonObject response = QJsonDocument::fromJson(reply->readAll()).object();
+        applyUserResponse(response, true);
+        bumpProfileRevision();
+        emit authStateChanged();
+    });
+}
+
 void AuthController::updateProfile(const QString &nickname, const QString &avatarFilePath)
 {
+    const QString trimmedNickname = nickname.trimmed();
     QString filePath = avatarFilePath;
     if (filePath.startsWith("file://")) {
         filePath = QUrl(avatarFilePath).toLocalFile();
@@ -61,7 +144,7 @@ void AuthController::updateProfile(const QString &nickname, const QString &avata
 
     if (filePath.isEmpty()) {
         QJsonObject reqObj;
-        reqObj["nickname"] = nickname;
+        reqObj["nickname"] = trimmedNickname;
         reqObj["avatar_hash"] = getUserAvatarHash();
 
         QNetworkRequest request(QUrl(API_BASE_URL + "/users/me"));
@@ -73,10 +156,12 @@ void AuthController::updateProfile(const QString &nickname, const QString &avata
 
         QNetworkReply *reply = m_networkManager->put(request, QJsonDocument(reqObj).toJson());
         
-        connect(reply, &QNetworkReply::finished, this, [this, reply, nickname]() {
+        connect(reply, &QNetworkReply::finished, this, [this, reply]() {
             reply->deleteLater();
             if (reply->error() == QNetworkReply::NoError) {
-                SettingsManager::instance().setUserNickname(nickname);
+                const QJsonObject response = QJsonDocument::fromJson(reply->readAll()).object();
+                applyUserResponse(response, false);
+                bumpProfileRevision();
                 emit authStateChanged();
             }
         });
@@ -112,7 +197,7 @@ void AuthController::updateProfile(const QString &nickname, const QString &avata
     
     QNetworkReply *urlReply = m_networkManager->post(request, QJsonDocument(urlReqObj).toJson());
     
-    connect(urlReply, &QNetworkReply::finished, this, [this, urlReply, pngData, hash, nickname]() {
+    connect(urlReply, &QNetworkReply::finished, this, [this, urlReply, pngData, hash, trimmedNickname]() {
         urlReply->deleteLater();
         if (urlReply->error() != QNetworkReply::NoError) {
             return;
@@ -121,9 +206,9 @@ void AuthController::updateProfile(const QString &nickname, const QString &avata
         QJsonDocument doc = QJsonDocument::fromJson(urlReply->readAll());
         QString uploadUrl = doc.object()["upload_url"].toString();
         
-        auto finishProfilePut = [this, nickname, hash]() {
+        auto finishProfilePut = [this, trimmedNickname, hash]() {
             QJsonObject reqObj;
-            reqObj["nickname"] = nickname;
+            reqObj["nickname"] = trimmedNickname;
             reqObj["avatar_hash"] = hash;
 
             QNetworkRequest req(QUrl(API_BASE_URL + "/users/me"));
@@ -134,11 +219,17 @@ void AuthController::updateProfile(const QString &nickname, const QString &avata
             }
 
             QNetworkReply *reply = m_networkManager->put(req, QJsonDocument(reqObj).toJson());
-            connect(reply, &QNetworkReply::finished, this, [this, reply, nickname, hash]() {
+            connect(reply, &QNetworkReply::finished, this, [this, reply, trimmedNickname, hash]() {
                 reply->deleteLater();
                 if (reply->error() == QNetworkReply::NoError) {
-                    SettingsManager::instance().setUserNickname(nickname);
-                    SettingsManager::instance().setUserAvatarHash(hash);
+                    const QJsonObject response = QJsonDocument::fromJson(reply->readAll()).object();
+                    if (!response.isEmpty()) {
+                        applyUserResponse(response, false);
+                    } else {
+                        SettingsManager::instance().setUserNickname(trimmedNickname);
+                        SettingsManager::instance().setUserAvatarHash(hash);
+                    }
+                    bumpProfileRevision();
                     emit authStateChanged();
                 }
             });
@@ -195,19 +286,13 @@ void AuthController::onLoginReply()
 
     QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
     QJsonObject obj = doc.object();
-    
+
     QString token = obj["access_token"].toString();
-    QString email = obj["email"].toString();
-    QString nickname = obj["nickname"].toString();
-    QString avatar_hash = obj["avatar_hash"].toString();
 
     if (!token.isEmpty()) {
         SettingsManager::instance().setJwtToken(token);
-        if (!email.isEmpty()) {
-            SettingsManager::instance().setUserEmail(email);
-        }
-        if (!nickname.isEmpty()) SettingsManager::instance().setUserNickname(nickname);
-        if (!avatar_hash.isEmpty()) SettingsManager::instance().setUserAvatarHash(avatar_hash);
+        applyUserResponse(obj, false);
+        bumpProfileRevision();
         emit authStateChanged();
         emit loginFinished(true, "Успешный вход!");
     } else {
@@ -248,17 +333,13 @@ void AuthController::onRegisterReply()
     // Если возвращает токен:
     QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
     QJsonObject obj = doc.object();
-    
+
     QString token = obj["access_token"].toString();
-    QString email = obj["email"].toString();
-    QString nickname = obj["nickname"].toString();
-    QString avatar_hash = obj["avatar_hash"].toString();
 
     if (!token.isEmpty()) {
         SettingsManager::instance().setJwtToken(token);
-        if (!email.isEmpty()) SettingsManager::instance().setUserEmail(email);
-        if (!nickname.isEmpty()) SettingsManager::instance().setUserNickname(nickname);
-        if (!avatar_hash.isEmpty()) SettingsManager::instance().setUserAvatarHash(avatar_hash);
+        applyUserResponse(obj, false);
+        bumpProfileRevision();
         emit authStateChanged();
         emit registerFinished(true, "Успешная регистрация и вход!");
     } else {
@@ -273,5 +354,7 @@ void AuthController::logout()
     SettingsManager::instance().setUserEmail("");
     SettingsManager::instance().setUserNickname("");
     SettingsManager::instance().setUserAvatarHash("");
+    m_userAvatarUrl.clear();
+    bumpProfileRevision();
     emit authStateChanged();
 }

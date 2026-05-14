@@ -28,6 +28,18 @@ Dialog {
     property color btnOpenColor: ThemeManager.colors.welcomeBtnOpenColor
     property color textDark: ThemeManager.colors.welcomeTextDark
     property color accentYellow: ThemeManager.colors.welcomeAccentYellow
+
+    function versionedUrl(url, revision) {
+        if (!url || url === "")
+            return ""
+        var lowerUrl = url.toLowerCase()
+        var isPresignedUrl = lowerUrl.indexOf("x-amz-signature=") !== -1
+            || lowerUrl.indexOf("x-amz-algorithm=") !== -1
+            || lowerUrl.indexOf("x-amz-credential=") !== -1
+        if (isPresignedUrl)
+            return url
+        return url + (url.indexOf("?") === -1 ? "?" : "&") + "v=" + revision
+    }
     
     // ========================================
     // BACKGROUND
@@ -288,7 +300,7 @@ Dialog {
             anchors.right: parent.right
             anchors.topMargin: 20
             anchors.rightMargin: 20
-            width: AuthController.isLoggedIn ? 40 : 80
+            width: AuthController.isLoggedIn ? Math.min(220, authLoggedRow.implicitWidth + 24) : 80
             height: 40
 
             Rectangle {
@@ -307,23 +319,67 @@ Dialog {
                     return "?"
                 }
 
+                Row {
+                    id: authLoggedRow
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.right: parent.right
+                    anchors.rightMargin: 4
+                    spacing: 8
+                    visible: AuthController.isLoggedIn
+
+                    Text {
+                        id: nicknameLabel
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: Math.min(140, implicitWidth)
+                        text: AuthController.userNickname !== "" ? AuthController.userNickname : AuthController.userEmail
+                        font.pixelSize: 14
+                        font.bold: true
+                        color: ThemeManager.colors.textColor
+                        elide: Text.ElideRight
+                        verticalAlignment: Text.AlignVCenter
+                    }
+
+                    Rectangle {
+                        width: 32
+                        height: 32
+                        radius: 16
+                        color: "#f3dcc7"
+                        border.width: 1
+                        border.color: ThemeManager.colors.borderColor
+                        clip: true
+
+                        Image {
+                            id: userAvatarImage
+                            anchors.fill: parent
+                            anchors.margins: 1
+                            source: AuthController.userAvatarUrl !== ""
+                                ? root.versionedUrl(AuthController.userAvatarUrl, AuthController.profileRevision)
+                                : ""
+                            fillMode: Image.PreserveAspectCrop
+                            cache: false
+                            asynchronous: true
+                            visible: status === Image.Ready
+                        }
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: authBtnRect.initialStr
+                            font.pixelSize: 15
+                            font.bold: true
+                            color: ThemeManager.colors.textColor
+                            visible: userAvatarImage.status !== Image.Ready
+                        }
+                    }
+                }
+
                 Text {
                     id: authBtnText
                     anchors.centerIn: parent
                     text: authBtnRect.initialStr
-                    font.pixelSize: AuthController.isLoggedIn ? 18 : 14
+                    font.pixelSize: 14
                     font.bold: true
-                    color: AuthController.isLoggedIn ? ThemeManager.colors.textColor : root.textDark
-                    visible: !AuthController.isLoggedIn || AuthController.userAvatarHash === ""
-                }
-                
-                Image {
-                    id: userAvatarImage
-                    anchors.fill: parent
-                    anchors.margins: 1
-                    source: AuthController.isLoggedIn && AuthController.userAvatarHash !== "" ? "https://imagoref.s3.timeweb.com/" + AuthController.userAvatarHash : ""
-                    fillMode: Image.PreserveAspectCrop
-                    visible: AuthController.isLoggedIn && AuthController.userAvatarHash !== ""
+                    color: root.textDark
+                    visible: !AuthController.isLoggedIn
                 }
 
                 MouseArea {
@@ -685,9 +741,10 @@ Dialog {
                     anchors.fill: parent
                     anchors.margins: 1
                     fillMode: Image.PreserveAspectCrop
+                    cache: false
                     source: {
                         if (profileDialog.avatarPath !== "") return profileDialog.avatarPath;
-                        if (AuthController.userAvatarHash !== "") return "https://imagoref.s3.timeweb.com/" + AuthController.userAvatarHash;
+                        if (AuthController.userAvatarUrl !== "") return root.versionedUrl(AuthController.userAvatarUrl, AuthController.profileRevision);
                         return "";
                     }
                     visible: source !== ""
@@ -723,6 +780,10 @@ Dialog {
         
         onAccepted: {
             AuthController.updateProfile(nicknameField.text, avatarPath)
+        }
+
+        onClosed: {
+            profileDialog.avatarPath = ""
         }
     }
     

@@ -14,6 +14,8 @@ class AuthController : public QObject {
     Q_PROPERTY(QString userEmail READ getUserEmail NOTIFY authStateChanged)
     Q_PROPERTY(QString userNickname READ getUserNickname NOTIFY authStateChanged)
     Q_PROPERTY(QString userAvatarHash READ getUserAvatarHash NOTIFY authStateChanged)
+    Q_PROPERTY(QString userAvatarUrl READ getUserAvatarUrl NOTIFY authStateChanged)
+    Q_PROPERTY(qint64 profileRevision READ getProfileRevision NOTIFY authStateChanged)
 
 public:
     static AuthController* create(QQmlEngine *qmlEngine, QJSEngine *jsEngine);
@@ -27,6 +29,8 @@ public:
     QString getUserEmail() const;
     QString getUserNickname() const;
     QString getUserAvatarHash() const;
+    QString getUserAvatarUrl() const;
+    qint64 getProfileRevision() const;
     
     Q_INVOKABLE void updateProfile(const QString &nickname, const QString &avatarFilePath);
 
@@ -40,10 +44,16 @@ private slots:
     void onRegisterReply();
 
 private:
+    void applyUserResponse(const QJsonObject& userObject, bool preserveExisting = true);
+    void bumpProfileRevision();
+    void refreshProfile();
+
     explicit AuthController(QObject* parent = nullptr);
     AuthController(const AuthController&) = delete;
     AuthController& operator=(const AuthController&) = delete;
 
     QNetworkAccessManager *m_networkManager;
+    qint64 m_profileRevision = 0;
+    QString m_userAvatarUrl;
     const QString API_BASE_URL = "https://imagoref.ru/api";
 };

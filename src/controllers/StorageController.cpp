@@ -658,6 +658,7 @@ QJsonObject StorageController::getUnsyncedBoardState(const QString& boardId)
                 itemObj["height"] = q.value("height").toDouble();
                 itemObj["z_index"] = q.value("z_index").toInt();
                 itemObj["payload"] = QJsonDocument::fromJson(q.value("payload").toString().toUtf8()).object();
+                itemObj["updated_at"] = q.value("updated_at").toLongLong();
                 
                 updatedItems.append(itemObj);
             }

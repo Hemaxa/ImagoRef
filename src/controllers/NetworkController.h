@@ -54,6 +54,7 @@ private:
     // Переменные для отслеживания пакетной загрузки
     int m_pendingUploads = 0;
     QJsonObject m_pendingBoardState;
+    bool m_uploadFailed = false;
     
     // API routes
     const QString API_BASE_URL = "https://imagoref.ru/api";
