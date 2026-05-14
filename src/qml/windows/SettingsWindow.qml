@@ -1,0 +1,752 @@
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
+import ImagoRef
+
+/**
+ * SettingsWindow.qml - диалог настроек приложения.
+ * Оформлен в стиле основного приложения (тёмный фон, акцентные элементы).
+ */
+Dialog {
+    id: root
+    
+    title: ""
+    width: 700
+    height: 500
+    
+    // Центрируем диалог вручную для корректной работы анимации
+    x: (parent.width - width) / 2
+    y: (parent.height - height) / 2
+    
+    modal: true
+    
+    enter: Transition {
+        NumberAnimation {
+            property: "y"
+            from: root.parent.height
+            to: (root.parent.height - root.height) / 2
+            duration: 300
+            easing.type: Easing.OutCubic
+        }
+        NumberAnimation {
+            property: "opacity"
+            from: 0.0
+            to: 1.0
+            duration: 300
+        }
+    }
+
+    exit: Transition {
+        NumberAnimation {
+            property: "y"
+            from: (root.parent.height - root.height) / 2
+            to: root.parent.height
+            duration: 300
+            easing.type: Easing.InCubic
+        }
+        NumberAnimation {
+            property: "opacity"
+            from: 1.0
+            to: 0.0
+            duration: 300
+        }
+    }
+    
+    standardButtons: Dialog.NoButton
+    
+    background: Rectangle {
+        color: ThemeManager.colors.backgroundColor
+        border.color: ThemeManager.colors.accentColor
+        border.width: 2
+        radius: 12
+    }
+    
+    // Пользовательский заголовок
+    header: Item {
+        height: 48
+        
+        Rectangle {
+            anchors.fill: parent
+            color: Qt.rgba(ThemeManager.colors.accentColor.r, ThemeManager.colors.accentColor.g, ThemeManager.colors.accentColor.b, 0.15)
+            radius: 12
+            
+            // Скругление только сверху
+            Rectangle {
+                anchors.bottom: parent.bottom
+                anchors.left: parent.left
+                anchors.right: parent.right
+                height: 12
+                color: parent.color
+            }
+        }
+        
+        Text {
+            anchors.centerIn: parent
+            text: "Настройки"
+            font.pixelSize: 16
+            font.bold: true
+            color: ThemeManager.colors.accentColor
+        }
+    }
+    
+    onAccepted: {
+        SettingsManager.gridSize = gridSizeSpinBox.value
+        SettingsManager.themeName = themeComboBox.currentValue
+        SettingsManager.canvasPattern = patternComboBox.currentValue
+        SettingsManager.labelFontSize = labelFontSizeSpinBox.value
+        SettingsManager.arrangeSpacing = arrangeSpacingSpinBox.value
+        SettingsManager.colorCopyMode = colorCopyModeComboBox.currentIndex
+        ThemeManager.applyTheme(themeComboBox.currentValue)
+    }
+    
+    RowLayout {
+        anchors.fill: parent
+        anchors.margins: 10
+        spacing: 10
+        
+        // Навигационный список
+        ListView {
+            id: navigationList
+            Layout.preferredWidth: 160
+            Layout.fillHeight: true
+            currentIndex: 0
+            
+            model: ListModel {
+                ListElement { name: "Общие" }
+                ListElement { name: "Горячие клавиши" }
+            }
+            
+            delegate: ItemDelegate {
+                width: navigationList.width
+                height: 42
+                
+                background: Rectangle {
+                    color: navigationList.currentIndex === index 
+                           ? Qt.rgba(ThemeManager.colors.accentColor.r, ThemeManager.colors.accentColor.g, ThemeManager.colors.accentColor.b, 0.25)
+                           : (hovered ? Qt.rgba(ThemeManager.colors.accentColor.r, ThemeManager.colors.accentColor.g, ThemeManager.colors.accentColor.b, 0.1) : "transparent")
+                    radius: 8
+                    border.color: navigationList.currentIndex === index ? ThemeManager.colors.accentColor : "transparent"
+                    border.width: 1
+                }
+                
+                contentItem: Text {
+                    text: model.name
+                    color: navigationList.currentIndex === index ? ThemeManager.colors.accentColor : ThemeManager.colors.textColor
+                    font.bold: navigationList.currentIndex === index
+                    verticalAlignment: Text.AlignVCenter
+                    leftPadding: 12
+                }
+                
+                onClicked: navigationList.currentIndex = index
+            }
+            
+            Rectangle {
+                anchors.fill: parent
+                color: "transparent"
+                border.color: ThemeManager.colors.borderColor
+                border.width: 1
+                radius: 8
+                z: -1
+            }
+        }
+        
+        // Разделитель
+        Rectangle {
+            Layout.fillHeight: true
+            Layout.preferredWidth: 1
+            color: ThemeManager.colors.borderColor
+        }
+        
+        // Страницы настроек
+        StackLayout {
+            currentIndex: navigationList.currentIndex
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            
+            // Страница "Общие"
+            Item {
+                ColumnLayout {
+                    anchors.fill: parent
+                    anchors.margins: 15
+                    spacing: 18
+                    
+                    // Шаг сетки
+                    RowLayout {
+                        spacing: 0
+                        
+                        Label {
+                            text: "Шаг сетки"
+                            color: ThemeManager.colors.textColor
+                            Layout.preferredWidth: 160
+                        }
+                        
+                        SpinBox {
+                            id: gridSizeSpinBox
+                            from: 20
+                            to: 200
+                            value: SettingsManager.gridSize
+                            editable: true
+                            Layout.preferredWidth: 180
+                            
+                            textFromValue: function(value) {
+                                return value + " px"
+                            }
+                            
+                            valueFromText: function(text) {
+                                return parseInt(text.replace(" px", ""))
+                            }
+                            
+                            background: Rectangle {
+                                color: ThemeManager.colors.controlBackground
+                                border.color: ThemeManager.colors.borderColor
+                                border.width: 1
+                                radius: 6
+                            }
+                            
+                            contentItem: TextInput {
+                                text: gridSizeSpinBox.textFromValue(gridSizeSpinBox.value, gridSizeSpinBox.locale)
+                                font.pixelSize: 13
+                                color: ThemeManager.colors.textColor
+                                horizontalAlignment: Text.AlignHCenter
+                                verticalAlignment: Text.AlignVCenter
+                                readOnly: !gridSizeSpinBox.editable
+                                validator: gridSizeSpinBox.validator
+                                inputMethodHints: Qt.ImhFormattedNumbersOnly
+                            }
+
+                            up.indicator: Rectangle {
+                                x: parent.mirrored ? 0 : parent.width - width
+                                height: parent.height
+                                implicitWidth: 30
+                                implicitHeight: 30
+                                color: gridSizeSpinBox.up.pressed ? ThemeManager.colors.accentPressedColor : ThemeManager.colors.controlBackground
+                                border.color: ThemeManager.colors.borderColor
+                                border.width: 1
+                                radius: 6
+
+                                Text {
+                                    text: "+"
+                                    font.pixelSize: 16
+                                    color: ThemeManager.colors.textColor
+                                    anchors.centerIn: parent
+                                }
+                            }
+
+                            down.indicator: Rectangle {
+                                x: parent.mirrored ? parent.width - width : 0
+                                height: parent.height
+                                implicitWidth: 30
+                                implicitHeight: 30
+                                color: gridSizeSpinBox.down.pressed ? ThemeManager.colors.accentPressedColor : ThemeManager.colors.controlBackground
+                                border.color: ThemeManager.colors.borderColor
+                                border.width: 1
+                                radius: 6
+
+                                Text {
+                                    text: "\u2212"
+                                    font.pixelSize: 16
+                                    color: ThemeManager.colors.textColor
+                                    anchors.centerIn: parent
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Тема интерфейса
+                    RowLayout {
+                        spacing: 0
+                        
+                        Label {
+                            text: "Тема интерфейса"
+                            color: ThemeManager.colors.textColor
+                            Layout.preferredWidth: 160
+                        }
+                        
+                        ComboBox {
+                            id: themeComboBox
+                            Layout.preferredWidth: 180
+                            
+                            model: ThemeManager.availableThemes
+                            
+                            background: Rectangle {
+                                color: ThemeManager.colors.controlBackground
+                                border.color: ThemeManager.colors.borderColor
+                                border.width: 1
+                                radius: 6
+                            }
+                            
+                            contentItem: Text {
+                                text: themeComboBox.displayText
+                                font.pixelSize: 13
+                                color: ThemeManager.colors.textColor
+                                verticalAlignment: Text.AlignVCenter
+                                leftPadding: 10
+                            }
+                            
+                            Component.onCompleted: {
+                                currentIndex = indexOfValue(SettingsManager.themeName)
+                            }
+                        }
+                    }
+                    
+                    // Паттерн рабочей области
+                    RowLayout {
+                        spacing: 0
+                        
+                        Label {
+                            text: "Паттерн холста"
+                            color: ThemeManager.colors.textColor
+                            Layout.preferredWidth: 160
+                        }
+                        
+                        ComboBox {
+                            id: patternComboBox
+                            Layout.preferredWidth: 180
+                            
+                            model: ListModel {
+                                ListElement { text: "Точки"; value: "dots" }
+                                ListElement { text: "Крестики"; value: "cross" }
+                                ListElement { text: "Без паттерна"; value: "none" }
+                            }
+                            
+                            textRole: "text"
+                            valueRole: "value"
+                            
+                            background: Rectangle {
+                                color: ThemeManager.colors.controlBackground
+                                border.color: ThemeManager.colors.borderColor
+                                border.width: 1
+                                radius: 6
+                            }
+                            
+                            contentItem: Text {
+                                text: patternComboBox.displayText
+                                font.pixelSize: 13
+                                color: ThemeManager.colors.textColor
+                                verticalAlignment: Text.AlignVCenter
+                                leftPadding: 10
+                            }
+                            
+                            Component.onCompleted: {
+                                currentIndex = indexOfValue(SettingsManager.canvasPattern)
+                            }
+                        }
+                    }
+                    
+                    // Размер шрифта подписи
+                    RowLayout {
+                        spacing: 0
+                        
+                        Label {
+                            text: "Размер шрифта подписи"
+                            color: ThemeManager.colors.textColor
+                            Layout.preferredWidth: 160
+                        }
+                        
+                        SpinBox {
+                            id: labelFontSizeSpinBox
+                            from: 8
+                            to: 72
+                            value: SettingsManager.labelFontSize
+                            editable: true
+                            Layout.preferredWidth: 180
+                            
+                            textFromValue: function(value) {
+                                return value + " px"
+                            }
+                            
+                            valueFromText: function(text) {
+                                return parseInt(text.replace(" px", ""))
+                            }
+                            
+                            background: Rectangle {
+                                color: ThemeManager.colors.controlBackground
+                                border.color: ThemeManager.colors.borderColor
+                                border.width: 1
+                                radius: 6
+                            }
+                            
+                            contentItem: TextInput {
+                                text: labelFontSizeSpinBox.textFromValue(labelFontSizeSpinBox.value, labelFontSizeSpinBox.locale)
+                                font.pixelSize: 13
+                                color: ThemeManager.colors.textColor
+                                horizontalAlignment: Text.AlignHCenter
+                                verticalAlignment: Text.AlignVCenter
+                                readOnly: !labelFontSizeSpinBox.editable
+                                validator: labelFontSizeSpinBox.validator
+                                inputMethodHints: Qt.ImhFormattedNumbersOnly
+                            }
+
+                            up.indicator: Rectangle {
+                                x: parent.mirrored ? 0 : parent.width - width
+                                height: parent.height
+                                implicitWidth: 30
+                                implicitHeight: 30
+                                color: labelFontSizeSpinBox.up.pressed ? ThemeManager.colors.accentPressedColor : ThemeManager.colors.controlBackground
+                                border.color: ThemeManager.colors.borderColor
+                                border.width: 1
+                                radius: 6
+
+                                Text {
+                                    text: "+"
+                                    font.pixelSize: 16
+                                    color: ThemeManager.colors.textColor
+                                    anchors.centerIn: parent
+                                }
+                            }
+
+                            down.indicator: Rectangle {
+                                x: parent.mirrored ? parent.width - width : 0
+                                height: parent.height
+                                implicitWidth: 30
+                                implicitHeight: 30
+                                color: labelFontSizeSpinBox.down.pressed ? ThemeManager.colors.accentPressedColor : ThemeManager.colors.controlBackground
+                                border.color: ThemeManager.colors.borderColor
+                                border.width: 1
+                                radius: 6
+
+                                Text {
+                                    text: "\u2212"
+                                    font.pixelSize: 16
+                                    color: ThemeManager.colors.textColor
+                                    anchors.centerIn: parent
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Отступ при расположении
+                    RowLayout {
+                        spacing: 0
+                        
+                        Label {
+                            text: "Отступ при расположении"
+                            color: ThemeManager.colors.textColor
+                            Layout.preferredWidth: 160
+                        }
+                        
+                        SpinBox {
+                            id: arrangeSpacingSpinBox
+                            from: 0
+                            to: 200
+                            value: SettingsManager.arrangeSpacing
+                            editable: true
+                            Layout.preferredWidth: 180
+                            
+                            textFromValue: function(value) {
+                                return value + " px"
+                            }
+                            
+                            valueFromText: function(text) {
+                                return parseInt(text.replace(" px", ""))
+                            }
+                            
+                            background: Rectangle {
+                                color: ThemeManager.colors.controlBackground
+                                border.color: ThemeManager.colors.borderColor
+                                border.width: 1
+                                radius: 6
+                            }
+                            
+                            contentItem: TextInput {
+                                text: arrangeSpacingSpinBox.textFromValue(arrangeSpacingSpinBox.value, arrangeSpacingSpinBox.locale)
+                                font.pixelSize: 13
+                                color: ThemeManager.colors.textColor
+                                horizontalAlignment: Text.AlignHCenter
+                                verticalAlignment: Text.AlignVCenter
+                                readOnly: !arrangeSpacingSpinBox.editable
+                                validator: arrangeSpacingSpinBox.validator
+                                inputMethodHints: Qt.ImhFormattedNumbersOnly
+                            }
+
+                            up.indicator: Rectangle {
+                                x: parent.mirrored ? 0 : parent.width - width
+                                height: parent.height
+                                implicitWidth: 30
+                                implicitHeight: 30
+                                color: arrangeSpacingSpinBox.up.pressed ? ThemeManager.colors.accentPressedColor : ThemeManager.colors.controlBackground
+                                border.color: ThemeManager.colors.borderColor
+                                border.width: 1
+                                radius: 6
+
+                                Text {
+                                    text: "+"
+                                    font.pixelSize: 16
+                                    color: ThemeManager.colors.textColor
+                                    anchors.centerIn: parent
+                                }
+                            }
+
+                            down.indicator: Rectangle {
+                                x: parent.mirrored ? parent.width - width : 0
+                                height: parent.height
+                                implicitWidth: 30
+                                implicitHeight: 30
+                                color: arrangeSpacingSpinBox.down.pressed ? ThemeManager.colors.accentPressedColor : ThemeManager.colors.controlBackground
+                                border.color: ThemeManager.colors.borderColor
+                                border.width: 1
+                                radius: 6
+
+                                Text {
+                                    text: "\u2212"
+                                    font.pixelSize: 16
+                                    color: ThemeManager.colors.textColor
+                                    anchors.centerIn: parent
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Режим копирования цвета (HEX / RGB)
+                    RowLayout {
+                        spacing: 0
+                        
+                        Label {
+                            text: "Формат цвета пипетки"
+                            color: ThemeManager.colors.textColor
+                            Layout.preferredWidth: 160
+                        }
+                        
+                        ComboBox {
+                            id: colorCopyModeComboBox
+                            Layout.preferredWidth: 180
+                            
+                            model: ListModel {
+                                ListElement { text: "HEX (#RRGGBB)"; value: 0 }
+                                ListElement { text: "RGB (r, g, b)"; value: 1 }
+                            }
+                            
+                            textRole: "text"
+                            valueRole: "value"
+                            
+                            background: Rectangle {
+                                color: ThemeManager.colors.controlBackground
+                                border.color: ThemeManager.colors.borderColor
+                                border.width: 1
+                                radius: 6
+                            }
+                            
+                            contentItem: Text {
+                                text: colorCopyModeComboBox.displayText
+                                font.pixelSize: 13
+                                color: ThemeManager.colors.textColor
+                                verticalAlignment: Text.AlignVCenter
+                                leftPadding: 10
+                            }
+                            
+                            Component.onCompleted: {
+                                currentIndex = SettingsManager.colorCopyMode
+                            }
+                        }
+                    }
+                    
+                    // Управление моделью Upscale
+                    RowLayout {
+                        spacing: 0
+                        
+                        Label {
+                            text: "Модель Upscale"
+                            color: ThemeManager.colors.textColor
+                            Layout.preferredWidth: 160
+                        }
+                        
+                        // Кнопка скачивания или удаления
+                        Button {
+                            Layout.preferredWidth: 180
+                            text: ModelsManager.isDownloading ? "Скачивание (" + Math.round(ModelsManager.downloadProgress * 100) + "%)" 
+                                                              : (ModelsManager.isModelDownloaded ? "Удалить модель" : "Скачать модель (35 МБ)")
+                            enabled: !ModelsManager.isDownloading
+                            
+                            contentItem: Text {
+                                text: parent.text
+                                font.pixelSize: 13
+                                color: ThemeManager.colors.textColor
+                                horizontalAlignment: Text.AlignHCenter
+                                verticalAlignment: Text.AlignVCenter
+                            }
+                            
+                            background: Rectangle {
+                                color: ThemeManager.colors.controlBackground
+                                border.color: ThemeManager.colors.borderColor
+                                border.width: 1
+                                radius: 6
+                            }
+                            
+                            onClicked: {
+                                if (ModelsManager.isModelDownloaded) {
+                                    ModelsManager.deleteModel()
+                                } else {
+                                    ModelsManager.downloadModel()
+                                }
+                            }
+                        }
+                    }
+                    
+                    Item { Layout.fillHeight: true }
+                }
+            }
+            
+            // Страница "Горячие клавиши"
+            ScrollView {
+                clip: true
+                
+                ColumnLayout {
+                    width: parent.width
+                    spacing: 10
+                    
+                    // Навигация и холст
+                    Label {
+                        text: "Навигация и холст"
+                        font.bold: true
+                        font.pixelSize: 14
+                        color: ThemeManager.colors.accentColor
+                        bottomPadding: 2
+                    }
+                    
+                    HotkeyRow { description: "Перемещение холста:"; keys: "Зажать ⌥ / среднюю кнопку мыши" }
+                    HotkeyRow { description: "Масштабирование:"; keys: "⌘/Ctrl + Колесико мыши" }
+                    HotkeyRow { description: "Приблизить:"; keys: "⌘/Ctrl + +" }
+                    HotkeyRow { description: "Отдалить:"; keys: "⌘/Ctrl + -" }
+                    HotkeyRow { description: "Привязать к сетке:"; keys: "G" }
+                    
+                    Item { height: 8 }
+                    
+                    // Управление элементами
+                    Label {
+                        text: "Управление элементами"
+                        font.bold: true
+                        font.pixelSize: 14
+                        color: ThemeManager.colors.accentColor
+                        bottomPadding: 2
+                    }
+                    
+                    HotkeyRow { description: "Выделить все:"; keys: "⌘/Ctrl + A" }
+                    HotkeyRow { description: "Вставить из буфера:"; keys: "⌘/Ctrl + V" }
+                    HotkeyRow { description: "Удалить выделенное:"; keys: "Delete / Backspace" }
+                    HotkeyRow { description: "Отменить действие:"; keys: "⌘/Ctrl + Z" }
+                    HotkeyRow { description: "Повторить действие:"; keys: "⌘/Ctrl + Shift + Z" }
+                    
+                    Item { height: 8 }
+                    
+                    // Трансформации
+                    Label {
+                        text: "Трансформации"
+                        font.bold: true
+                        font.pixelSize: 14
+                        color: ThemeManager.colors.accentColor
+                        bottomPadding: 2
+                    }
+                    
+                    HotkeyRow { description: "Изменить размер:"; keys: "S" }
+                    HotkeyRow { description: "Обрезать:"; keys: "C" }
+                    HotkeyRow { description: "Непрозрачность:"; keys: "O" }
+                    HotkeyRow { description: "Подписать:"; keys: "L" }
+                    HotkeyRow { description: "Расположить:"; keys: "A" }
+                    HotkeyRow { description: "Пипетка:"; keys: "I" }
+                    HotkeyRow { description: "Панель истории цветов:"; keys: "P" }
+                    HotkeyRow { description: "Вращать по часовой:"; keys: "R" }
+                    HotkeyRow { description: "Вращать против часовой:"; keys: "Shift + R" }
+                    HotkeyRow { description: "Сохранять пропорции:"; keys: "Зажать Shift" }
+                    
+                    Item { height: 8 }
+                    
+                    // Интерфейс
+                    Label {
+                        text: "Интерфейс"
+                        font.bold: true
+                        font.pixelSize: 14
+                        color: ThemeManager.colors.accentColor
+                        bottomPadding: 2
+                    }
+                    
+                    HotkeyRow { description: "Скрыть/показать панель:"; keys: "Tab" }
+                    HotkeyRow { description: "Открыть настройки:"; keys: "⌘/Ctrl + ," }
+                    HotkeyRow { description: "Сбросить инструменты:"; keys: "Escape" }
+                    
+                    Item { Layout.fillHeight: true }
+                }
+            }
+        }
+    }
+    
+    // Кнопки OK / Отмена
+    footer: Item {
+        height: 52
+        
+        RowLayout {
+            anchors.right: parent.right
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.rightMargin: 15
+            spacing: 10
+            
+            // Отмена
+            AbstractButton {
+                id: cancelBtn
+                Layout.preferredWidth: 90
+                Layout.preferredHeight: 32
+                
+                background: Rectangle {
+                    color: cancelBtn.hovered ? Qt.rgba(ThemeManager.colors.textColor.r, ThemeManager.colors.textColor.g, ThemeManager.colors.textColor.b, 0.1) : "transparent"
+                    border.color: ThemeManager.colors.borderColor
+                    border.width: 1
+                    radius: 6
+                }
+                
+                contentItem: Text {
+                    text: "Отмена"
+                    color: ThemeManager.colors.textColor
+                    font.pixelSize: 13
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                }
+                
+                onClicked: root.reject()
+            }
+            
+            // OK
+            AbstractButton {
+                id: applyBtn
+                Layout.preferredWidth: 90
+                Layout.preferredHeight: 32
+                
+                background: Rectangle {
+                    color: applyBtn.hovered ? ThemeManager.colors.accentPressedColor : ThemeManager.colors.accentColor
+                    radius: 6
+                }
+                
+                contentItem: Text {
+                    text: "Применить"
+                    color: ThemeManager.colors.backgroundColor
+                    font.pixelSize: 13
+                    font.bold: true
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                }
+                
+                onClicked: root.accept()
+            }
+        }
+    }
+    
+    // Компонент для строки горячей клавиши
+    component HotkeyRow: RowLayout {
+        property string description
+        property string keys
+        
+        spacing: 0
+        
+        Label {
+            text: description
+            color: Qt.rgba(ThemeManager.colors.textColor.r, ThemeManager.colors.textColor.g, ThemeManager.colors.textColor.b, 0.7)
+            font.pixelSize: 12
+            Layout.preferredWidth: 200
+        }
+        
+        Label {
+            text: keys
+            font.pixelSize: 12
+            font.bold: true
+            color: ThemeManager.colors.textColor
+        }
+    }
+}
