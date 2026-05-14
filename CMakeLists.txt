@@ -155,7 +155,6 @@ if(APPLE)
         Qt6::QuickControls2
         Qt6::Qml
         Qt6::Gui
-        Qt6::GuiPrivate
         Qt6::Svg
         Qt6::Network
         Qt6::WebSockets
@@ -237,7 +236,6 @@ if(WIN32)
         Qt6::QuickControls2
         Qt6::Qml
         Qt6::Gui
-        Qt6::GuiPrivate
         Qt6::Svg
         Qt6::Network
         Qt6::WebSockets
@@ -303,7 +301,6 @@ if(UNIX AND NOT APPLE)
         Qt6::QuickControls2
         Qt6::Qml
         Qt6::Gui
-        Qt6::GuiPrivate
         Qt6::Svg
         Qt6::Network
         Qt6::WebSockets
