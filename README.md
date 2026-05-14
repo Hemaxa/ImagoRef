@@ -1,6 +1,6 @@
 # ImagoRef
 
-<img width="1920" height="1080" alt="ImagoRef" src="https://github.com/user-attachments/assets/983b1af5-8686-469d-9f02-5d50836c96b6" />
+![ImagoRef](https://github.com/Hemaxa/ImagoRef/blob/395b4fde8db2288142e7e75bb466d7516bca76e7/graphics/ImagoRef.png)
 
 ImagoRef is a desktop reference-board application built with `Qt 6`, `QML`, and `C++`.
 
