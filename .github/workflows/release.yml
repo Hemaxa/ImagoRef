@@ -1,0 +1,210 @@
+name: Release Desktop
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: desktop-release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  QT_VERSION: 6.8.3
+  CMAKE_BUILD_TYPE: Release
+
+jobs:
+  meta:
+    name: Prepare Release Metadata
+    runs-on: ubuntu-22.04
+    outputs:
+      version: ${{ steps.meta.outputs.version }}
+      tag: ${{ steps.meta.outputs.tag }}
+      release_name: ${{ steps.meta.outputs.release_name }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Compute version and tag
+        id: meta
+        run: |
+          VERSION="$(python3 - <<'PY'
+import re
+from pathlib import Path
+text = Path('CMakeLists.txt').read_text(encoding='utf-8')
+match = re.search(r'project\(ImagoRef VERSION ([0-9.]+)', text)
+if not match:
+    raise SystemExit('Unable to extract project version')
+print(match.group(1))
+PY
+)"
+          DATE="$(date -u +%Y%m%d)"
+          TAG="v${VERSION}-${DATE}.${GITHUB_RUN_NUMBER}"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          echo "release_name=ImagoRef ${TAG}" >> "$GITHUB_OUTPUT"
+
+  build-macos:
+    name: Build macOS Package
+    needs: meta
+    runs-on: macos-14
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: ${{ env.QT_VERSION }}
+          target: desktop
+          arch: clang_64
+          cache: true
+
+      - name: Configure project
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=${{ env.CMAKE_BUILD_TYPE }} -DCMAKE_OSX_ARCHITECTURES=arm64
+
+      - name: Build package
+        run: cmake --build build --config ${{ env.CMAKE_BUILD_TYPE }} --target package
+
+      - name: Upload macOS artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-macos
+          path: build/ImagoRef_v*_macOS.pkg
+          if-no-files-found: error
+
+  build-windows:
+    name: Build Windows Installer
+    needs: meta
+    runs-on: windows-2022
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: ${{ env.QT_VERSION }}
+          target: desktop
+          arch: win64_msvc2022_64
+          cache: true
+
+      - name: Setup NSIS
+        uses: repolevedavaj/install-nsis@v1.0.1
+        with:
+          nsis-version: "3.10"
+
+      - name: Configure project
+        shell: pwsh
+        run: >
+          cmake -S . -B build
+          -G "Visual Studio 17 2022"
+          -A x64
+          -DCMAKE_BUILD_TYPE=${{ env.CMAKE_BUILD_TYPE }}
+          -DCMAKE_INSTALL_PREFIX="${{ github.workspace }}\install"
+
+      - name: Build and install
+        shell: pwsh
+        run: cmake --build build --config ${{ env.CMAKE_BUILD_TYPE }} --target INSTALL
+
+      - name: Deploy Qt runtime
+        shell: pwsh
+        run: |
+          & "${env:QT_ROOT_DIR}\bin\windeployqt.exe" `
+            --no-compiler-runtime `
+            --no-opengl-sw `
+            --no-translations `
+            --verbose 1 `
+            "${{ github.workspace }}\install\bin\ImagoRef.exe"
+
+      - name: Build installer
+        shell: pwsh
+        run: cmake --build build --config ${{ env.CMAKE_BUILD_TYPE }} --target PACKAGE
+
+      - name: Upload Windows artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-windows
+          path: build/ImagoRef_v*_windows.exe
+          if-no-files-found: error
+
+  build-linux:
+    name: Build Linux AppImage
+    needs: meta
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential libgl1-mesa-dev patchelf fakeroot libfuse2 libxcb-cursor0
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: ${{ env.QT_VERSION }}
+          target: desktop
+          arch: gcc_64
+          cache: true
+
+      - name: Download linuxdeployqt
+        run: |
+          wget -nv https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage -O linuxdeployqt
+          chmod +x linuxdeployqt
+
+      - name: Configure project
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=${{ env.CMAKE_BUILD_TYPE }} -DCMAKE_INSTALL_PREFIX=/usr
+
+      - name: Build project
+        run: cmake --build build --parallel
+
+      - name: Install into AppDir
+        run: cmake --install build --prefix AppDir/usr
+
+      - name: Build AppImage
+        run: |
+          cp AppDir/usr/share/applications/ImagoRef.desktop AppDir/
+          cp AppDir/usr/share/icons/hicolor/256x256/apps/ImagoRef.png AppDir/
+          ./linuxdeployqt ./AppDir/usr/bin/ImagoRef -appimage -qmldir=src/qml -extra-plugins=iconengines,imageformats,platformthemes
+          mv ./*.AppImage "ImagoRef_v${{ needs.meta.outputs.version }}_linux.AppImage"
+
+      - name: Upload Linux artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-linux
+          path: ImagoRef_v*_linux.AppImage
+          if-no-files-found: error
+
+  release:
+    name: Publish GitHub Release
+    needs:
+      - meta
+      - build-macos
+      - build-windows
+      - build-linux
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Download release artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+
+      - name: Publish release and tag
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ needs.meta.outputs.tag }}
+          RELEASE_NAME: ${{ needs.meta.outputs.release_name }}
+        run: |
+          mapfile -t files < <(find dist -type f | sort)
+          test "${#files[@]}" -gt 0
+          gh release create "$TAG" "${files[@]}" \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" \
+            --title "$RELEASE_NAME" \
+            --generate-notes

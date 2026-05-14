@@ -5,6 +5,8 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Dialogs
 
+import "../components"
+
 Dialog {
     id: root
     
@@ -339,36 +341,16 @@ Dialog {
                         verticalAlignment: Text.AlignVCenter
                     }
 
-                    Rectangle {
+                    CircularAvatar {
                         width: 32
                         height: 32
-                        radius: 16
-                        color: "#f3dcc7"
-                        border.width: 1
-                        border.color: ThemeManager.colors.borderColor
-                        clip: true
-
-                        Image {
-                            id: userAvatarImage
-                            anchors.fill: parent
-                            anchors.margins: 1
-                            source: AuthController.userAvatarUrl !== ""
-                                ? root.versionedUrl(AuthController.userAvatarUrl, AuthController.profileRevision)
-                                : ""
-                            fillMode: Image.PreserveAspectCrop
-                            cache: false
-                            asynchronous: true
-                            visible: status === Image.Ready
-                        }
-
-                        Text {
-                            anchors.centerIn: parent
-                            text: authBtnRect.initialStr
-                            font.pixelSize: 15
-                            font.bold: true
-                            color: ThemeManager.colors.textColor
-                            visible: userAvatarImage.status !== Image.Ready
-                        }
+                        borderColor: ThemeManager.colors.borderColor
+                        textColor: ThemeManager.colors.textColor
+                        fallbackFontPixelSize: 15
+                        fallbackText: authBtnRect.initialStr
+                        source: AuthController.userAvatarUrl !== ""
+                            ? root.versionedUrl(AuthController.userAvatarUrl, AuthController.profileRevision)
+                            : ""
                     }
                 }
 
@@ -726,36 +708,19 @@ Dialog {
             anchors.fill: parent
             spacing: 15
             
-            Rectangle {
+            CircularAvatar {
                 Layout.alignment: Qt.AlignHCenter
                 width: 80
                 height: 80
-                radius: 40
-                color: ThemeManager.colors.controlBackground
-                border.color: ThemeManager.colors.borderColor
-                border.width: 1
-                clip: true
-                
-                Image {
-                    id: profileAvatarImage
-                    anchors.fill: parent
-                    anchors.margins: 1
-                    fillMode: Image.PreserveAspectCrop
-                    cache: false
-                    source: {
-                        if (profileDialog.avatarPath !== "") return profileDialog.avatarPath;
-                        if (AuthController.userAvatarUrl !== "") return root.versionedUrl(AuthController.userAvatarUrl, AuthController.profileRevision);
-                        return "";
-                    }
-                    visible: source !== ""
-                }
-                
-                Text {
-                    anchors.centerIn: parent
-                    text: AuthController.userNickname !== "" ? AuthController.userNickname.charAt(0).toUpperCase() : (AuthController.userEmail !== "" ? AuthController.userEmail.charAt(0).toUpperCase() : "?")
-                    font.pixelSize: 24
-                    color: ThemeManager.colors.textColor
-                    visible: profileAvatarImage.source == ""
+                backgroundColor: ThemeManager.colors.controlBackground
+                borderColor: ThemeManager.colors.borderColor
+                textColor: ThemeManager.colors.textColor
+                fallbackFontPixelSize: 24
+                fallbackText: AuthController.userNickname !== "" ? AuthController.userNickname.charAt(0).toUpperCase() : (AuthController.userEmail !== "" ? AuthController.userEmail.charAt(0).toUpperCase() : "?")
+                source: {
+                    if (profileDialog.avatarPath !== "") return profileDialog.avatarPath;
+                    if (AuthController.userAvatarUrl !== "") return root.versionedUrl(AuthController.userAvatarUrl, AuthController.profileRevision);
+                    return "";
                 }
                 
                 MouseArea {

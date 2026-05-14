@@ -70,8 +70,9 @@ qt_add_qml_module(ImagoRef
         src/qml/windows/MainWindow.qml
         src/qml/windows/SettingsWindow.qml
 
-        src/qml/components/CanvasView.qml
-        src/qml/components/ImageItem.qml
+            src/qml/components/CanvasView.qml
+            src/qml/components/CircularAvatar.qml
+            src/qml/components/ImageItem.qml
         src/qml/components/FloatingToolbar.qml
         src/qml/components/ToolbarButton.qml
         src/qml/components/ResizeOverlay.qml
@@ -249,21 +250,21 @@ if(WIN32)
     )
 
     #добавление файла ресурсов (resources.rc)
-    target_sources(ImagoRef PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/resources.rc)
+    target_sources(ImagoRef PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/packs/resources.rc)
 
     #исполняемый файл помещается в /bin
     install(TARGETS ImagoRef DESTINATION bin)
 
     #копирование иконки в /bin
-    install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/res/app_icon/icon.ico" DESTINATION bin)
+    install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/res/app-icon/icon.ico" DESTINATION bin)
 
     #создание и настройка .exe
     set(CPACK_PACKAGE_NAME "ImagoRef")
     set(CPACK_PACKAGE_VENDOR "Yashin Sergey")
     set(CPACK_PACKAGE_VERSION "${ImagoRef_VERSION}")
     set(CPACK_PACKAGE_INSTALL_DIRECTORY "ImagoRef")
-    set(CPACK_NSIS_MUI_ICON "${CMAKE_CURRENT_SOURCE_DIR}/res/app_icon/icon.ico")
-    set(CPACK_NSIS_MUI_UNIICON "${CMAKE_CURRENT_SOURCE_DIR}/res/app_icon/icon.ico")
+    set(CPACK_NSIS_MUI_ICON "${CMAKE_CURRENT_SOURCE_DIR}/res/app-icon/icon.ico")
+    set(CPACK_NSIS_MUI_UNIICON "${CMAKE_CURRENT_SOURCE_DIR}/res/app-icon/icon.ico")
     set(CPACK_NSIS_INSTALLED_ICON_NAME "bin/ImagoRef.exe" CACHE STRING "" FORCE)
     set(CPACK_NSIS_DISPLAY_NAME "ImagoRef")
     set(CPACK_NSIS_PACKAGE_NAME "ImagoRef ${ImagoRef_VERSION}")
@@ -311,7 +312,7 @@ if(UNIX AND NOT APPLE)
 
     #регистрация приложения (Info.desktop.in)
     configure_file(
-        "${CMAKE_CURRENT_SOURCE_DIR}/Info.desktop.in"
+        "${CMAKE_CURRENT_SOURCE_DIR}/packs/Info.desktop.in"
         "${CMAKE_CURRENT_BINARY_DIR}/Info.desktop"
         COPYONLY
     )
@@ -328,7 +329,7 @@ if(UNIX AND NOT APPLE)
 
     #копирование иконки приложения
     install(
-        FILES "${CMAKE_CURRENT_SOURCE_DIR}/res/app_icon/icon.png"
+        FILES "${CMAKE_CURRENT_SOURCE_DIR}/res/app-icon/icon.png"
         DESTINATION share/icons/hicolor/256x256/apps
         RENAME ImagoRef.png
     )
