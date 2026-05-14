@@ -1,5 +1,7 @@
 # ImagoRef
 
+<img width="1920" height="1080" alt="ImagoRef" src="https://github.com/user-attachments/assets/983b1af5-8686-469d-9f02-5d50836c96b6" />
+
 ImagoRef is a desktop reference-board application built with `Qt 6`, `QML`, and `C++`.
 
 It is the main desktop client in the ImagoRef ecosystem:
