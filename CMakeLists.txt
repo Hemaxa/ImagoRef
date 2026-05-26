@@ -196,6 +196,12 @@ if(APPLE)
             #запуск macdeployqt
             COMMAND ${MACDEPLOYQT_EXECUTABLE} "$<TARGET_BUNDLE_DIR:ImagoRef>" -qmldir=${SRC_DIR}/qml -verbose=1
 
+            #копирование тем внутрь .app рядом с исполняемым файлом
+            COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/res/themes" "$<TARGET_BUNDLE_DIR:ImagoRef>/Contents/MacOS/themes"
+            COMMAND /bin/test -f "$<TARGET_BUNDLE_DIR:ImagoRef>/Contents/MacOS/themes/imago/theme.json"
+            COMMAND /bin/test -f "$<TARGET_BUNDLE_DIR:ImagoRef>/Contents/MacOS/themes/imago/WelcomeWindow/background/logo.svg"
+            COMMAND /bin/test -f "$<TARGET_BUNDLE_DIR:ImagoRef>/Contents/PlugIns/imageformats/libqsvg.dylib"
+
             #подпись приложения
             COMMAND codesign --force --deep --sign - "$<TARGET_BUNDLE_DIR:ImagoRef>"
 
@@ -323,4 +329,7 @@ if(UNIX AND NOT APPLE)
         DESTINATION share/icons/hicolor/256x256/apps
         RENAME ImagoRef.png
     )
+
+    #копирование тем рядом с исполняемым файлом
+    install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/res/themes" DESTINATION bin)
 endif()

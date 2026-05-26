@@ -174,6 +174,41 @@ jobs:
 
           Get-ChildItem $bin -Filter *.dll | Sort-Object Name | ForEach-Object { $_.Name }
 
+      - name: Deploy app resources
+        shell: pwsh
+        run: |
+          $bin = "${{ github.workspace }}\install\bin"
+
+          foreach ($pluginDir in @("imageformats", "iconengines")) {
+            $source = Join-Path $env:QT_ROOT_DIR "plugins\$pluginDir"
+            if (-not (Test-Path $source)) {
+              Write-Error "Required Qt plugin directory was not found: $source"
+              exit 1
+            }
+            Copy-Item $source $bin -Recurse -Force
+          }
+
+          $themes = Join-Path $bin "themes"
+          Remove-Item $themes -Recurse -Force -ErrorAction SilentlyContinue
+          Copy-Item "${{ github.workspace }}\res\themes" $themes -Recurse -Force
+
+          $requiredFiles = @(
+            (Join-Path $themes "imago\theme.json"),
+            (Join-Path $themes "imago\WelcomeWindow\background\logo.svg"),
+            (Join-Path $themes "imago\MainWindow\tools\paste.svg"),
+            (Join-Path $bin "imageformats\qsvg.dll")
+          )
+
+          foreach ($path in $requiredFiles) {
+            if (-not (Test-Path $path)) {
+              Write-Error "Missing packaged resource: $path"
+              exit 1
+            }
+          }
+
+          $themeFileCount = (Get-ChildItem $themes -Recurse -File | Measure-Object).Count
+          Write-Host "Packaged theme files: $themeFileCount"
+
       - name: Build installer
         shell: pwsh
         run: |
@@ -230,6 +265,11 @@ jobs:
         run: |
           cp AppDir/usr/share/applications/ImagoRef.desktop AppDir/
           cp AppDir/usr/share/icons/hicolor/256x256/apps/ImagoRef.png AppDir/
+          rm -rf AppDir/usr/bin/themes
+          cp -a res/themes AppDir/usr/bin/themes
+          test -f AppDir/usr/bin/themes/imago/theme.json
+          test -f AppDir/usr/bin/themes/imago/WelcomeWindow/background/logo.svg
+          test -f AppDir/usr/bin/themes/imago/MainWindow/tools/paste.svg
           find "$QT_PLUGIN_PATH/sqldrivers" -type f ! -name 'libqsqlite.so' -delete
           export LD_LIBRARY_PATH="$PWD/AppDir/usr/lib/x86_64-linux-gnu:${LD_LIBRARY_PATH:-}"
           ./linuxdeployqt ./AppDir/usr/bin/ImagoRef -appimage -qmldir=src/qml -extra-plugins=iconengines,imageformats
