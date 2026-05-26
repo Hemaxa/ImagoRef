@@ -256,6 +256,9 @@ if(WIN32)
     #копирование иконки в /bin
     install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/res/app-icon/icon.ico" DESTINATION bin)
 
+    #копирование тем рядом с исполняемым файлом
+    install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/res/themes" DESTINATION bin)
+
     #создание и настройка .exe
     set(CPACK_PACKAGE_NAME "ImagoRef")
     set(CPACK_PACKAGE_VENDOR "Yashin Sergey")

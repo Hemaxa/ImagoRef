@@ -113,9 +113,9 @@ jobs:
         shell: pwsh
         run: |
           & "${env:QT_ROOT_DIR}\bin\windeployqt.exe" `
-            --no-compiler-runtime `
             --no-opengl-sw `
             --no-translations `
+            --qmldir "${{ github.workspace }}\src\qml" `
             --verbose 1 `
             "${{ github.workspace }}\install\bin\ImagoRef.exe"
 
