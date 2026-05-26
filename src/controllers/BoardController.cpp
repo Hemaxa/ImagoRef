@@ -13,6 +13,7 @@
 #include <QBuffer>
 #include <QCryptographicHash>
 #include <QJsonObject>
+#include <QUrl>
 
 BoardController::BoardController(QObject *parent) : QObject(parent)
     , m_model(new ImagoImageModel(this))
@@ -407,7 +408,7 @@ QString BoardController::generateBoardPreview()
     
     preview.save(path, "PNG");
     
-    QString finalPath = "file://" + path;
+    QString finalPath = QUrl::fromLocalFile(path).toString();
     SettingsManager::instance().updateBoardPreview(identifier, finalPath);
     
     return finalPath;
