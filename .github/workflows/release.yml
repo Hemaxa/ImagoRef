@@ -34,8 +34,7 @@ jobs:
         run: |
           VERSION="$(sed -nE 's/^project\(ImagoRef VERSION ([0-9.]+).*/\1/p' CMakeLists.txt | head -n 1)"
           test -n "$VERSION"
-          DATE="$(date -u +%Y%m%d)"
-          TAG="v${VERSION}-${DATE}.${GITHUB_RUN_NUMBER}"
+          TAG="v${VERSION}"
           echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
           echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
           echo "release_name=ImagoRef ${TAG}" >> "$GITHUB_OUTPUT"
@@ -122,7 +121,12 @@ jobs:
 
       - name: Build installer
         shell: pwsh
-        run: cmake --build build --config ${{ env.CMAKE_BUILD_TYPE }} --target PACKAGE
+        run: |
+          cmake --build build --config ${{ env.CMAKE_BUILD_TYPE }} --target PACKAGE
+          if ($LASTEXITCODE -ne 0) {
+            Get-Content "build\_CPack_Packages\win64\NSIS\NSISOutput.log" -ErrorAction SilentlyContinue
+            exit $LASTEXITCODE
+          }
 
       - name: Upload Windows artifact
         uses: actions/upload-artifact@v4
@@ -162,7 +166,7 @@ jobs:
         run: cmake -S . -B build -DCMAKE_BUILD_TYPE=${{ env.CMAKE_BUILD_TYPE }} -DCMAKE_INSTALL_PREFIX=/usr
 
       - name: Build project
-        run: cmake --build build --parallel
+        run: cmake --build build --parallel 2
 
       - name: Install into AppDir
         run: cmake --install build --prefix AppDir/usr
