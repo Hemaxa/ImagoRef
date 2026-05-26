@@ -119,6 +119,61 @@ jobs:
             --verbose 1 `
             "${{ github.workspace }}\install\bin\ImagoRef.exe"
 
+      - name: Deploy additional runtime DLLs
+        shell: pwsh
+        run: |
+          $bin = "${{ github.workspace }}\install\bin"
+          $searchRoots = @(
+            "${env:QT_ROOT_DIR}\bin",
+            "${env:VCPKG_INSTALLATION_ROOT}\installed\x64-windows\bin"
+          )
+
+          $requiredDlls = @(
+            "Qt6Core5Compat.dll"
+          )
+
+          foreach ($dll in $requiredDlls) {
+            $source = $null
+            foreach ($root in $searchRoots) {
+              $candidate = Join-Path $root $dll
+              if (Test-Path $candidate) {
+                $source = $candidate
+                break
+              }
+            }
+
+            if ($source) {
+              Copy-Item $source $bin -Force
+              Write-Host "Copied $dll from $source"
+            } else {
+              Write-Error "Required runtime DLL was not found: $dll"
+              exit 1
+            }
+          }
+
+          $zlib = $null
+          foreach ($dll in @("z.dll", "zlib1.dll")) {
+            foreach ($root in $searchRoots) {
+              $candidate = Join-Path $root $dll
+              if (Test-Path $candidate) {
+                $zlib = $candidate
+                break
+              }
+            }
+            if ($zlib) { break }
+          }
+
+          if (-not $zlib) {
+            Write-Error "Required zlib runtime DLL was not found"
+            exit 1
+          }
+
+          Copy-Item $zlib (Join-Path $bin (Split-Path $zlib -Leaf)) -Force
+          Copy-Item $zlib (Join-Path $bin "z.dll") -Force
+          Write-Host "Copied zlib runtime from $zlib"
+
+          Get-ChildItem $bin -Filter *.dll | Sort-Object Name | ForEach-Object { $_.Name }
+
       - name: Build installer
         shell: pwsh
         run: |
