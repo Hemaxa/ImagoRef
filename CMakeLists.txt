@@ -268,29 +268,11 @@ if(WIN32)
     set(CPACK_NSIS_PACKAGE_NAME "ImagoRef ${ImagoRef_VERSION}")
     set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/docs/LICENSE")
     set(CPACK_NSIS_MODIFY_PATH OFF)
-    set(CPACK_NSIS_CREATE_ICONS_EXTRA [[
-        CreateShortCut "$DESKTOP\ImagoRef.lnk" "$INSTDIR\bin\ImagoRef.exe"
-    ]])
-    set(CPACK_NSIS_DELETE_ICONS_EXTRA [[
-        Delete "$DESKTOP\ImagoRef.lnk"
-    ]])
+    set(CPACK_NSIS_CREATE_ICONS_EXTRA "CreateShortCut \\\"$DESKTOP\\\\ImagoRef.lnk\\\" \\\"$INSTDIR\\\\bin\\\\ImagoRef.exe\\\"")
+    set(CPACK_NSIS_DELETE_ICONS_EXTRA "Delete \\\"$DESKTOP\\\\ImagoRef.lnk\\\"")
     set(CPACK_PACKAGE_FILE_NAME "ImagoRef_v${ImagoRef_VERSION}_windows")
     set(CPACK_GENERATOR "NSIS")
     set(CPACK_INSTALLED_DIRECTORIES "${CMAKE_INSTALL_PREFIX};.")
-
-    set(CPACK_NSIS_EXTRA_INSTALL_COMMANDS [[
-        WriteRegStr HKCR ".iref" "" "ImagoRef.Board"
-        WriteRegStr HKCR "ImagoRef.Board" "" "ImagoRef Board"
-        WriteRegStr HKCR "ImagoRef.Board\DefaultIcon" "" "$INSTDIR\bin\ImagoRef.exe,1"
-        WriteRegStr HKCR "ImagoRef.Board\shell" "" "open"
-        WriteRegStr HKCR "ImagoRef.Board\shell\open" "" "Open in ImagoRef"
-        WriteRegStr HKCR "ImagoRef.Board\shell\open\command" "" "$\"$INSTDIR\bin\ImagoRef.exe$\" $\"%1$\""
-    ]])
-
-    set(CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS [[
-        DeleteRegKey HKCR ".iref"
-        DeleteRegKey HKCR "ImagoRef.Board"
-    ]])
     include(CPack)
 endif()
 
@@ -298,6 +280,10 @@ endif()
 # НАСТРОЙКИ ДЛЯ LINUX
 # ====================================================================
 if(UNIX AND NOT APPLE)
+    set_target_properties(ImagoRef PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+    )
+
     #подключение необходимых библиотек
     target_link_libraries(ImagoRef PRIVATE
         Qt6::Core
