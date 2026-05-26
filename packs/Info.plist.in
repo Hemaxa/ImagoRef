@@ -18,13 +18,13 @@
     <string>ImagoRef</string>
 
     <key>CFBundleVersion</key>
-    <string>1.0.0</string>
+    <string>2.0.0</string>
 
     <key>CFBundleShortVersionString</key>
-    <string>1.0</string>
+    <string>2.0</string>
 
     <key>LSMinimumSystemVersion</key>
-    <string>10.13</string>
+    <string>11</string>
 
     <key>NSHumanReadableCopyright</key>
     <string>© 2025 YAstra Company. All rights reserved.</string>

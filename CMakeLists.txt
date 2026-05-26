@@ -2,7 +2,7 @@
 cmake_minimum_required(VERSION 3.21.1)
 
 #определение версии проекта
-project(ImagoRef VERSION 1.0 LANGUAGES CXX)
+project(ImagoRef VERSION 2.0 LANGUAGES CXX)
 
 #определение cтандарта C++
 set(CMAKE_CXX_STANDARD 17)

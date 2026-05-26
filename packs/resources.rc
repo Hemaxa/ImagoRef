@@ -2,8 +2,8 @@ IDI_ICON1               ICON                    "res/app-icon/icon.ico"
 IDI_ICON2               ICON                    "res/app-icon/icon.ico"
 
 VS_VERSION_INFO VERSIONINFO
-FILEVERSION     1,0,0,0
-PRODUCTVERSION  1,0,0,0
+FILEVERSION     2,0,0,0
+PRODUCTVERSION  2,0,0,0
 BEGIN
     BLOCK "StringFileInfo"
     BEGIN
@@ -11,12 +11,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Yashin Sergey"
             VALUE "FileDescription", "ImagoRef Application"
-            VALUE "FileVersion", "1.0.0"
+            VALUE "FileVersion", "2.0.0"
             VALUE "InternalName", "ImagoRef"
             VALUE "LegalCopyright", "© 2025 Yashin Sergey. All rights reserved."
             VALUE "OriginalFilename", "ImagoRef.exe"
             VALUE "ProductName", "ImagoRef"
-            VALUE "ProductVersion", "1.0.0"
+            VALUE "ProductVersion", "2.0.0"
         END
     END
     BLOCK "VarFileInfo"
