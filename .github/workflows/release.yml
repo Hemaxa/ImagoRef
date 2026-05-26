@@ -175,6 +175,7 @@ jobs:
         run: |
           cp AppDir/usr/share/applications/ImagoRef.desktop AppDir/
           cp AppDir/usr/share/icons/hicolor/256x256/apps/ImagoRef.png AppDir/
+          export LD_LIBRARY_PATH="$PWD/AppDir/usr/lib/x86_64-linux-gnu:${LD_LIBRARY_PATH:-}"
           ./linuxdeployqt ./AppDir/usr/bin/ImagoRef -appimage -qmldir=src/qml -extra-plugins=iconengines,imageformats,platformthemes
           mv ./*.AppImage "ImagoRef_v${{ needs.meta.outputs.version }}_linux.AppImage"
 
