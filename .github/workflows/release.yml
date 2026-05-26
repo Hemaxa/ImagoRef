@@ -175,8 +175,9 @@ jobs:
         run: |
           cp AppDir/usr/share/applications/ImagoRef.desktop AppDir/
           cp AppDir/usr/share/icons/hicolor/256x256/apps/ImagoRef.png AppDir/
+          find "$QT_PLUGIN_PATH/sqldrivers" -type f ! -name 'libqsqlite.so' -delete
           export LD_LIBRARY_PATH="$PWD/AppDir/usr/lib/x86_64-linux-gnu:${LD_LIBRARY_PATH:-}"
-          ./linuxdeployqt ./AppDir/usr/bin/ImagoRef -appimage -qmldir=src/qml -extra-plugins=iconengines,imageformats,platformthemes
+          ./linuxdeployqt ./AppDir/usr/bin/ImagoRef -appimage -qmldir=src/qml -extra-plugins=iconengines,imageformats
           mv ./*.AppImage "ImagoRef_v${{ needs.meta.outputs.version }}_linux.AppImage"
 
       - name: Upload Linux artifact
